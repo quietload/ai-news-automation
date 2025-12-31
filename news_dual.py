@@ -114,21 +114,16 @@ def fetch_global_news(count: int = 5) -> list:
     return fetch_global_news_with_backup(count, backup_count=0)
 
 
-# 13개 카테고리 (domestic, education, other, top 제외)
+# 8개 글로벌 카테고리 (지역성 카테고리 제외)
 ALL_CATEGORIES = [
-    "world",        # 세계
-    "business",     # 비즈니스
+    "world",        # 세계 뉴스
+    "business",     # 비즈니스/경제
     "technology",   # 기술
     "science",      # 과학
     "health",       # 건강
     "sports",       # 스포츠
     "entertainment",# 연예
     "environment",  # 환경
-    "politics",     # 정치
-    "crime",        # 범죄
-    "food",         # 음식
-    "lifestyle",    # 라이프스타일
-    "tourism"       # 관광
 ]
 
 CATEGORY_NAMES = {
@@ -313,11 +308,10 @@ def fetch_global_news_with_backup(count: int, backup_count: int = 5) -> list:
     used_news = load_used_news()
     news_items = []
     
-    # 17개 전체 카테고리 (top, domestic, other 제외한 14개 + 다양성 위해 섞기)
+    # 8개 글로벌 카테고리 (지역성 카테고리 제외)
     all_categories = [
-        "world", "business", "technology", "science", "health", 
-        "sports", "entertainment", "environment", "politics",
-        "crime", "education", "food", "lifestyle", "tourism"
+        "world", "business", "technology", "science", 
+        "health", "sports", "entertainment", "environment"
     ]
     
     # 랜덤 순서로 섞기 (다양성)
