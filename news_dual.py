@@ -32,6 +32,13 @@ Version: 2.0
 
 import os
 import sys
+import io
+
+# Windows 콘솔 UTF-8 인코딩 설정
+if sys.platform == 'win32':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+
 import json
 import time
 import argparse
@@ -987,7 +994,7 @@ def generate_description(news_list: list) -> str:
         title = n['title']
         link = n.get('link', '')
         if link:
-            stories.append(f"{i+1}. {title}\n   🔗 {link}")
+            stories.append(f"{i+1}. {title}\n{link}")
         else:
             stories.append(f"{i+1}. {title}")
     
@@ -995,13 +1002,13 @@ def generate_description(news_list: list) -> str:
     
     return f"""Global News Today | AI Generated
 
-📰 Today's Stories:
+Today's Stories:
 
 {stories_text}
 
 ---
-🤖 Generated with AI (GPT Image + OpenAI TTS)
-📊 Source: NewsData.io
+Generated with AI (GPT Image + OpenAI TTS)
+Source: NewsData.io
 
 #news #AI #globalNews #worldnews #breakingnews
 """
@@ -1319,21 +1326,13 @@ def main():
         create_video(shorts_images, shorts_audio, shorts_video, (1080, 1920), ENDING_SHORTS)
         print(f"  [OK] Shorts: {shorts_video.name}")
         
-        # Generate Shorts thumbnail
-        print(f"  Generating Shorts thumbnail...")
-        try:
-            shorts_thumb = output_dir / f"{ts}_shorts_thumbnail.jpg"
-            generate_thumbnail(news_list, shorts_thumb, style="shorts")
-            print(f"  [OK] Thumbnail: {shorts_thumb.name}")
-        except Exception as e:
-            shorts_thumb = None
-            print(f"  [WARN] Thumbnail failed: {e}")
+        # Shorts는 썸네일 업로드 불가 (영상에서 프레임 선택 방식)
         
         results["shorts"] = {
             "video": str(shorts_video),
-            "thumbnail": str(shorts_thumb) if shorts_thumb else None,
+            "thumbnail": None,  # Shorts는 썸네일 없음
             "subtitles": {k: str(v) for k, v in shorts_srt.items()},
-            "title": f"Global News Today {ts[:8]} #shorts",
+            "title": f"Today's Top News - {datetime.now().strftime('%b %d')} #shorts",
             "description": generate_description(news_list)
         }
     
