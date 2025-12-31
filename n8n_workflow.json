@@ -1,0 +1,134 @@
+{
+  "name": "News Automation - Daily Shorts + Weekly Video",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 17,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "id": "1",
+      "name": "Daily 5PM (Publish at 6PM KST)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $now.weekday }}",
+              "rightValue": 6,
+              "operator": {
+                "type": "number",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "leftValue": "={{ $now.weekday }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "5",
+      "name": "Skip Weekend",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [400, 200]
+    },
+    {
+      "parameters": {
+        "command": "cd D:\\workspace\\news && python run_daily_shorts.py"
+      },
+      "id": "2",
+      "name": "Run Daily Shorts",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [600, 180]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtDay": 6,
+              "triggerAtHour": 17,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "id": "3",
+      "name": "Saturday 5PM (Publish at 6PM KST)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 400]
+    },
+    {
+      "parameters": {
+        "command": "cd D:\\workspace\\news && python run_weekly_video.py"
+      },
+      "id": "4",
+      "name": "Run Weekly Video",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [500, 400]
+    }
+  ],
+  "connections": {
+    "Daily 5PM (Publish at 6PM KST)": {
+      "main": [
+        [
+          {
+            "node": "Skip Weekend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Skip Weekend": {
+      "main": [
+        [
+          {
+            "node": "Run Daily Shorts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Saturday 5PM (Publish at 6PM KST)": {
+      "main": [
+        [
+          {
+            "node": "Run Weekly Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Seoul"
+  }
+}

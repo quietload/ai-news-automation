@@ -1,0 +1,29 @@
+# API Keys & Secrets
+.env
+client_secrets.json
+*-oauth2.json
+
+# Output files
+output/
+logs/
+
+# Used news tracking (개인 데이터)
+used_news.json
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.Python
+venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
