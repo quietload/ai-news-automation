@@ -981,29 +981,18 @@ def create_video(images: list, audio_path: Path, output_path: Path, resolution: 
 
 
 def generate_description(news_list: list) -> str:
-    """Generate YouTube description with source links"""
-    stories = []
-    for i, n in enumerate(news_list):
-        title = n['title']
-        link = n.get('link', '')
-        if link:
-            stories.append(f"{i+1}. {title}\n   🔗 {link}")
-        else:
-            stories.append(f"{i+1}. {title}")
-    
-    stories_text = "\n\n".join(stories)
-    
+    """Generate YouTube description"""
+    titles = "\n".join([f"{i+1}. {n['title']}" for i, n in enumerate(news_list)])
     return f"""Global News Today | AI Generated
 
-📰 Today's Stories:
-
-{stories_text}
+Today's Stories:
+{titles}
 
 ---
-🤖 Generated with AI (GPT Image + OpenAI TTS)
-📊 Source: NewsData.io
+Generated with AI (DALL-E 3 + OpenAI TTS)
+Source: NewsData.io
 
-#news #AI #globalNews #worldnews #breakingnews
+#news #AI #globalNews #worldnews
 """
 
 

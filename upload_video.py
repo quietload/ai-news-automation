@@ -202,10 +202,16 @@ def upload_thumbnail(youtube, video_id, thumbnail_path):
         print(f"[WARN] Thumbnail file not found: {thumbnail_path}")
         return False
     
+    # 파일 확장자에 따라 mimetype 결정
+    if thumbnail_path.lower().endswith('.jpg') or thumbnail_path.lower().endswith('.jpeg'):
+        mimetype = "image/jpeg"
+    else:
+        mimetype = "image/png"
+    
     try:
         youtube.thumbnails().set(
             videoId=video_id,
-            media_body=MediaFileUpload(thumbnail_path, mimetype="image/png")
+            media_body=MediaFileUpload(thumbnail_path, mimetype=mimetype)
         ).execute()
         print(f"[OK] Thumbnail uploaded")
         return True
