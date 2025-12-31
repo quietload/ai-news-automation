@@ -77,7 +77,10 @@ def run_shorts():
         return json.load(f)
 
 
-def upload_video(video_path: str, title: str, description: str, publish_at: str = None) -> str:
+def upload_video(video_path: str, title: str, description: str, 
+                 thumbnail: str = None, subtitles: dict = None, 
+                 publish_at: str = None) -> str:
+    """Upload video with thumbnail, captions, and schedule"""
     if not video_path or not Path(video_path).exists():
         log(f"[FAIL] Video not found: {video_path}")
         return None
@@ -90,10 +93,21 @@ def upload_video(video_path: str, title: str, description: str, publish_at: str 
         "--privacyStatus", "public"
     ]
     
+    # 썸네일
+    if thumbnail and Path(thumbnail).exists():
+        cmd.extend(["--thumbnail", thumbnail])
+        log(f"  [INFO] Thumbnail: {thumbnail}")
+    
+    # 자막 (쉼표로 구분된 파일 경로)
+    if subtitles:
+        srt_files = ",".join(subtitles.values())
+        cmd.extend(["--subtitles", srt_files])
+        log(f"  [INFO] Subtitles: {len(subtitles)} languages")
+    
     # 예약 게시 설정
     if publish_at:
         cmd.extend(["--publish-at", publish_at])
-        log(f"  [OK] Scheduled publish at: {publish_at}")
+        log(f"  [INFO] Scheduled: {publish_at}")
     
     result = subprocess.run(
         cmd,
@@ -117,50 +131,6 @@ def upload_video(video_path: str, title: str, description: str, publish_at: str 
     return None
 
 
-def upload_thumbnail(video_id: str, thumbnail_path: str) -> bool:
-    if not video_id or not thumbnail_path or not Path(thumbnail_path).exists():
-        return False
-    
-    try:
-        from googleapiclient.discovery import build
-        from googleapiclient.http import MediaFileUpload
-        from oauth2client.file import Storage
-        import httplib2
-        
-        storage = Storage(str(Path(__file__).parent / "upload_video.py-oauth2.json"))
-        credentials = storage.get()
-        
-        if credentials and not credentials.invalid:
-            youtube = build("youtube", "v3", http=credentials.authorize(httplib2.Http()))
-            request = youtube.thumbnails().set(
-                videoId=video_id,
-                media_body=MediaFileUpload(thumbnail_path, mimetype="image/png")
-            )
-            request.execute()
-            log(f"  [OK] Thumbnail uploaded")
-            return True
-    except Exception as e:
-        log(f"  [WARN] Thumbnail failed: {e}")
-    return False
-
-
-def upload_captions(video_id: str, srt_dir: str, prefix: str) -> bool:
-    result = subprocess.run(
-        [sys.executable, "upload_captions.py",
-         "--video-id", video_id,
-         "--srt-dir", srt_dir,
-         "--prefix", prefix],
-        cwd=Path(__file__).parent,
-        capture_output=True,
-        text=True
-    )
-    if result.stdout:
-        log(result.stdout)
-    if result.stderr:
-        log(f"Caption STDERR: {result.stderr}")
-    return result.returncode == 0
-
-
 def main():
     log("\n")
     log("*" * 60)
@@ -182,22 +152,23 @@ def main():
             sys.exit(1)
         
         shorts = summary["shorts"]
-        ts = summary["timestamp"]
         
         log("\n" + "=" * 60)
         log("[2/2] Uploading Shorts to YouTube...")
         log("=" * 60)
         
-        video_id = upload_video(shorts["video"], shorts["title"], shorts["description"], publish_at)
+        video_id = upload_video(
+            video_path=shorts["video"],
+            title=shorts["title"],
+            description=shorts["description"],
+            thumbnail=shorts.get("thumbnail"),
+            subtitles=shorts.get("subtitles"),
+            publish_at=publish_at
+        )
         
         if video_id:
             log(f"[OK] Shorts uploaded! ID: {video_id}")
-            
-            if shorts.get("thumbnail"):
-                upload_thumbnail(video_id, shorts["thumbnail"])
-            
-            log("  Uploading captions...")
-            upload_captions(video_id, "output", f"{ts}_shorts")
+            log(f"[OK] URL: https://youtube.com/watch?v={video_id}")
         else:
             log("[FAIL] Shorts upload failed")
             sys.exit(1)
