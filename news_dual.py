@@ -7,28 +7,35 @@ Automatically generates YouTube content from global news:
 - Daily Shorts: 6 news stories, vertical format, ~60 seconds (2x daily)
 - Weekly Video: 16 news stories (2 per category), horizontal format, ~4 minutes
 
+Tech Stack:
+- Text generation: GPT-5 mini (reasoning_effort: minimal)
+- Image generation: GPT Image 1.5
+- Text-to-speech: GPT-4o mini TTS (Marin voice, news anchor style)
+- News source: 38 RSS feeds (real-time)
+
 Features:
-- News fetching from RSS feeds (real-time) or NewsData.io API
-- AI image generation (GPT Image 1.5)
-- Text generation (GPT-5 mini with minimal reasoning)
-- Text-to-speech narration (GPT-4o mini TTS, marin voice)
+- Real-time news from RSS feeds
+- AI-generated images (2-3 per news)
 - Multi-language subtitles (EN, KO, JA, ZH, ES)
 - Synchronized audio-image timing
-- Auto-generated thumbnails
+- Auto-generated thumbnails (Weekly Video)
 - YouTube scheduled upload support
+- Duplicate news prevention
 
 Usage:
     # Daily Shorts (6 news) with RSS
     python news_dual.py --count 6 --shorts-only --use-rss
     
-    # Weekly Video (20 news by category) with RSS
-    python news_dual.py --count 20 --video-only --by-category --use-rss
-    
-    # Using NewsData.io (12h delay)
-    python news_dual.py --count 10 --shorts-only
+    # Weekly Video (16 news by category) with RSS
+    python news_dual.py --count 16 --video-only --by-category --use-rss
 
-Author: AI News Automation
-Version: 2.1
+Schedule:
+    - Morning Shorts: 08:00 KST → 09:00 KST (US prime time)
+    - Evening Shorts: 20:00 KST → 21:00 KST (Korea prime time)
+    - Weekly Video: Sat 21:00 KST → 22:00 KST
+
+GitHub: https://github.com/quietload/ai-news-automation
+Version: 2.2
 """
 
 import os
