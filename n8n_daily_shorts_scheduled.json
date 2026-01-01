@@ -6,14 +6,14 @@
         "rule": {
           "interval": [
             {
-              "triggerAtHour": 17,
+              "triggerAtHour": 20,
               "triggerAtMinute": 0
             }
           ]
         }
       },
       "id": "1",
-      "name": "Daily 5PM",
+      "name": "Daily 8PM",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [250, 200]
@@ -65,7 +65,7 @@
     }
   ],
   "connections": {
-    "Daily 5PM": {
+    "Daily 8PM": {
       "main": [
         [
           {
