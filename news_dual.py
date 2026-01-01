@@ -272,7 +272,7 @@ Output one prompt per line, no numbering."""
                 "role": "user",
                 "content": f"News: {news['title']}\n{news.get('description', '')[:200]}"
             }],
-            "max_tokens": 500
+            "max_completion_tokens": 500
         },
         timeout=30
     )
@@ -464,7 +464,7 @@ Output ONLY the narration. Keep it under 350 words."""
             "model": "gpt-5-mini",
             "messages": [{"role": "system", "content": system_prompt},
                         {"role": "user", "content": f"Create narration:\n\n{news_text}"}],
-            "max_tokens": 800 if style == "long" else 300
+            "max_completion_tokens": 800 if style == "long" else 300
         },
         timeout=30
     )
@@ -511,7 +511,7 @@ Output ONLY the narration."""
                 "model": "gpt-5-mini",
                 "messages": [{"role": "system", "content": system_prompt},
                             {"role": "user", "content": news_text}],
-                "max_tokens": 100
+                "max_completion_tokens": 100
             },
             timeout=30
         )
@@ -772,7 +772,7 @@ RULES:
 - Keep translations concise
 - Do NOT merge or skip any line"""
                     }, {"role": "user", "content": "\n".join(numbered_texts)}],
-                    "max_tokens": 2000
+                    "max_completion_tokens": 2000
                 },
                 timeout=60
             )
@@ -858,7 +858,7 @@ RULES:
 - Output EXACTLY {num_segments} numbered lines
 - Keep translations concise"""
                     }, {"role": "user", "content": "\n".join(numbered_texts)}],
-                    "max_tokens": 2000
+                    "max_completion_tokens": 2000
                 },
                 timeout=60
             )
@@ -1116,7 +1116,7 @@ Example: If news is about tech, sports, weather → "Dramatic cinematic scene of
                 "role": "user",
                 "content": f"News topics: {titles_summary}"
             }],
-            "max_tokens": 150
+            "max_completion_tokens": 150
         },
         timeout=30
     )
