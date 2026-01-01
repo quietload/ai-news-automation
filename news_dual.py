@@ -529,7 +529,7 @@ Output ONLY the narration."""
     return segments
 
 
-def generate_segmented_audio(segments: list, output_dir: Path, prefix: str, voice: str = "coral") -> list:
+def generate_segmented_audio(segments: list, output_dir: Path, prefix: str, voice: str = "marin") -> list:
     """Generate TTS for each segment and return list with durations"""
     
     # 뉴스 앵커 스타일 instructions
@@ -603,7 +603,7 @@ def merge_audio_segments(segments: list, output_path: Path) -> Path:
     return output_path
 
 
-def generate_tts(text: str, output_path: Path, voice: str = "coral") -> Path:
+def generate_tts(text: str, output_path: Path, voice: str = "marin") -> Path:
     """Generate speech with OpenAI TTS - handles long text by chunking"""
     
     # 뉴스 앵커 스타일 instructions
