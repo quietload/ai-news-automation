@@ -529,8 +529,11 @@ Output ONLY the narration."""
     return segments
 
 
-def generate_segmented_audio(segments: list, output_dir: Path, prefix: str, voice: str = "nova") -> list:
+def generate_segmented_audio(segments: list, output_dir: Path, prefix: str, voice: str = "coral") -> list:
     """Generate TTS for each segment and return list with durations"""
+    
+    # 뉴스 앵커 스타일 instructions
+    tts_instructions = "Speak in a clear, professional news anchor tone. Confident and authoritative, with natural pacing and slight emphasis on key words."
     
     result = []
     
@@ -540,7 +543,13 @@ def generate_segmented_audio(segments: list, output_dir: Path, prefix: str, voic
         response = requests.post(
             f"{OPENAI_API_BASE}/audio/speech",
             headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
-            json={"model": "gpt-4o-mini-tts", "input": seg["text"], "voice": voice, "response_format": "mp3"},
+            json={
+                "model": "gpt-4o-mini-tts",
+                "input": seg["text"],
+                "voice": voice,
+                "instructions": tts_instructions,
+                "response_format": "mp3"
+            },
             timeout=60
         )
         
@@ -594,8 +603,11 @@ def merge_audio_segments(segments: list, output_path: Path) -> Path:
     return output_path
 
 
-def generate_tts(text: str, output_path: Path, voice: str = "nova") -> Path:
+def generate_tts(text: str, output_path: Path, voice: str = "coral") -> Path:
     """Generate speech with OpenAI TTS - handles long text by chunking"""
+    
+    # 뉴스 앵커 스타일 instructions
+    tts_instructions = "Speak in a clear, professional news anchor tone. Confident and authoritative, with natural pacing and slight emphasis on key words."
     
     # TTS limit is 4096 characters
     MAX_CHARS = 4000
@@ -605,7 +617,13 @@ def generate_tts(text: str, output_path: Path, voice: str = "nova") -> Path:
         response = requests.post(
             f"{OPENAI_API_BASE}/audio/speech",
             headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
-            json={"model": "gpt-4o-mini-tts", "input": text, "voice": voice, "response_format": "mp3"},
+            json={
+                "model": "gpt-4o-mini-tts",
+                "input": text,
+                "voice": voice,
+                "instructions": tts_instructions,
+                "response_format": "mp3"
+            },
             timeout=120
         )
         
@@ -643,7 +661,13 @@ def generate_tts(text: str, output_path: Path, voice: str = "nova") -> Path:
         response = requests.post(
             f"{OPENAI_API_BASE}/audio/speech",
             headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
-            json={"model": "gpt-4o-mini-tts", "input": chunk, "voice": voice, "response_format": "mp3"},
+            json={
+                "model": "gpt-4o-mini-tts",
+                "input": chunk,
+                "voice": voice,
+                "instructions": tts_instructions,
+                "response_format": "mp3"
+            },
             timeout=120
         )
         
