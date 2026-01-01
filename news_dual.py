@@ -78,27 +78,51 @@ ASSETS_DIR = Path(__file__).parent / "assets"
 ENDING_SHORTS = ASSETS_DIR / "ending_shorts.png"
 ENDING_VIDEO = ASSETS_DIR / "ending_video.png"
 
-# Used news tracking (duplicate prevention)
-USED_NEWS_FILE = Path(__file__).parent / "used_news.json"
+# Used news tracking (duplicate prevention) - Daily와 Weekly 분리
+USED_NEWS_FILE_DAILY = Path(__file__).parent / "used_news_daily.json"
+USED_NEWS_FILE_WEEKLY = Path(__file__).parent / "used_news_weekly.json"
+
+# 신뢰도 높은 글로벌 언론사 목록
+TRUSTED_SOURCES = [
+    # 영국
+    "bbc", "reuters", "the guardian", "financial times", "the economist", "sky news",
+    # 미국 (글로벌 커버리지)
+    "cnn", "ap news", "associated press", "bloomberg", "cnbc", "npr", "washington post",
+    "new york times", "wall street journal", "time", "newsweek", "usa today",
+    # 호주/뉴질랜드
+    "abc news", "sydney morning herald", "the australian",
+    # 캐나다
+    "cbc", "global news", "ctv news",
+    # 아시아 (영어)
+    "south china morning post", "the straits times", "channel news asia", "nikkei",
+    # 중동/아프리카
+    "al jazeera", "africa news",
+    # 유럽
+    "euronews", "dw", "france 24",
+    # 통신사
+    "afp", "agence france-presse",
+]
 
 # =============================================================================
 # UTILITY FUNCTIONS
 # =============================================================================
 
 
-def load_used_news() -> set:
+def load_used_news(news_type: str = "daily") -> set:
     """이미 사용한 뉴스 ID/제목 로드"""
-    if USED_NEWS_FILE.exists():
-        with open(USED_NEWS_FILE, 'r', encoding='utf-8') as f:
+    file_path = USED_NEWS_FILE_DAILY if news_type == "daily" else USED_NEWS_FILE_WEEKLY
+    if file_path.exists():
+        with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
             return set(data.get("used", []))
     return set()
 
 
-def save_used_news(used: set, max_keep: int = 200):
+def save_used_news(used: set, news_type: str = "daily", max_keep: int = 200):
     """사용한 뉴스 저장 (최근 200개만 유지)"""
+    file_path = USED_NEWS_FILE_DAILY if news_type == "daily" else USED_NEWS_FILE_WEEKLY
     used_list = list(used)[-max_keep:]  # 최근 200개만
-    with open(USED_NEWS_FILE, 'w', encoding='utf-8') as f:
+    with open(file_path, 'w', encoding='utf-8') as f:
         json.dump({"used": used_list}, f)
 
 
@@ -153,7 +177,7 @@ def fetch_news_by_categories(categories: list = None, backup_per_category: int =
     if not NEWSDATA_API_KEY:
         raise Exception("NEWSDATA_API_KEY is not set! Please set the environment variable.")
     
-    used_news = load_used_news()
+    used_news = load_used_news("weekly")
     news_items = []
     
     for category in categories:
@@ -165,7 +189,8 @@ def fetch_news_by_categories(categories: list = None, backup_per_category: int =
                     "language": "en",
                     "category": category,
                     "prioritydomain": "top",
-                    "size": 1 + backup_per_category  # 1개 + 백업
+                    "timeframe": 168,  # 최근 7일 (Weekly Video용)
+                    "size": 10  # 필터링 후 선택하기 위해 더 많이 가져옴
                 },
                 timeout=30
             )
@@ -191,8 +216,18 @@ def fetch_news_by_categories(categories: list = None, backup_per_category: int =
                 }
                 
                 news_id = get_news_id(news)
-                if news_id not in used_news:
-                    category_news.append(news)
+                if news_id in used_news:
+                    continue
+                
+                # 제목/설명 품질 체크
+                if len(news['title']) < 20 or not news['description']:
+                    continue
+                    
+                # 신뢰도 체크 (마크 표시용)
+                source_lower = news['source'].lower()
+                news['is_trusted'] = any(trusted in source_lower for trusted in TRUSTED_SOURCES)
+                
+                category_news.append(news)
             
             if category_news:
                 news_items.extend(category_news)  # 모든 백업 포함
@@ -299,13 +334,13 @@ class ContentPolicyError(Exception):
 
 
 def fetch_global_news_with_backup(count: int, backup_count: int = 5) -> list:
-    """Fetch news from multiple categories to ensure diversity"""
+    """Fetch news from multiple categories to ensure diversity (Daily Shorts용)"""
     print(f"\n[1/8] Fetching news (target: {count}, backup: {backup_count})...")
     
     if not NEWSDATA_API_KEY:
         raise Exception("NEWSDATA_API_KEY is not set! Please set the environment variable.")
     
-    used_news = load_used_news()
+    used_news = load_used_news("daily")
     news_items = []
     
     # 8개 글로벌 카테고리 (지역성 카테고리 제외)
@@ -330,7 +365,8 @@ def fetch_global_news_with_backup(count: int, backup_count: int = 5) -> list:
                     "language": "en",
                     "category": category,
                     "prioritydomain": "top",
-                    "size": 3  # 카테고리당 3개씩
+                    "timeframe": 24,  # 최근 24시간 기사만
+                    "size": 10  # 필터링 후 선택하기 위해 더 많이 가져옴
                 },
                 timeout=30
             )
@@ -359,12 +395,21 @@ def fetch_global_news_with_backup(count: int, backup_count: int = 5) -> list:
                 if news_id in used_news:
                     continue
                 
+                # 신뢰도 높은 언론사 우선 (없으면 아무거나)
+                source_lower = news['source'].lower()
+                is_trusted = any(trusted in source_lower for trusted in TRUSTED_SOURCES)
+                
+                # 제목/설명 품질 체크
+                if len(news['title']) < 20 or not news['description']:
+                    continue
+                
                 # 이미 같은 카테고리 뉴스가 있으면 스킵 (다양성)
                 if any(n.get('category') == news['category'] for n in news_items):
                     continue
                 
                 news_items.append(news)
-                print(f"  [OK] {category}: {news['title'][:40]}...")
+                trusted_mark = "★" if is_trusted else ""
+                print(f"  [OK] {category}: {news['title'][:40]}... {trusted_mark}{news['source']}")
                 break  # 카테고리당 1개만
                 
         except Exception as e:
@@ -1405,11 +1450,12 @@ def main():
     with open(summary_file, 'w', encoding='utf-8') as f:
         json.dump(summary, f, indent=2, ensure_ascii=False)
     
-    # 사용한 뉴스 저장 (중복 방지)
-    used_news = load_used_news()
+    # 사용한 뉴스 저장 (중복 방지) - Daily/Weekly 분리
+    news_type = "weekly" if args.by_category else "daily"
+    used_news = load_used_news(news_type)
     for news in news_list:
         used_news.add(get_news_id(news))
-    save_used_news(used_news)
+    save_used_news(used_news, news_type)
     
     print(f"\n{'='*60}")
     print(f"[OK] Complete!")
