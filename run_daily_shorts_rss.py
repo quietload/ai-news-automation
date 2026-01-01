@@ -100,7 +100,7 @@ def upload_shorts(summary: dict):
         "--title", shorts["title"][:100],
         "--description", shorts["description"][:5000],
         "--privacyStatus", "private",
-        "--publishAt", publish_time
+        "--publish-at", publish_time
     ]
     
     thumbnail = shorts.get("thumbnail")

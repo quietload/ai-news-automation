@@ -100,7 +100,7 @@ def upload_video(summary: dict):
         "--title", video["title"][:100],
         "--description", video["description"][:5000],
         "--privacyStatus", "private",
-        "--publishAt", publish_time
+        "--publish-at", publish_time
     ]
     
     thumbnail = video.get("thumbnail")
