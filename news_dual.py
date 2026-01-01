@@ -5,7 +5,7 @@ News Automation Pipeline - Daily Shorts & Weekly Video Generator
 
 Automatically generates YouTube content from global news:
 - Daily Shorts: 7 news stories, vertical format, ~60 seconds
-- Weekly Video: 20 news stories (by category), horizontal format, ~5 minutes
+- Weekly Video: 16 news stories (2 per category), horizontal format, ~4 minutes
 
 Features:
 - News fetching from RSS feeds (real-time) or NewsData.io API
@@ -1068,7 +1068,7 @@ def generate_description(news_list: list, is_weekly: bool = False) -> str:
     stories_text = "\n\n".join(stories)
     
     if is_weekly:
-        header = "AI News Daily | Weekly Roundup (20 Stories)"
+        header = "AI News Daily | Weekly Roundup (16 Stories)"
         stories_header = "This Week's Top Stories:"
     else:
         header = "AI News Daily | Today's Headlines (7 Stories)"

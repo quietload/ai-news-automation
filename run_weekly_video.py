@@ -50,11 +50,11 @@ def get_publish_time() -> str:
 
 def run_video():
     log("=" * 60)
-    log("[1/2] Generating Weekly Video (20 news)...")
+    log("[1/2] Generating Weekly Video (16 news)...")
     log("=" * 60)
     
     result = subprocess.run(
-        [sys.executable, "news_dual.py", "--count", "20", "--video-only", "--by-category", "--output", "./output"],
+        [sys.executable, "news_dual.py", "--count", "16", "--video-only", "--by-category", "--output", "./output"],
         cwd=Path(__file__).parent,
         capture_output=True,
         text=True
