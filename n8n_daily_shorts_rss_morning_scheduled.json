@@ -20,17 +20,63 @@
     },
     {
       "parameters": {
-        "command": "C:\\Users\\USER\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe D:\\workspace\\news\\run_daily_shorts_rss_morning.py"
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $now.weekday }}",
+              "rightValue": 6,
+              "operator": {
+                "type": "number",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "leftValue": "={{ $now.weekday }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
       },
       "id": "2",
+      "name": "Skip Weekend",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [450, 200]
+    },
+    {
+      "parameters": {
+        "command": "C:\\Users\\USER\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe D:\\workspace\\news\\run_daily_shorts_rss_morning.py"
+      },
+      "id": "3",
       "name": "Run Daily Shorts RSS Morning",
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
-      "position": [500, 200]
+      "position": [700, 180]
     }
   ],
   "connections": {
     "Daily 8AM": {
+      "main": [
+        [
+          {
+            "node": "Skip Weekend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Skip Weekend": {
       "main": [
         [
           {
