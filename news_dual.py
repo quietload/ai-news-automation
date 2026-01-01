@@ -1024,7 +1024,7 @@ def create_video(images: list, audio_path: Path, output_path: Path, resolution: 
     return output_path
 
 
-def generate_description(news_list: list) -> str:
+def generate_description(news_list: list, is_weekly: bool = False) -> str:
     """Generate YouTube description with source links"""
     stories = []
     for i, n in enumerate(news_list):
@@ -1037,9 +1037,16 @@ def generate_description(news_list: list) -> str:
     
     stories_text = "\n\n".join(stories)
     
-    return f"""Global News Today | AI Generated
+    if is_weekly:
+        header = "AI News Daily | Weekly Roundup"
+        stories_header = "This Week's Stories:"
+    else:
+        header = "AI News Daily | Today's Headlines"
+        stories_header = "Today's Stories:"
+    
+    return f"""{header}
 
-Today's Stories:
+{stories_header}
 
 {stories_text}
 
@@ -1432,8 +1439,8 @@ def main():
             "video": str(video_file),
             "thumbnail": str(video_thumb) if video_thumb else None,
             "subtitles": {k: str(v) for k, v in video_srt.items()},
-            "title": f"Global News Today {ts[:8]} | AI News Roundup",
-            "description": generate_description(news_list)
+            "title": f"Weekly News Roundup - {datetime.now().strftime('%b %d, %Y')}",
+            "description": generate_description(news_list, is_weekly=True)
         }
     
     # Save summary

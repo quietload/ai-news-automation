@@ -31,11 +31,11 @@ def log(msg):
 
 def run_video():
     log("=" * 60)
-    log("[1/2] Generating Weekly Video (13 categories)...")
+    log("[1/2] Generating Weekly Video (8 categories x 2 = 16 news)...")
     log("=" * 60)
     
     result = subprocess.run(
-        [sys.executable, "news_dual.py", "--count", "13", "--video-only", "--by-category", "--output", "./output"],
+        [sys.executable, "news_dual.py", "--count", "16", "--video-only", "--by-category", "--output", "./output"],
         cwd=Path(__file__).parent,
         capture_output=True,
         text=True
