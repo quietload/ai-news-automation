@@ -13,8 +13,9 @@ Automatically generates and uploads YouTube news content using AI.
 ## 🚀 Features
 
 - ✅ News fetching from RSS feeds (real-time) or NewsData.io
+- ✅ AI text generation (GPT-5 mini with minimal reasoning)
 - ✅ AI image generation (GPT Image 1.5)
-- ✅ Text-to-speech narration (OpenAI TTS - Nova voice)
+- ✅ Text-to-speech narration (GPT-4o mini TTS - Marin voice)
 - ✅ Multi-language subtitles (EN, KO, JA, ZH, ES)
 - ✅ Synchronized audio-image timing
 - ✅ Auto-generated thumbnails
@@ -192,7 +193,7 @@ python run_weekly_video_now.py
 | Weekly Video | $2.00 × 4 weeks | $8.00 |
 | **Total** | | **~$22.30** |
 
-*Based on GPT Image 1.5 + TTS pricing*
+*Based on GPT-5 mini + GPT Image 1.5 + GPT-4o mini TTS pricing*
 
 ## 🔧 Configuration
 

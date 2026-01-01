@@ -10,7 +10,8 @@ Automatically generates YouTube content from global news:
 Features:
 - News fetching from RSS feeds (real-time) or NewsData.io API
 - AI image generation (GPT Image 1.5)
-- Text-to-speech narration (OpenAI TTS)
+- Text generation (GPT-5 mini with minimal reasoning)
+- Text-to-speech narration (GPT-4o mini TTS, marin voice)
 - Multi-language subtitles (EN, KO, JA, ZH, ES)
 - Synchronized audio-image timing
 - Auto-generated thumbnails
@@ -1080,7 +1081,7 @@ def generate_description(news_list: list, is_weekly: bool = False) -> str:
 {stories_text}
 
 ---
-Generated with AI (GPT Image + OpenAI TTS)
+Generated with AI (GPT-5 mini + GPT Image 1.5 + GPT-4o mini TTS)
 
 #news #AI #globalNews #worldnews #breakingnews
 """
