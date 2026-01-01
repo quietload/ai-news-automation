@@ -189,7 +189,7 @@ def fetch_news_by_categories(categories: list = None, backup_per_category: int =
                     "language": "en",
                     "category": category,
                     "prioritydomain": "top",
-                    "size": 50  # 충분한 백업을 위해 더 많이 가져옴
+                    "size": 10  # 무료 플랜 최대
                 },
                 timeout=30
             )
@@ -364,7 +364,7 @@ def fetch_global_news_with_backup(count: int, backup_count: int = 5) -> list:
                     "language": "en",
                     "category": category,
                     "prioritydomain": "top",
-                    "size": 50  # 충분한 백업을 위해 더 많이 가져옴
+                    "size": 10  # 무료 플랜 최대
                 },
                 timeout=30
             )
