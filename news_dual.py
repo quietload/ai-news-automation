@@ -4,7 +4,7 @@ News Automation Pipeline - Daily Shorts & Weekly Video Generator
 ================================================================
 
 Automatically generates YouTube content from global news:
-- Daily Shorts: 10 news stories, vertical format, ~60 seconds
+- Daily Shorts: 8 news stories, vertical format, ~60 seconds
 - Weekly Video: 20 news stories (by category), horizontal format, ~5 minutes
 
 Features:
@@ -18,8 +18,8 @@ Features:
 - YouTube scheduled upload support
 
 Usage:
-    # Daily Shorts (10 news) with RSS
-    python news_dual.py --count 10 --shorts-only --use-rss
+    # Daily Shorts (8 news) with RSS
+    python news_dual.py --count 8 --shorts-only --use-rss
     
     # Weekly Video (20 news by category) with RSS
     python news_dual.py --count 20 --video-only --by-category --use-rss
@@ -439,17 +439,17 @@ def generate_narration_script(news_list: list, style: str = "short", is_saturday
     
     if style == "short":
         system_prompt = f"""Write a SHORT news narration for YouTube Shorts.
-STRICT LIMIT: Maximum 60 seconds when spoken (~140 words total).
+STRICT LIMIT: Maximum 55-60 seconds when spoken (~130-140 words total).
 
 Structure:
 - Quick intro (1 sentence): "Here's today's top news"
-- {len(news_list)} news stories: 1 sentence each, just the key point
+- {len(news_list)} news stories: 1-2 sentences each with key details
 - Quick outro (1 sentence): "{outro}"
 
 Rules:
-- Be concise and punchy
+- Be concise but informative
 - No filler words
-- Total ~140 words maximum
+- Total ~130-140 words
 Output ONLY the narration."""
     else:
         system_prompt = f"""Write a DETAILED news narration (2-3 minutes, ~350 words max).
@@ -502,9 +502,9 @@ def generate_segmented_narration(news_list: list, style: str = "long", is_saturd
 - Under 50 words
 Output ONLY the narration, no intro or outro."""
         else:
-            system_prompt = """Write 1 sentence narration for this news.
-- Just the key point
-- Under 20 words
+            system_prompt = """Write 1-2 sentences narration for this news.
+- Include key details
+- 15-20 words total
 Output ONLY the narration."""
         
         response = requests.post(
@@ -1071,7 +1071,7 @@ def generate_description(news_list: list, is_weekly: bool = False) -> str:
         header = "AI News Daily | Weekly Roundup (20 Stories)"
         stories_header = "This Week's Top Stories:"
     else:
-        header = "AI News Daily | Today's Headlines (10 Stories)"
+        header = "AI News Daily | Today's Headlines (8 Stories)"
         stories_header = "Today's Stories:"
     
     return f"""{header}

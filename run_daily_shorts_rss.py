@@ -46,11 +46,11 @@ def get_publish_time() -> str:
 
 def run_shorts():
     log("=" * 60)
-    log("[1/2] Generating Shorts with RSS (10 news, max 60 seconds)...")
+    log("[1/2] Generating Shorts with RSS (8 news, max 60 seconds)...")
     log("=" * 60)
     
     result = subprocess.run(
-        [sys.executable, "news_dual.py", "--count", "10", "--shorts-only", "--use-rss", "--output", "./output"],
+        [sys.executable, "news_dual.py", "--count", "8", "--shorts-only", "--use-rss", "--output", "./output"],
         cwd=Path(__file__).parent,
         capture_output=True,
         text=True

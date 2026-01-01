@@ -201,7 +201,7 @@ python run_weekly_video_now.py
 
 | Content | News Count |
 |---------|------------|
-| Daily Shorts | 10 stories |
+| Daily Shorts | 8 stories |
 | Weekly Video | 20 stories |
 
 ### Subtitle Languages
