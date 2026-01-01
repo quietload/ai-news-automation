@@ -156,7 +156,7 @@ python run_weekly_video_now.py
 |------------|---------|-----------------|
 | 08:00 → 09:00 | Daily Shorts (6 news) | 🇺🇸 US (East 7PM, West 4PM) |
 | 20:00 → 21:00 | Daily Shorts (6 news) | 🇰🇷 Korea (Prime Time) |
-| **Sat** 09:00 → 10:00 | Weekly Video (16 news) | 🌏 Global |
+| **Sat** 21:00 → 22:00 | Weekly Video (16 news) | 🌏 Global |
 
 *First time = Generation, Second time = YouTube publish*
 

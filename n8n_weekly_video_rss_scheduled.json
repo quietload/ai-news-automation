@@ -7,14 +7,14 @@
           "interval": [
             {
               "triggerAtDay": 6,
-              "triggerAtHour": 9,
+              "triggerAtHour": 21,
               "triggerAtMinute": 0
             }
           ]
         }
       },
       "id": "1",
-      "name": "Saturday 9AM",
+      "name": "Saturday 9PM",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [250, 200]
@@ -31,7 +31,7 @@
     }
   ],
   "connections": {
-    "Saturday 9AM": {
+    "Saturday 9PM": {
       "main": [
         [
           {
