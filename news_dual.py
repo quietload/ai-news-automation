@@ -189,7 +189,7 @@ def fetch_news_by_categories(categories: list = None, backup_per_category: int =
                     "language": "en",
                     "category": category,
                     "prioritydomain": "top",
-                    "size": 10  # 필터링 후 선택하기 위해 더 많이 가져옴
+                    "size": 50  # 충분한 백업을 위해 더 많이 가져옴
                 },
                 timeout=30
             )
@@ -364,7 +364,7 @@ def fetch_global_news_with_backup(count: int, backup_count: int = 5) -> list:
                     "language": "en",
                     "category": category,
                     "prioritydomain": "top",
-                    "size": 10  # 필터링 후 선택하기 위해 더 많이 가져옴
+                    "size": 50  # 충분한 백업을 위해 더 많이 가져옴
                 },
                 timeout=30
             )
@@ -1251,8 +1251,8 @@ def main():
     
     # 1. Fetch news
     if args.by_category:
-        # 카테고리별 1개씩 (주간 비디오용)
-        all_news = fetch_news_by_categories(ALL_CATEGORIES[:args.count])
+        # 카테고리별 뉴스 가져오기 (주간 비디오용)
+        all_news = fetch_news_by_categories(ALL_CATEGORIES)
     else:
         # 기존 방식 (일반)
         all_news = fetch_global_news_with_backup(args.count, backup_count=5)
@@ -1304,16 +1304,18 @@ def main():
             video_used_news = []
             video_news_index = 0
             target_count = args.count
+            max_per_category = (target_count + len(ALL_CATEGORIES) - 1) // len(ALL_CATEGORIES)  # 카테고리당 최대 개수
             
             while len(video_used_news) < target_count and video_news_index < len(all_news):
                 news = all_news[video_news_index]
                 video_news_index += 1
                 
-                # 이미 같은 카테고리 뉴스가 있으면 스킵
-                if any(n.get('category') == news.get('category') for n in video_used_news):
+                # 카테고리당 max_per_category개까지만 허용
+                category = news.get('category', 'News')
+                category_count = sum(1 for n in video_used_news if n.get('category') == category)
+                if category_count >= max_per_category:
                     continue
                 
-                category = news.get('category', 'News')
                 print(f"  [{len(video_used_news)+1}/{target_count}] [{category}] {news['title'][:30]}...")
                 try:
                     prompts = generate_image_prompts(news, count=3, orientation="horizontal")
