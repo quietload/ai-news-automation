@@ -1,0 +1,16 @@
+1
+00:00:00,000 --> 00:00:01,645
+Aquí están las principales noticias de hoy.
+
+2
+00:00:01,645 --> 00:00:15,289
+El ministro de Defensa Ahn Gyu‑back realizó este jueves su primera inspección del año a bordo de un avión de alerta temprana, revisando la postura de seguridad de la Fuerza Aérea en medio de las tensiones regionales.
+
+3
+00:00:15,289 --> 00:00:32,088
+Científicos advierten que virus en desechos plásticos pueden propagar genes de resistencia a antibióticos; un nuevo enfoque en Biocontaminant indica que las superficies plásticas pueden albergar comunidades virales que aceleran la transferencia génica y presentan riesgos inesperados para la salud pública.
+
+4
+00:00:32,088 --> 00:00:33,047
+Mantente informado.
+

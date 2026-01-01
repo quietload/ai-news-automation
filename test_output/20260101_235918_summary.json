@@ -1,0 +1,33 @@
+{
+  "timestamp": "20260101_235918",
+  "news_count": 2,
+  "news": [
+    {
+      "title": "Defense chief inspects security posture aboard Air Force aircraft",
+      "description": "Defense Minister Ahn Gyu-back conducted his first inspection of the year Thursday aboard an airborne early warning aircraft amid lingering security concerns over North Korea, the ministry said. Ahn flew on the E-737 Peace Eye, flanked by KF-21, FA-50 and TA-50 jets, marking the first time homegrown aircraft were used for such an escort mission, according to the defense ministry. \"Sustainable peace is possible when a nation has the strength to defend itself,\" Ahn said, adding that the military mu",
+      "source": "Korea Times",
+      "category": "World",
+      "link": "https://www.koreatimes.co.kr/southkorea/defense/20260101/defense-chief-inspects-security-posture-aboard-air-force-aircraft?utm_source=rss"
+    },
+    {
+      "title": "Viruses on plastic waste pose new antibiotic resistance risks",
+      "description": "Plastic pollution does more than litter landscapes and oceans. According to a new perspective article published in Biocontaminant, viruses living on plastic surfaces may play an underrecognized role in spreading antibiotic resistance, raising concerns for environmental and public health worldwide.",
+      "source": "Health News",
+      "category": "Health",
+      "link": "https://www.news-medical.net/news/20251231/Viruses-on-plastic-waste-pose-new-antibiotic-resistance-risks.aspx"
+    }
+  ],
+  "shorts": {
+    "video": "test_output\\20260101_235918_Shorts.mp4",
+    "thumbnail": null,
+    "subtitles": {
+      "en": "test_output\\20260101_235918_shorts_subtitles_en.srt",
+      "ko": "test_output\\20260101_235918_shorts_subtitles_ko.srt",
+      "ja": "test_output\\20260101_235918_shorts_subtitles_ja.srt",
+      "zh": "test_output\\20260101_235918_shorts_subtitles_zh.srt",
+      "es": "test_output\\20260101_235918_shorts_subtitles_es.srt"
+    },
+    "title": "Today's Top News - Jan 02 #shorts",
+    "description": "AI News Daily | Today's Headlines (10 Stories)\n\nToday's Stories:\n\n1. Defense chief inspects security posture aboard Air Force aircraft\nhttps://www.koreatimes.co.kr/southkorea/defense/20260101/defense-chief-inspects-security-posture-aboard-air-force-aircraft?utm_source=rss\n\n2. Viruses on plastic waste pose new antibiotic resistance risks\nhttps://www.news-medical.net/news/20251231/Viruses-on-plastic-waste-pose-new-antibiotic-resistance-risks.aspx\n\n---\nGenerated with AI (GPT Image + OpenAI TTS)\n\n#news #AI #globalNews #worldnews #breakingnews\n"
+  }
+}
