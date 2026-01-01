@@ -4,11 +4,11 @@ News Automation Pipeline - Daily Shorts & Weekly Video Generator
 ================================================================
 
 Automatically generates YouTube content from global news:
-- Daily Shorts: 8 news stories, vertical format, ~60 seconds
-- Weekly Video: 13 news stories (by category), horizontal format, ~3 minutes
+- Daily Shorts: 10 news stories, vertical format, ~60 seconds
+- Weekly Video: 20 news stories (by category), horizontal format, ~5 minutes
 
 Features:
-- News fetching from NewsData.io API
+- News fetching from RSS feeds (real-time) or NewsData.io API
 - AI image generation (GPT Image 1.5)
 - Text-to-speech narration (OpenAI TTS)
 - Multi-language subtitles (EN, KO, JA, ZH, ES)
@@ -17,17 +17,17 @@ Features:
 - YouTube scheduled upload support
 
 Usage:
-    # Daily Shorts (8 news)
-    python news_dual.py --count 8 --shorts-only
+    # Daily Shorts (10 news) with RSS
+    python news_dual.py --count 10 --shorts-only --use-rss
     
-    # Weekly Video (13 news by category)
-    python news_dual.py --count 13 --video-only --by-category
+    # Weekly Video (20 news by category) with RSS
+    python news_dual.py --count 20 --video-only --by-category --use-rss
     
-    # Both
-    python news_dual.py --count 8
+    # Using NewsData.io (12h delay)
+    python news_dual.py --count 10 --shorts-only
 
 Author: AI News Automation
-Version: 2.0
+Version: 2.1
 """
 
 import os
@@ -1038,10 +1038,10 @@ def generate_description(news_list: list, is_weekly: bool = False) -> str:
     stories_text = "\n\n".join(stories)
     
     if is_weekly:
-        header = "AI News Daily | Weekly Roundup"
-        stories_header = "This Week's Stories:"
+        header = "AI News Daily | Weekly Roundup (20 Stories)"
+        stories_header = "This Week's Top Stories:"
     else:
-        header = "AI News Daily | Today's Headlines"
+        header = "AI News Daily | Today's Headlines (10 Stories)"
         stories_header = "Today's Stories:"
     
     return f"""{header}
@@ -1052,7 +1052,6 @@ def generate_description(news_list: list, is_weekly: bool = False) -> str:
 
 ---
 Generated with AI (GPT Image + OpenAI TTS)
-Source: NewsData.io
 
 #news #AI #globalNews #worldnews #breakingnews
 """
@@ -1235,11 +1234,12 @@ Example: If news is about tech, sports, weather → "Dramatic cinematic scene of
 
 def main():
     parser = argparse.ArgumentParser(description="News Shorts + Video Generator")
-    parser.add_argument("--count", type=int, default=8, help="Number of news")
+    parser.add_argument("--count", type=int, default=10, help="Number of news")
     parser.add_argument("--output", type=str, default="./output", help="Output directory")
     parser.add_argument("--shorts-only", action="store_true", help="Generate Shorts only")
     parser.add_argument("--video-only", action="store_true", help="Generate Video only")
     parser.add_argument("--by-category", action="store_true", help="Fetch 1 news per category (for weekly video)")
+    parser.add_argument("--use-rss", action="store_true", help="Use RSS feeds instead of NewsData.io (real-time, no delay)")
     args = parser.parse_args()
     
     output_dir = Path(args.output)
@@ -1250,11 +1250,18 @@ def main():
     generate_video = not args.shorts_only
     
     # 1. Fetch news
-    if args.by_category:
-        # 카테고리별 뉴스 가져오기 (주간 비디오용)
+    if args.use_rss:
+        # RSS 피드 사용 (실시간, 딜레이 없음)
+        from news_rss import fetch_rss_news, fetch_rss_news_by_category
+        if args.by_category:
+            all_news = fetch_rss_news_by_category(count=args.count, news_type="weekly")
+        else:
+            all_news = fetch_rss_news(count=args.count, news_type="daily")
+    elif args.by_category:
+        # NewsData.io 카테고리별 (주간 비디오용)
         all_news = fetch_news_by_categories(ALL_CATEGORIES)
     else:
-        # 기존 방식 (일반)
+        # NewsData.io 기존 방식 (일반)
         all_news = fetch_global_news_with_backup(args.count, backup_count=5)
     
     # 2. Generate images (skip policy violations, use backup news)

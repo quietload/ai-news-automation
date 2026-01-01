@@ -204,14 +204,16 @@ def upload_local_video(video_path: str, caption: str,
 def generate_instagram_caption(news_list: list, is_weekly: bool = False) -> str:
     """Generate Instagram caption with hashtags"""
     if is_weekly:
-        header = "📰 Weekly News Roundup"
+        header = "📰 Weekly News Roundup (20 Stories)"
+        max_headlines = 10
     else:
-        header = "📰 Today's Top News"
+        header = "📰 Today's Top News (10 Stories)"
+        max_headlines = 10
     
     # Instagram caption limit: 2200 characters
     # Keep it shorter with just headlines
     headlines = []
-    for i, n in enumerate(news_list[:8]):  # Max 8 headlines
+    for i, n in enumerate(news_list[:max_headlines]):
         headlines.append(f"{i+1}. {n['title'][:80]}")
     
     headlines_text = "\n".join(headlines)

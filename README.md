@@ -6,13 +6,13 @@ Automatically generates and uploads YouTube news content using AI.
 
 | Content | Schedule | Format | Duration |
 |---------|----------|--------|----------|
-| **Daily Shorts** | Mon-Fri 18:00 KST | Vertical (1080x1920) | ~60s |
-| **Weekly Video** | Sat 18:00 KST | Horizontal (1920x1080) | ~3min |
+| **Daily Shorts** | Mon-Fri 21:00 KST | Vertical (1080x1920) | ~60s |
+| **Weekly Video** | Sat 21:00 KST | Horizontal (1920x1080) | ~5min |
 | **Sunday** | Rest day 😴 | - | - |
 
 ## 🚀 Features
 
-- ✅ News fetching from NewsData.io (14 categories)
+- ✅ News fetching from RSS feeds (real-time) or NewsData.io
 - ✅ AI image generation (GPT Image 1.5)
 - ✅ Text-to-speech narration (OpenAI TTS - Nova voice)
 - ✅ Multi-language subtitles (EN, KO, JA, ZH, ES)
@@ -20,25 +20,47 @@ Automatically generates and uploads YouTube news content using AI.
 - ✅ Auto-generated thumbnails
 - ✅ YouTube scheduled upload
 - ✅ Duplicate news prevention
+- ✅ Korean news sources for World category
 
 ## 📁 File Structure
 
 ```
 news/
-├── news_dual.py           # Main generator
-├── run_daily_shorts.py    # Daily shorts runner
-├── run_weekly_video.py    # Weekly video runner
-├── upload_video.py        # YouTube uploader
-├── create_ending_images.py # Ending image generator
-├── n8n_workflow.json      # Automation schedule
-├── .env                   # API keys (create from .env.example)
-├── .env.example           # API keys template
-├── used_news.json         # Duplicate tracking
+├── news_dual.py                    # Main generator
+├── news_rss.py                     # RSS feed fetcher
+├── upload_video.py                 # YouTube uploader
+├── upload_instagram.py             # Instagram uploader (optional)
+│
+├── # NewsData.io runners
+├── run_daily_shorts.py             # Daily shorts (scheduled)
+├── run_daily_shorts_now.py         # Daily shorts (immediate)
+├── run_weekly_video.py             # Weekly video (scheduled)
+├── run_weekly_video_now.py         # Weekly video (immediate)
+│
+├── # RSS runners (recommended)
+├── run_daily_shorts_rss.py         # Daily shorts RSS (scheduled)
+├── run_daily_shorts_rss_now.py     # Daily shorts RSS (immediate)
+├── run_weekly_video_rss.py         # Weekly video RSS (scheduled)
+├── run_weekly_video_rss_now.py     # Weekly video RSS (immediate)
+│
+├── # n8n workflows
+├── n8n_daily_shorts_scheduled.json
+├── n8n_weekly_video_scheduled.json
+├── n8n_daily_shorts_rss_scheduled.json
+├── n8n_weekly_video_rss_scheduled.json
+│
+├── .env                            # API keys
+├── client_secrets.json             # YouTube OAuth
+├── used_news_daily.json            # Daily duplicate tracking
+├── used_news_weekly.json           # Weekly duplicate tracking
+├── used_news_rss_daily.json        # RSS daily tracking
+├── used_news_rss_weekly.json       # RSS weekly tracking
 ├── assets/
-│   ├── ending_shorts.png  # Shorts ending image
-│   └── ending_video.png   # Video ending image
-├── output/                # Generated content
-└── logs/                  # Execution logs
+│   ├── ending_shorts.png
+│   └── ending_video.png
+├── output/                         # Generated content
+├── logs/                           # Execution logs
+└── n8n_data/                       # n8n database
 ```
 
 ## ⚙️ Setup
@@ -46,7 +68,7 @@ news/
 ### 1. Install Dependencies
 
 ```bash
-pip install requests python-dotenv pillow
+pip install requests python-dotenv pillow feedparser
 ```
 
 ### 2. Install FFmpeg
@@ -63,7 +85,7 @@ choco install ffmpeg
 Create `.env` file:
 
 ```env
-NEWSDATA_API_KEY=pub_xxxxxxxxxxxxx
+NEWSDATA_API_KEY=pub_xxxxxxxxxxxxx   # Optional if using RSS
 OPENAI_API_KEY=sk-xxxxxxxxxxxxx
 ```
 
@@ -89,62 +111,97 @@ python create_ending_images.py
 ### Manual Generation
 
 ```bash
-# Daily Shorts (8 news)
-python news_dual.py --count 8 --shorts-only
+# Daily Shorts with RSS (10 news, recommended)
+python news_dual.py --count 10 --shorts-only --use-rss
 
-# Weekly Video (13 news by category)
-python news_dual.py --count 13 --video-only --by-category
+# Weekly Video with RSS (20 news by category)
+python news_dual.py --count 20 --video-only --by-category --use-rss
 
-# Both
-python news_dual.py --count 8
+# Using NewsData.io (12h delay, not recommended)
+python news_dual.py --count 10 --shorts-only
+```
+
+### Runner Scripts
+
+```bash
+# RSS (recommended - real-time news)
+python run_daily_shorts_rss_now.py    # Immediate upload
+python run_weekly_video_rss_now.py    # Immediate upload
+
+# NewsData.io (12h delay)
+python run_daily_shorts_now.py
+python run_weekly_video_now.py
 ```
 
 ### Automated (with n8n)
 
-1. Import `n8n_workflow.json` into n8n
-2. Activate the workflow
-3. Keep n8n server running
+1. Start n8n:
+   ```powershell
+   $env:N8N_USER_FOLDER = "D:\workspace\news\n8n_data"
+   npx n8n
+   ```
 
-```bash
-# Start n8n
-npx n8n
-# or
-docker start n8n
-```
+2. Import workflow:
+   - `n8n_daily_shorts_rss_scheduled.json` (recommended)
+   - `n8n_weekly_video_rss_scheduled.json` (recommended)
 
-## 📅 Schedule (n8n)
+3. Set timezone to `Asia/Seoul`
+
+4. Activate workflows
+
+## 📅 Schedule
 
 | Day | Time (KST) | Content |
 |-----|------------|---------|
-| Mon | 17:00 → 18:00 | Shorts |
-| Tue | 17:00 → 18:00 | Shorts |
-| Wed | 17:00 → 18:00 | Shorts |
-| Thu | 17:00 → 18:00 | Shorts |
-| Fri | 17:00 → 18:00 | Shorts |
-| **Sat** | 17:00 → 18:00 | **Weekly Video** |
+| Mon | 20:00 → 21:00 | Daily Shorts (10 news) |
+| Tue | 20:00 → 21:00 | Daily Shorts (10 news) |
+| Wed | 20:00 → 21:00 | Daily Shorts (10 news) |
+| Thu | 20:00 → 21:00 | Daily Shorts (10 news) |
+| Fri | 20:00 → 21:00 | Daily Shorts (10 news) |
+| **Sat** | 20:00 → 21:00 | **Weekly Video (20 news)** |
 | Sun | - | Rest |
 
-*17:00 = Generation starts, 18:00 = YouTube publish time*
+*20:00 = Generation starts, 21:00 = YouTube publish time (Korean Prime Time)*
+
+## 📰 News Sources
+
+### RSS Feeds (Recommended)
+
+| Category | Sources |
+|----------|---------|
+| World | Korea Herald, Korea Times, Yonhap, Arirang, BBC, Al Jazeera, DW |
+| Business | BBC, CNBC, Bloomberg, Financial Times, MarketWatch |
+| Technology | BBC, TechCrunch, Ars Technica, The Verge, Wired |
+| Science | BBC, Science Daily, Nature, New Scientist, Space.com |
+| Health | BBC, WebMD, Medical News Today |
+| Sports | BBC, ESPN, Sky Sports, Sports Illustrated |
+| Entertainment | BBC, Variety, Hollywood Reporter, Entertainment Weekly |
+| Environment | BBC, Guardian, Climate News, Mongabay |
+
+### NewsData.io (Alternative)
+
+- 8 global categories
+- 12-hour delay on free plan
+- 200 credits/day limit
 
 ## 💰 Monthly Cost Estimate
 
 | Item | Calculation | Cost |
 |------|-------------|------|
-| Daily Shorts | $0.59 × 22 days | $12.98 |
-| Weekly Video | $1.40 × 4 weeks | $5.60 |
-| **Total** | | **~$18.58** |
+| Daily Shorts | $0.65 × 22 days | $14.30 |
+| Weekly Video | $2.00 × 4 weeks | $8.00 |
+| **Total** | | **~$22.30** |
 
-*Based on GPT Image 1.5 medium quality pricing*
+*Based on GPT Image 1.5 + TTS pricing*
 
 ## 🔧 Configuration
 
-### News Categories (14)
+### News Count
 
-```
-world, business, technology, science, health,
-sports, entertainment, environment, politics,
-crime, education, food, lifestyle, tourism
-```
+| Content | News Count |
+|---------|------------|
+| Daily Shorts | 10 stories |
+| Weekly Video | 20 stories |
 
 ### Subtitle Languages
 
@@ -163,37 +220,47 @@ Each generation creates:
 ```
 output/
 ├── {timestamp}_Shorts.mp4
-├── {timestamp}_shorts_thumbnail.png
-├── {timestamp}_shorts_subtitles_en.srt
-├── {timestamp}_shorts_subtitles_ko.srt
-├── {timestamp}_shorts_subtitles_ja.srt
-├── {timestamp}_shorts_subtitles_zh.srt
-├── {timestamp}_shorts_subtitles_es.srt
-├── {timestamp}_shorts_script.txt
-├── {timestamp}_shorts_audio.mp3
-├── {timestamp}_shorts_*.png (images)
-└── {timestamp}_summary.json
+├── {timestamp}_shorts_subtitles_*.srt
+├── {timestamp}_Video.mp4
+├── {timestamp}_video_thumbnail.jpg
+├── {timestamp}_video_subtitles_*.srt
+├── {timestamp}_summary.json
+└── {timestamp}_*.png (images)
 ```
 
 ## 🐛 Troubleshooting
 
-### API Errors
+### RSS Feed Errors
 
-- **NewsData 422**: Free plan limit (size=10 max). Already handled with multi-category fetching.
-- **OpenAI Policy Violation**: Content blocked. Automatically tries next news.
+- Some feeds may be temporarily unavailable
+- System automatically falls back to next source
+- Check `logs/` for details
+
+### NewsData.io Errors
+
+- **size > 10**: Free plan max is 10
+- **timeframe**: Paid feature only
+- Use RSS instead (recommended)
 
 ### FFmpeg Not Found
 
 ```bash
-# Add to PATH or install via package manager
 choco install ffmpeg
+# Or add to PATH manually
 ```
 
 ### YouTube Upload Limit
 
 - New channels: 15 videos/day
-- API quota: 10,000 units/day
-- Wait 24 hours or use different Google account
+- API quota: 10,000 units/day (resets 17:00 KST)
+- Upload: 1,600 units, Thumbnail: 50 units
+
+### n8n Process Not Stopping
+
+```powershell
+# Force kill Python processes
+taskkill /f /im python.exe
+```
 
 ## 📄 License
 
