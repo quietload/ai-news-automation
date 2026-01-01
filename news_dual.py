@@ -189,7 +189,6 @@ def fetch_news_by_categories(categories: list = None, backup_per_category: int =
                     "language": "en",
                     "category": category,
                     "prioritydomain": "top",
-                    "timeframe": 168,  # 최근 7일 (Weekly Video용)
                     "size": 10  # 필터링 후 선택하기 위해 더 많이 가져옴
                 },
                 timeout=30
@@ -365,7 +364,6 @@ def fetch_global_news_with_backup(count: int, backup_count: int = 5) -> list:
                     "language": "en",
                     "category": category,
                     "prioritydomain": "top",
-                    "timeframe": 24,  # 최근 24시간 기사만
                     "size": 10  # 필터링 후 선택하기 위해 더 많이 가져옴
                 },
                 timeout=30
