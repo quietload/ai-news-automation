@@ -8,11 +8,11 @@ No delay, no API limits, completely free.
 Usage:
     from news_rss import fetch_rss_news, fetch_rss_news_by_category
     
-    # Get 8 news for Daily Shorts
-    news = fetch_rss_news(count=8)
+    # Get 10 news for Daily Shorts
+    news = fetch_rss_news(count=10)
     
-    # Get 16 news for Weekly Video (by category)
-    news = fetch_rss_news_by_category(count=16)
+    # Get 20 news for Weekly Video (by category)
+    news = fetch_rss_news_by_category(count=20)
 """
 
 import feedparser
@@ -275,12 +275,12 @@ if __name__ == "__main__":
     print("=" * 60)
     
     # Test daily fetch
-    print("\n--- Daily Shorts (8 news) ---")
-    daily_news = fetch_rss_news(count=8, news_type="daily")
+    print("\n--- Daily Shorts (10 news) ---")
+    daily_news = fetch_rss_news(count=10, news_type="daily")
     for i, news in enumerate(daily_news, 1):
         print(f"{i}. [{news['category']}] {news['title'][:50]}...")
     
-    print("\n--- Weekly Video (16 news) ---")
-    weekly_news = fetch_rss_news_by_category(count=16, news_type="weekly")
+    print("\n--- Weekly Video (20 news) ---")
+    weekly_news = fetch_rss_news_by_category(count=20, news_type="weekly")
     for i, news in enumerate(weekly_news, 1):
         print(f"{i}. [{news['category']}] {news['title'][:50]}...")
