@@ -32,11 +32,11 @@ def log(msg):
 
 def run_shorts():
     log("=" * 60)
-    log("[1/2] Generating Shorts with RSS (7 news)...")
+    log("[1/2] Generating Shorts with RSS (6 news)...")
     log("=" * 60)
     
     result = subprocess.run(
-        [sys.executable, "news_dual.py", "--count", "7", "--shorts-only", "--use-rss", "--output", "./output"],
+        [sys.executable, "news_dual.py", "--count", "6", "--shorts-only", "--use-rss", "--output", "./output"],
         cwd=Path(__file__).parent,
         capture_output=True,
         text=True

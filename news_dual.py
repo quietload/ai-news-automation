@@ -4,7 +4,7 @@ News Automation Pipeline - Daily Shorts & Weekly Video Generator
 ================================================================
 
 Automatically generates YouTube content from global news:
-- Daily Shorts: 7 news stories, vertical format, ~60 seconds
+- Daily Shorts: 6 news stories, vertical format, ~60 seconds (2x daily)
 - Weekly Video: 16 news stories (2 per category), horizontal format, ~4 minutes
 
 Features:
@@ -18,8 +18,8 @@ Features:
 - YouTube scheduled upload support
 
 Usage:
-    # Daily Shorts (7 news) with RSS
-    python news_dual.py --count 7 --shorts-only --use-rss
+    # Daily Shorts (6 news) with RSS
+    python news_dual.py --count 6 --shorts-only --use-rss
     
     # Weekly Video (20 news by category) with RSS
     python news_dual.py --count 20 --video-only --by-category --use-rss
@@ -439,17 +439,17 @@ def generate_narration_script(news_list: list, style: str = "short", is_saturday
     
     if style == "short":
         system_prompt = f"""Write a SHORT news narration for YouTube Shorts.
-STRICT LIMIT: Maximum 50-55 seconds when spoken (~115 words total).
+STRICT LIMIT: Maximum 55 seconds when spoken (~118 words total).
 
 Structure:
 - Quick intro (1 sentence): "Here's today's top news"
-- {len(news_list)} news stories: 1 sentence each (14 words per story)
+- {len(news_list)} news stories: 1 sentence each (15-16 words per story)
 - Quick outro (1 sentence): "{outro}"
 
 Rules:
 - Be concise but clear
 - No filler words
-- Total ~115 words
+- Total ~118 words
 Output ONLY the narration."""
     else:
         system_prompt = f"""Write a DETAILED news narration (2-3 minutes, ~350 words max).
@@ -504,7 +504,7 @@ Output ONLY the narration, no intro or outro."""
         else:
             system_prompt = """Write 1 sentence narration for this news.
 - Just the key point
-- 12-15 words
+- 15-16 words
 Output ONLY the narration."""
         
         response = requests.post(
@@ -1071,7 +1071,7 @@ def generate_description(news_list: list, is_weekly: bool = False) -> str:
         header = "AI News Daily | Weekly Roundup (16 Stories)"
         stories_header = "This Week's Top Stories:"
     else:
-        header = "AI News Daily | Today's Headlines (7 Stories)"
+        header = "AI News Daily | Today's Headlines (6 Stories)"
         stories_header = "Today's Stories:"
     
     return f"""{header}

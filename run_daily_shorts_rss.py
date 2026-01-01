@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Daily Shorts Runner (RSS version)
-==================================
-Generates and uploads daily news shorts using RSS feeds (real-time, no delay).
-Runs Mon-Fri at 20:00 KST, publishes at 21:00 KST.
+Daily Shorts Runner - Evening (RSS version)
+=============================================
+Generates and uploads daily news shorts for Korean audience.
+Runs daily at 20:00 KST, publishes at 21:00 KST (Korea primetime).
 
 Usage:
     python run_daily_shorts_rss.py
@@ -46,11 +46,11 @@ def get_publish_time() -> str:
 
 def run_shorts():
     log("=" * 60)
-    log("[1/2] Generating Shorts with RSS (7 news, max 60 seconds)...")
+    log("[1/2] Generating Shorts with RSS (6 news, max 60 seconds)...")
     log("=" * 60)
     
     result = subprocess.run(
-        [sys.executable, "news_dual.py", "--count", "7", "--shorts-only", "--use-rss", "--output", "./output"],
+        [sys.executable, "news_dual.py", "--count", "6", "--shorts-only", "--use-rss", "--output", "./output"],
         cwd=Path(__file__).parent,
         capture_output=True,
         text=True

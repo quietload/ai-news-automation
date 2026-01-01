@@ -112,14 +112,14 @@ python create_ending_images.py
 ### Manual Generation
 
 ```bash
-# Daily Shorts with RSS (10 news, recommended)
-python news_dual.py --count 10 --shorts-only --use-rss
+# Daily Shorts with RSS (6 news, recommended)
+python news_dual.py --count 6 --shorts-only --use-rss
 
-# Weekly Video with RSS (20 news by category)
-python news_dual.py --count 20 --video-only --by-category --use-rss
+# Weekly Video with RSS (16 news by category)
+python news_dual.py --count 16 --video-only --by-category --use-rss
 
 # Using NewsData.io (12h delay, not recommended)
-python news_dual.py --count 10 --shorts-only
+python news_dual.py --count 6 --shorts-only
 ```
 
 ### Runner Scripts
@@ -152,17 +152,13 @@ python run_weekly_video_now.py
 
 ## 📅 Schedule
 
-| Day | Time (KST) | Content |
-|-----|------------|---------|
-| Mon | 20:00 → 21:00 | Daily Shorts (10 news) |
-| Tue | 20:00 → 21:00 | Daily Shorts (10 news) |
-| Wed | 20:00 → 21:00 | Daily Shorts (10 news) |
-| Thu | 20:00 → 21:00 | Daily Shorts (10 news) |
-| Fri | 20:00 → 21:00 | Daily Shorts (10 news) |
-| **Sat** | 20:00 → 21:00 | **Weekly Video (20 news)** |
-| Sun | - | Rest |
+| Time (KST) | Content | Target Audience |
+|------------|---------|-----------------|
+| 08:00 → 09:00 | Daily Shorts (6 news) | 🇺🇸 US (East 7PM, West 4PM) |
+| 20:00 → 21:00 | Daily Shorts (6 news) | 🇰🇷 Korea (Prime Time) |
+| **Sat** 20:00 → 21:00 | Weekly Video (16 news) | 🌏 Global |
 
-*20:00 = Generation starts, 21:00 = YouTube publish time (Korean Prime Time)*
+*First time = Generation, Second time = YouTube publish*
 
 ## 📰 News Sources
 
@@ -201,7 +197,7 @@ python run_weekly_video_now.py
 
 | Content | News Count |
 |---------|------------|
-| Daily Shorts | 7 stories |
+| Daily Shorts | 6 stories (2x daily) |
 | Weekly Video | 16 stories (2 per category) |
 
 ### Subtitle Languages

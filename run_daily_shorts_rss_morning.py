@@ -1,0 +1,147 @@
+#!/usr/bin/env python3
+"""
+Daily Shorts Runner - Morning (RSS version)
+=============================================
+Generates and uploads daily news shorts for US audience.
+Runs daily at 08:00 KST, publishes at 09:00 KST (US East 7PM / West 4PM previous day).
+
+Usage:
+    python run_daily_shorts_rss_morning.py
+"""
+
+import os
+import sys
+import json
+import subprocess
+import traceback
+from pathlib import Path
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+# Logging setup
+LOG_DIR = Path(__file__).parent / "logs"
+LOG_DIR.mkdir(exist_ok=True)
+LOG_FILE = LOG_DIR / f"shorts_rss_morning_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+
+KST = ZoneInfo("Asia/Seoul")
+
+
+def log(msg):
+    """Log to console and file"""
+    print(msg)
+    with open(LOG_FILE, 'a', encoding='utf-8') as f:
+        f.write(msg + '\n')
+
+
+def get_publish_time() -> str:
+    """KST 오전 9시 예약 게시 (US 프라임타임)"""
+    now = datetime.now(KST)
+    publish_time = now.replace(hour=9, minute=0, second=0, microsecond=0)
+    
+    if now.hour >= 9:
+        publish_time += timedelta(days=1)
+    
+    return publish_time.isoformat()
+
+
+def run_shorts():
+    log("=" * 60)
+    log("[1/2] Generating Morning Shorts with RSS (6 news)...")
+    log("=" * 60)
+    
+    result = subprocess.run(
+        [sys.executable, "news_dual.py", "--count", "6", "--shorts-only", "--use-rss", "--output", "./output"],
+        cwd=Path(__file__).parent,
+        capture_output=True,
+        text=True
+    )
+    
+    if result.stdout:
+        log(result.stdout)
+    if result.stderr:
+        log(f"STDERR: {result.stderr}")
+    
+    if result.returncode != 0:
+        log(f"[FAIL] news_dual.py failed with code {result.returncode}")
+        return None
+    
+    output_dir = Path(__file__).parent / "output"
+    summaries = sorted(output_dir.glob("*_summary.json"), key=lambda x: x.stat().st_mtime, reverse=True)
+    
+    if not summaries:
+        log("[FAIL] No summary file found")
+        return None
+    
+    with open(summaries[0], 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+
+def upload_shorts(summary: dict):
+    log("=" * 60)
+    log("[2/2] Uploading to YouTube (scheduled for US primetime)...")
+    log("=" * 60)
+    
+    shorts = summary.get("shorts")
+    if not shorts:
+        log("[FAIL] No shorts in summary")
+        return
+    
+    video_path = shorts.get("video")
+    if not video_path or not Path(video_path).exists():
+        log(f"[FAIL] Video not found: {video_path}")
+        return
+    
+    publish_time = get_publish_time()
+    log(f"  Publish time: {publish_time}")
+    
+    cmd = [
+        sys.executable, "upload_video.py",
+        "--file", video_path,
+        "--title", shorts["title"][:100],
+        "--description", shorts["description"][:5000],
+        "--privacyStatus", "private",
+        "--publish-at", publish_time
+    ]
+    
+    subtitles = shorts.get("subtitles", {})
+    subtitle_files = [f for f in subtitles.values() if Path(f).exists()]
+    if subtitle_files:
+        cmd.extend(["--subtitles", ",".join(subtitle_files)])
+    
+    result = subprocess.run(
+        cmd,
+        cwd=Path(__file__).parent,
+        capture_output=True,
+        text=True
+    )
+    
+    if result.stdout:
+        log(result.stdout)
+    if result.stderr:
+        log(f"STDERR: {result.stderr}")
+    
+    if result.returncode != 0:
+        log(f"[FAIL] Upload failed with code {result.returncode}")
+    else:
+        log("[OK] Upload scheduled successfully!")
+
+
+def main():
+    log(f"\n{'='*60}")
+    log(f"Daily Shorts Runner - Morning (US Primetime)")
+    log(f"Time: {datetime.now(KST).strftime('%Y-%m-%d %H:%M:%S KST')}")
+    log(f"{'='*60}\n")
+    
+    try:
+        summary = run_shorts()
+        if summary:
+            upload_shorts(summary)
+        else:
+            log("[FAIL] No shorts generated")
+    except Exception as e:
+        log(f"[ERROR] {e}")
+        log(traceback.format_exc())
+
+
+if __name__ == "__main__":
+    main()
