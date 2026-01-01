@@ -249,7 +249,7 @@ def generate_image_prompts(news: dict, count: int, orientation: str) -> list:
         f"{OPENAI_API_BASE}/chat/completions",
         headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
         json={
-            "model": "gpt-5-mini",
+            "model": "gpt-4.1-mini",
             "messages": [{
                 "role": "system",
                 "content": f"""Create {count} DALL-E prompts for news photo.
@@ -272,7 +272,7 @@ Output one prompt per line, no numbering."""
                 "role": "user",
                 "content": f"News: {news['title']}\n{news.get('description', '')[:200]}"
             }],
-            "max_completion_tokens": 500
+            "max_tokens": 500
         },
         timeout=30
     )
@@ -280,7 +280,7 @@ Output one prompt per line, no numbering."""
     if response.status_code == 200:
         content = response.json()["choices"][0]["message"]["content"].strip()
         prompts = [p.strip() for p in content.split('\n') if p.strip()]
-        return prompts[:count]
+        return prompts[:count] if prompts else [f"Professional news photograph, {orient_desc}, photojournalism style: {news['title'][:50]}"] * count
     return [f"Professional news photograph, {orient_desc}, photojournalism style: {news['title'][:50]}"] * count
 
 
@@ -461,10 +461,10 @@ Output ONLY the narration. Keep it under 350 words."""
         f"{OPENAI_API_BASE}/chat/completions",
         headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
         json={
-            "model": "gpt-5-mini",
+            "model": "gpt-4.1-mini",
             "messages": [{"role": "system", "content": system_prompt},
                         {"role": "user", "content": f"Create narration:\n\n{news_text}"}],
-            "max_completion_tokens": 800 if style == "long" else 300
+            "max_tokens": 800 if style == "long" else 300
         },
         timeout=30
     )
@@ -508,10 +508,10 @@ Output ONLY the narration."""
             f"{OPENAI_API_BASE}/chat/completions",
             headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
             json={
-                "model": "gpt-5-mini",
+                "model": "gpt-4.1-mini",
                 "messages": [{"role": "system", "content": system_prompt},
                             {"role": "user", "content": news_text}],
-                "max_completion_tokens": 100
+                "max_tokens": 100
             },
             timeout=30
         )
@@ -760,7 +760,7 @@ def generate_subtitles(script: str, output_dir: Path, prefix: str, audio_path: P
                 f"{OPENAI_API_BASE}/chat/completions",
                 headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
                 json={
-                    "model": "gpt-5-mini",
+                    "model": "gpt-4.1-mini",
                     "messages": [{
                         "role": "system",
                         "content": f"""Translate to {LANGUAGE_NAMES[lang]} for video subtitles.
@@ -772,7 +772,7 @@ RULES:
 - Keep translations concise
 - Do NOT merge or skip any line"""
                     }, {"role": "user", "content": "\n".join(numbered_texts)}],
-                    "max_completion_tokens": 2000
+                    "max_tokens": 2000
                 },
                 timeout=60
             )
@@ -848,7 +848,7 @@ def generate_subtitles_from_segments(audio_segments: list, output_dir: Path, pre
                 f"{OPENAI_API_BASE}/chat/completions",
                 headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
                 json={
-                    "model": "gpt-5-mini",
+                    "model": "gpt-4.1-mini",
                     "messages": [{
                         "role": "system",
                         "content": f"""Translate to {LANGUAGE_NAMES[lang]} for video subtitles.
@@ -858,7 +858,7 @@ RULES:
 - Output EXACTLY {num_segments} numbered lines
 - Keep translations concise"""
                     }, {"role": "user", "content": "\n".join(numbered_texts)}],
-                    "max_completion_tokens": 2000
+                    "max_tokens": 2000
                 },
                 timeout=60
             )
@@ -1097,7 +1097,7 @@ def generate_thumbnail(news_list: list, output_path: Path, style: str = "shorts"
         f"{OPENAI_API_BASE}/chat/completions",
         headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
         json={
-            "model": "gpt-5-mini",
+            "model": "gpt-4.1-mini",
             "messages": [{
                 "role": "system",
                 "content": f"""Create a DALL-E image prompt that combines these news topics into ONE dramatic scene.
@@ -1116,7 +1116,7 @@ Example: If news is about tech, sports, weather → "Dramatic cinematic scene of
                 "role": "user",
                 "content": f"News topics: {titles_summary}"
             }],
-            "max_completion_tokens": 150
+            "max_tokens": 150
         },
         timeout=30
     )
