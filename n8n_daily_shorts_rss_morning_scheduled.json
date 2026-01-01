@@ -29,7 +29,7 @@
           "conditions": [
             {
               "leftValue": "={{ $now.weekday }}",
-              "rightValue": 6,
+              "rightValue": 0,
               "operator": {
                 "type": "number",
                 "operation": "notEquals"
@@ -37,7 +37,7 @@
             },
             {
               "leftValue": "={{ $now.weekday }}",
-              "rightValue": 0,
+              "rightValue": 1,
               "operator": {
                 "type": "number",
                 "operation": "notEquals"
@@ -48,7 +48,7 @@
         }
       },
       "id": "2",
-      "name": "Skip Weekend",
+      "name": "Skip Sun-Mon (US Weekend)",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [450, 200]
@@ -69,14 +69,14 @@
       "main": [
         [
           {
-            "node": "Skip Weekend",
+            "node": "Skip Sun-Mon (US Weekend)",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Skip Weekend": {
+    "Skip Sun-Mon (US Weekend)": {
       "main": [
         [
           {
