@@ -214,6 +214,9 @@ def fetch_rss_news(count: int = 8, news_type: str = "daily") -> List[Dict]:
                 if len(selected) >= count:
                     break
     
+    # 순서 랜덤 섞기
+    random.shuffle(selected)
+    
     # Save used news
     for news in selected:
         used_news.add(get_news_id(news['title']))
@@ -255,6 +258,9 @@ def fetch_rss_news_by_category(count: int = 16, news_type: str = "weekly") -> Li
                         break
         
         all_news.extend(category_news)
+    
+    # 순서 랜덤 섞기
+    random.shuffle(all_news)
     
     # Save used news
     for news in all_news:
