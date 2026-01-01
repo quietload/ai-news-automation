@@ -249,7 +249,7 @@ def generate_image_prompts(news: dict, count: int, orientation: str) -> list:
         f"{OPENAI_API_BASE}/chat/completions",
         headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
         json={
-            "model": "gpt-4.1-mini",
+            "model": "gpt-5-mini",
             "messages": [{
                 "role": "system",
                 "content": f"""Create {count} DALL-E prompts for news photo.
@@ -461,7 +461,7 @@ Output ONLY the narration. Keep it under 350 words."""
         f"{OPENAI_API_BASE}/chat/completions",
         headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
         json={
-            "model": "gpt-4.1-mini",
+            "model": "gpt-5-mini",
             "messages": [{"role": "system", "content": system_prompt},
                         {"role": "user", "content": f"Create narration:\n\n{news_text}"}],
             "max_tokens": 800 if style == "long" else 300
@@ -508,7 +508,7 @@ Output ONLY the narration."""
             f"{OPENAI_API_BASE}/chat/completions",
             headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
             json={
-                "model": "gpt-4.1-mini",
+                "model": "gpt-5-mini",
                 "messages": [{"role": "system", "content": system_prompt},
                             {"role": "user", "content": news_text}],
                 "max_tokens": 100
@@ -540,7 +540,7 @@ def generate_segmented_audio(segments: list, output_dir: Path, prefix: str, voic
         response = requests.post(
             f"{OPENAI_API_BASE}/audio/speech",
             headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
-            json={"model": "tts-1", "input": seg["text"], "voice": voice, "response_format": "mp3"},
+            json={"model": "gpt-4o-mini-tts", "input": seg["text"], "voice": voice, "response_format": "mp3"},
             timeout=60
         )
         
@@ -605,7 +605,7 @@ def generate_tts(text: str, output_path: Path, voice: str = "nova") -> Path:
         response = requests.post(
             f"{OPENAI_API_BASE}/audio/speech",
             headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
-            json={"model": "tts-1", "input": text, "voice": voice, "response_format": "mp3"},
+            json={"model": "gpt-4o-mini-tts", "input": text, "voice": voice, "response_format": "mp3"},
             timeout=120
         )
         
@@ -643,7 +643,7 @@ def generate_tts(text: str, output_path: Path, voice: str = "nova") -> Path:
         response = requests.post(
             f"{OPENAI_API_BASE}/audio/speech",
             headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
-            json={"model": "tts-1", "input": chunk, "voice": voice, "response_format": "mp3"},
+            json={"model": "gpt-4o-mini-tts", "input": chunk, "voice": voice, "response_format": "mp3"},
             timeout=120
         )
         
@@ -736,7 +736,7 @@ def generate_subtitles(script: str, output_dir: Path, prefix: str, audio_path: P
                 f"{OPENAI_API_BASE}/chat/completions",
                 headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
                 json={
-                    "model": "gpt-4.1-mini",
+                    "model": "gpt-5-mini",
                     "messages": [{
                         "role": "system",
                         "content": f"""Translate to {LANGUAGE_NAMES[lang]} for video subtitles.
@@ -824,7 +824,7 @@ def generate_subtitles_from_segments(audio_segments: list, output_dir: Path, pre
                 f"{OPENAI_API_BASE}/chat/completions",
                 headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
                 json={
-                    "model": "gpt-4.1-mini",
+                    "model": "gpt-5-mini",
                     "messages": [{
                         "role": "system",
                         "content": f"""Translate to {LANGUAGE_NAMES[lang]} for video subtitles.
@@ -1073,7 +1073,7 @@ def generate_thumbnail(news_list: list, output_path: Path, style: str = "shorts"
         f"{OPENAI_API_BASE}/chat/completions",
         headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
         json={
-            "model": "gpt-4.1-mini",
+            "model": "gpt-5-mini",
             "messages": [{
                 "role": "system",
                 "content": f"""Create a DALL-E image prompt that combines these news topics into ONE dramatic scene.
