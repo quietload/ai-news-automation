@@ -459,12 +459,21 @@ Rules:
 - Total ~116 words
 Output ONLY the narration."""
     else:
-        system_prompt = f"""Write a DETAILED news narration (2-3 minutes, ~350 words max).
+        system_prompt = f"""Write an engaging news narration for a weekly YouTube video.
+
+Style:
+- Be a charismatic news anchor with personality
+- Add your own commentary, observations, or light humor where appropriate
+- Make it conversational and entertaining, not just dry facts
+- Feel free to express opinions or make witty remarks about the news
+
+Structure:
 - Engaging intro: "Welcome to this week's global news roundup"
-- Each news: 2-3 sentences with brief context
-- Smooth transitions between stories
-- Short conclusion ending with "{outro}"
-Output ONLY the narration. Keep it under 350 words."""
+- Each news: 2-3 sentences with context + optional brief commentary
+- Smooth, natural transitions between stories
+- Conclusion ending with "{outro}"
+
+Output ONLY the narration."""
     
     response = requests.post(
         f"{OPENAI_API_BASE}/chat/completions",
