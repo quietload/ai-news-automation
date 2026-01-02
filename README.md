@@ -29,9 +29,9 @@ Automatically generates and uploads YouTube news content using AI.
 
 | Time (KST) | Days | Content | Target |
 |------------|------|---------|--------|
-| 11:50 → 12:00 | Tue-Sat | Daily Shorts | 🇺🇸 US Primetime |
-| 20:50 → 21:00 | Mon-Fri | Daily Shorts | 🇰🇷 Korea Primetime |
-| 11:30 → 12:00 | Sun | Weekly Video | 🌏 Global |
+| 11:50 - 12:00 | Tue-Sat | Daily Shorts | 🇺🇸 US Primetime |
+| 20:50 - 21:00 | Mon-Fri | Daily Shorts | 🇰🇷 Korea Primetime |
+| 11:30 - 12:00 | Sun | Weekly Video | 🌏 Global |
 | Every 10min | 24/7 | Breaking News | 🌏 On-demand |
 
 ## 🔥 Breaking News
@@ -53,11 +53,11 @@ record, historic, first ever, unprecedented
 
 **Detection Flow:**
 ```
-n8n (10min interval) → run_breaking_news.py → detect_breaking_news()
-    ↓
-Scan 38 RSS feeds → Filter breaking keywords → Group similar (40%)
-    ↓
-5+ sources? → Generate Shorts → Upload → Email alert
+n8n (10min interval) -> run_breaking_news.py -> detect_breaking_news()
+    |
+Scan 38 RSS feeds -> Filter breaking keywords -> Group similar (40%)
+    |
+5+ sources? -> Generate Shorts -> Upload -> Email alert
 ```
 
 ## 🔍 News Filtering
