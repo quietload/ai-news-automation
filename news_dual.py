@@ -1123,7 +1123,7 @@ def generate_description(news_list: list, is_weekly: bool = False) -> str:
 {stories_text}
 
 ---
-Generated with AI (GPT-5 mini + GPT Image 1.5 + GPT-4o mini TTS)
+Generated with AI
 
 #news #AI #globalNews #worldnews #breakingnews
 """
