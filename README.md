@@ -1,4 +1,4 @@
-# 📰 AI News Automation Pipeline v2.2
+# 📰 AI News Automation Pipeline v2.3
 
 Automatically generates and uploads YouTube news content using AI.
 
@@ -19,11 +19,12 @@ Automatically generates and uploads YouTube news content using AI.
 | Spec | Daily Shorts | Weekly Video |
 |------|--------------|--------------|
 | News Count | 6 stories | 16 stories (2 per category) |
-| Duration | ~60 seconds | ~4 minutes |
+| Duration | ~60 seconds | No limit |
 | Resolution | 1080x1920 (9:16) | 1920x1080 (16:9) |
-| Narration | ~118 words | ~400 words |
+| Narration | ~116 words | No limit (with personality) |
 | Images | 2 per news | 3 per news |
 | Thumbnail | None (YouTube auto) | AI Generated |
+| Style | Charismatic anchor (concise) | Charismatic anchor + commentary/humor |
 
 ## 📅 Schedule
 

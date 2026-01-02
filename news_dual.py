@@ -4,8 +4,13 @@ News Automation Pipeline - Daily Shorts & Weekly Video Generator
 ================================================================
 
 Automatically generates YouTube content from global news:
-- Daily Shorts: 6 news stories, vertical format, ~60 seconds (2x daily)
-- Weekly Video: 16 news stories (2 per category), horizontal format, ~4 minutes
+- Daily Shorts: 6 news stories, vertical format, ~60 seconds, ~116 words (2x daily)
+- Weekly Video: 16 news stories (2 per category), horizontal format, no limit
+
+Anchor Style:
+- Charismatic, professional, personable news anchor
+- Weekly Video: Free to add commentary, opinions, and light humor
+- Daily Shorts: Same personality but concise (no time for jokes)
 
 Tech Stack:
 - Text generation: GPT-5 mini (reasoning_effort: minimal)
@@ -35,7 +40,7 @@ Schedule:
     - Weekly Video: Sun 11:40 KST → 12:00 KST
 
 GitHub: https://github.com/quietload/ai-news-automation
-Version: 2.2
+Version: 2.3
 """
 
 import os
