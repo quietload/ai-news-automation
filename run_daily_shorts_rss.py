@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Daily Shorts Runner - Midnight (RSS version)
-=============================================
+Daily Shorts Runner - Evening (RSS version)
+============================================
 Generates and uploads daily news shorts for Korean audience.
-Runs daily at 23:00 KST, publishes at 00:00 KST (Korea late night).
+Runs daily at 20:50 KST, publishes at 21:00 KST (Korea primetime).
 
 Usage:
     python run_daily_shorts_rss.py
@@ -34,12 +34,12 @@ def log(msg):
 
 
 def get_publish_time() -> str:
-    """KST 자정 0시 예약 게시"""
+    """KST 오후 9시 예약 게시 (한국 프라임타임)"""
     now = datetime.now(KST)
-    publish_time = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    publish_time = now.replace(hour=21, minute=0, second=0, microsecond=0)
     
-    # 다음날 자정으로 설정
-    publish_time += timedelta(days=1)
+    if now.hour >= 21:
+        publish_time += timedelta(days=1)
     
     return publish_time.isoformat()
 

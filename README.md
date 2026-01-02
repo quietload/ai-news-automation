@@ -31,7 +31,7 @@ Automatically generates and uploads YouTube news content using AI.
 | Time (KST) | Days | Content | Target Audience |
 |------------|------|---------|-----------------|
 | 11:50 → 12:00 | Tue-Sat | Daily Shorts (6 news) | 🇺🇸 US (Mon-Fri 10PM ET / 7PM PT) |
-| 23:50 → 00:00 | Mon-Fri | Daily Shorts (6 news) | 🇰🇷 Korea (Late Night) |
+| 20:50 → 21:00 | Mon-Fri | Daily Shorts (6 news) | 🇰🇷 Korea (Prime Time) |
 | 11:30 → 12:00 | Sun | Weekly Video (16 news) | 🌏 Global |
 
 *First time = Generation, Second time = YouTube publish*
