@@ -141,8 +141,8 @@ Import workflows:
 
 | Time (KST) | Days | Content | Target |
 |------------|------|---------|--------|
-| 08:00 → 09:00 | Tue-Sat | Daily Shorts (6 news) | 🇺🇸 US (Mon-Fri evening) |
-| 20:00 → 21:00 | Mon-Fri | Daily Shorts (6 news) | 🇰🇷 Korea (Prime Time) |
+| 11:00 → 12:00 | Tue-Sat | Daily Shorts (6 news) | 🇺🇸 US (Mon-Fri 10PM ET / 7PM PT) |
+| 23:00 → 00:00 | Mon-Fri | Daily Shorts (6 news) | 🇰🇷 Korea (Late Night) |
 | 21:00 → 22:00 | Sat | Weekly Video (16 news) | 🌏 Global |
 
 *First time = Generation, Second time = YouTube publish*

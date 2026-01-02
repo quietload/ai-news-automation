@@ -1,19 +1,19 @@
 {
-  "name": "News Automation - Daily Shorts RSS Morning (Scheduled)",
+  "name": "News Automation - Daily Shorts RSS Noon (Scheduled)",
   "nodes": [
     {
       "parameters": {
         "rule": {
           "interval": [
             {
-              "triggerAtHour": 8,
+              "triggerAtHour": 11,
               "triggerAtMinute": 0
             }
           ]
         }
       },
       "id": "1",
-      "name": "Daily 8AM",
+      "name": "Daily 11AM",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [250, 200]
@@ -65,7 +65,7 @@
     }
   ],
   "connections": {
-    "Daily 8AM": {
+    "Daily 11AM": {
       "main": [
         [
           {

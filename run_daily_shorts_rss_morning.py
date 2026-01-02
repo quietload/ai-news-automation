@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Daily Shorts Runner - Morning (RSS version)
-=============================================
+Daily Shorts Runner - Noon (RSS version)
+=========================================
 Generates and uploads daily news shorts for US audience.
-Runs daily at 08:00 KST, publishes at 09:00 KST (US East 7PM / West 4PM previous day).
+Runs daily at 11:00 KST, publishes at 12:00 KST (US East 10PM / West 7PM previous day).
 
 Usage:
     python run_daily_shorts_rss_morning.py
@@ -34,11 +34,11 @@ def log(msg):
 
 
 def get_publish_time() -> str:
-    """KST 오전 9시 예약 게시 (US 프라임타임)"""
+    """KST 정오 12시 예약 게시 (US 프라임타임)"""
     now = datetime.now(KST)
-    publish_time = now.replace(hour=9, minute=0, second=0, microsecond=0)
+    publish_time = now.replace(hour=12, minute=0, second=0, microsecond=0)
     
-    if now.hour >= 9:
+    if now.hour >= 12:
         publish_time += timedelta(days=1)
     
     return publish_time.isoformat()
@@ -128,7 +128,7 @@ def upload_shorts(summary: dict):
 
 def main():
     log(f"\n{'='*60}")
-    log(f"Daily Shorts Runner - Morning (US Primetime)")
+    log(f"Daily Shorts Runner - Noon (US Primetime)")
     log(f"Time: {datetime.now(KST).strftime('%Y-%m-%d %H:%M:%S KST')}")
     log(f"{'='*60}\n")
     
