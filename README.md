@@ -1,4 +1,4 @@
-# 📰 AI News Automation Pipeline v2.4
+# 📰 AI News Automation Pipeline v2.5
 
 Automatically generates and uploads YouTube news content using AI.
 
@@ -33,8 +33,17 @@ Automatically generates and uploads YouTube news content using AI.
 | 11:50 → 12:00 | Tue-Sat | Daily Shorts (6 news) | 🇺🇸 US (Mon-Fri 10PM ET / 7PM PT) |
 | 20:50 → 21:00 | Mon-Fri | Daily Shorts (6 news) | 🇰🇷 Korea (Prime Time) |
 | 11:30 → 12:00 | Sun | Weekly Video (16 news) | 🌏 Global |
+| Every 10min | 24/7 | Breaking News (1 news) | 🌏 Global (on-demand) |
 
 *First time = Generation, Second time = YouTube publish*
+
+### 🔥 Breaking News
+
+Automatically detects and generates Shorts when:
+- Contains breaking keywords (breaking, dies, war, earthquake, etc.)
+- Found in **5+ different news sources**
+
+Single story deep-dive format (~120 words, 60 seconds).
 
 ## 📁 Project Structure
 

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
-News Automation Pipeline - Daily Shorts & Weekly Video Generator
-================================================================
+News Automation Pipeline - Daily Shorts, Weekly Video & Breaking News Generator
+================================================================================
 
 Automatically generates YouTube content from global news:
 - Daily Shorts: 6 news stories, vertical format, ~60 seconds, ~116 words (2x daily)
 - Weekly Video: 16 news stories (2 per category), horizontal format, no limit
+- Breaking News: Single story deep-dive, ~60 seconds, ~120 words (on-demand)
 
 Anchor Style:
 - Charismatic, professional, personable news anchor
@@ -41,7 +42,7 @@ Schedule:
     - Weekly Video: Sun 11:30 KST → 12:00 KST
 
 GitHub: https://github.com/quietload/ai-news-automation
-Version: 2.4
+Version: 2.5
 """
 
 import os
@@ -465,6 +466,24 @@ Structure:
 - Quick outro: "{outro}"
 
 Output ONLY the narration. Stay within ~116 words."""
+    elif style == "breaking":
+        # Breaking News - 단일 뉴스 딥다이브 (60초)
+        system_prompt = f"""Write an URGENT breaking news narration for YouTube Shorts.
+STRICT LIMIT: ~120 words total (60 seconds when spoken).
+
+Style:
+- Urgent, authoritative breaking news anchor tone
+- This is a SINGLE major story - give it depth
+- Professional but convey the significance
+
+Structure:
+- Urgent intro: "Breaking news" or "This just in"
+- What happened (2-3 sentences)
+- Why it matters / context (1-2 sentences)
+- What's next / developing (1 sentence)
+- Quick outro: "Stay tuned for updates"
+
+Output ONLY the narration. ~120 words."""
     else:
         system_prompt = f"""Write an engaging news narration for a weekly YouTube video.
 
@@ -489,7 +508,7 @@ Output ONLY the narration."""
             "model": "gpt-5-mini",
             "messages": [{"role": "system", "content": system_prompt},
                         {"role": "user", "content": f"Create narration:\n\n{news_text}"}],
-            "max_completion_tokens": 800 if style == "long" else 300,
+            "max_completion_tokens": 800 if style == "long" else 400 if style == "breaking" else 300,
             "reasoning_effort": "minimal"
         },
         timeout=30
@@ -1294,6 +1313,7 @@ def main():
     parser.add_argument("--video-only", action="store_true", help="Generate Video only")
     parser.add_argument("--by-category", action="store_true", help="Fetch 1 news per category (for weekly video)")
     parser.add_argument("--use-rss", action="store_true", help="Use RSS feeds instead of NewsData.io (real-time, no delay)")
+    parser.add_argument("--breaking-news", type=str, help="Path to breaking news JSON file (single story, 60s deep dive)")
     args = parser.parse_args()
     
     output_dir = Path(args.output)
@@ -1302,9 +1322,34 @@ def main():
     
     generate_shorts = not args.video_only
     generate_video = not args.shorts_only
+    is_breaking = args.breaking_news is not None
     
     # 1. Fetch news
-    if args.use_rss:
+    if args.breaking_news:
+        # Breaking News 모드 - 단일 뉴스 딥다이브
+        print(f"\n[1/8] Loading breaking news from {args.breaking_news}...")
+        with open(args.breaking_news, 'r', encoding='utf-8') as f:
+            breaking_data = json.load(f)
+        
+        main_news = breaking_data['main']
+        related = breaking_data.get('related', [])
+        
+        # 메인 뉴스 + 관련 소스 정보를 하나의 뉴스로 합침
+        all_news = [{
+            'title': main_news['title'],
+            'description': main_news.get('description', ''),
+            'category': main_news.get('category', 'Breaking'),
+            'source': main_news.get('source', 'Multiple Sources'),
+            'related_sources': [r.get('source', '') for r in related[:4]],
+            'is_breaking': True
+        }]
+        
+        print(f"  [OK] Breaking: {main_news['title'][:50]}...")
+        print(f"  [OK] Related sources: {len(related)}")
+        
+        generate_video = False  # Breaking은 Shorts만
+        
+    elif args.use_rss:
         # RSS 피드 사용 (실시간, 딜레이 없음)
         from news_rss import fetch_rss_news, fetch_rss_news_by_category
         if args.by_category:
@@ -1325,21 +1370,26 @@ def main():
     skipped_news = []  # Policy violation news
     news_index = 0
     
+    # Breaking News는 단일 뉴스에 더 많은 이미지 (4-5장)
+    shorts_images_per_news = 5 if is_breaking else 2
+    
     if generate_shorts:
-        print(f"\n[2/8] Generating Shorts images (vertical, 2 per news)...")
-        while len(used_news) < args.count and news_index < len(all_news):
+        print(f"\n[2/8] Generating Shorts images (vertical, {shorts_images_per_news} per news)...")
+        target_news_count = 1 if is_breaking else args.count
+        
+        while len(used_news) < target_news_count and news_index < len(all_news):
             news = all_news[news_index]
             news_index += 1
             
-            print(f"  [{len(used_news)+1}/{args.count}] {news['title'][:35]}...")
+            print(f"  [{len(used_news)+1}/{target_news_count}] {news['title'][:35]}...")
             try:
-                prompts = generate_image_prompts(news, count=2, orientation="vertical")
+                prompts = generate_image_prompts(news, count=shorts_images_per_news, orientation="vertical")
                 news_images = []
                 for j, prompt in enumerate(prompts, 1):
                     img_path = output_dir / f"{ts}_shorts_{len(used_news)+1}_{j}.png"
                     generate_image(prompt, img_path, SHORTS_SIZE)
                     news_images.append(img_path)
-                    print(f"    [OK] Image {j}/2")
+                    print(f"    [OK] Image {j}/{shorts_images_per_news}")
                 
                 shorts_images.extend(news_images)
                 if news not in used_news:
@@ -1414,8 +1464,9 @@ def main():
     
     # 3-5. Generate Shorts
     if generate_shorts and shorts_images:
-        print(f"\n[4/8] Generating Shorts narration (short)...")
-        shorts_script = generate_narration_script(news_list, style="short")
+        narration_style = "breaking" if is_breaking else "short"
+        print(f"\n[4/8] Generating Shorts narration ({narration_style})...")
+        shorts_script = generate_narration_script(news_list, style=narration_style)
         shorts_script_file = output_dir / f"{ts}_shorts_script.txt"
         with open(shorts_script_file, 'w', encoding='utf-8') as f:
             f.write(shorts_script)

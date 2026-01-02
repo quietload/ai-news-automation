@@ -9,22 +9,27 @@ Features:
     - Local news filter: Skips region-specific articles (US cities, UK towns, etc.)
     - Similar article filter: Skips articles with 50%+ title similarity
     - Auto-fill: If a category is short, fills from other categories
-    - Duplicate prevention: Tracks used articles per daily/weekly
+    - Duplicate prevention: Tracks used articles per daily/weekly/breaking
+    - Breaking news detection: Monitors for major stories (5+ sources)
 
 Usage:
-    from news_rss import fetch_rss_news, fetch_rss_news_by_category
+    from news_rss import fetch_rss_news, fetch_rss_news_by_category, detect_breaking_news
     
     # Daily Shorts: 6 diverse news
     news = fetch_rss_news(count=6, news_type="daily")
     
     # Weekly Video: 16 news (2 per category)
     news = fetch_rss_news_by_category(count=16, news_type="weekly")
+    
+    # Breaking News: Detect major story
+    breaking = detect_breaking_news(min_sources=5)
 
 Log Examples:
     [OK] technology: Apple announces AI... (TechCrunch)
     [SKIP] Local: Florida governor signs...
     [SKIP] Similar: Apple reveals new AI...
     [FILL] business: Amazon reports Q4... (Bloomberg)
+    [BREAKING] Found: Major earthquake hits...
 """
 
 import feedparser
@@ -113,6 +118,37 @@ CATEGORY_NAMES = {
 # Used news tracking
 USED_NEWS_FILE_RSS_DAILY = Path(__file__).parent / "used_news_rss_daily.json"
 USED_NEWS_FILE_RSS_WEEKLY = Path(__file__).parent / "used_news_rss_weekly.json"
+USED_NEWS_FILE_RSS_BREAKING = Path(__file__).parent / "used_news_rss_breaking.json"
+
+# Breaking News 키워드
+BREAKING_KEYWORDS = [
+    # 속보 표현
+    "breaking", "just in", "urgent", "developing", "alert",
+    # 사망/사고
+    "dies", "dead", "killed", "assassination", "assassinated",
+    # 전쟁/공격
+    "war", "invasion", "attack", "explosion", "bombing", "missile",
+    # 자연재해
+    "earthquake", "tsunami", "hurricane", "typhoon", "wildfire",
+    # 경제/금융 충격
+    "crash", "collapse", "bankruptcy", "default",
+    # 정치 이벤트
+    "resigns", "resigned", "impeached", "arrested", "indicted",
+    # 역사적 사건
+    "record", "historic", "first ever", "unprecedented",
+]
+
+# 주요 인물/기관 (이들 관련 뉴스는 가중치)
+MAJOR_ENTITIES = [
+    # 국가 정상
+    "president", "prime minister", "xi jinping", "putin",
+    # 빅테크
+    "elon musk", "tim cook", "satya nadella", "sundar pichai", "mark zuckerberg",
+    # 글로벌 기업
+    "apple", "google", "microsoft", "amazon", "tesla", "nvidia", "samsung",
+    # 국제기구
+    "united nations", "un", "who", "nato", "federal reserve", "fed",
+]
 
 
 # =============================================================================
@@ -122,6 +158,50 @@ USED_NEWS_FILE_RSS_WEEKLY = Path(__file__).parent / "used_news_rss_weekly.json"
 def get_news_id(title: str) -> str:
     """Generate unique ID from title"""
     return hashlib.md5(title.encode()).hexdigest()[:16]
+
+
+def normalize_title(title: str) -> str:
+    """Normalize title for comparison (lowercase, remove punctuation)"""
+    import re
+    title = title.lower()
+    title = re.sub(r'[^\w\s]', '', title)
+    return ' '.join(title.split())
+
+
+def titles_match(title1: str, title2: str, threshold: float = 0.5) -> bool:
+    """Check if two titles are about the same news"""
+    words1 = set(normalize_title(title1).split())
+    words2 = set(normalize_title(title2).split())
+    
+    if not words1 or not words2:
+        return False
+    
+    intersection = len(words1 & words2)
+    union = len(words1 | words2)
+    
+    return (intersection / union) >= threshold
+
+
+def is_breaking_news(title: str, description: str = "") -> bool:
+    """Check if news contains breaking keywords"""
+    text = (title + " " + description).lower()
+    
+    for keyword in BREAKING_KEYWORDS:
+        if keyword in text:
+            return True
+    
+    return False
+
+
+def has_major_entity(title: str, description: str = "") -> bool:
+    """Check if news involves major entities"""
+    text = (title + " " + description).lower()
+    
+    for entity in MAJOR_ENTITIES:
+        if entity in text:
+            return True
+    
+    return False
 
 
 # 지역/단체 한정 기사 필터링 키워드
@@ -176,7 +256,15 @@ def is_similar_news(new_title: str, existing_titles: list, threshold: float = 0.
 
 def load_used_news(news_type: str = "daily") -> set:
     """Load used news IDs"""
-    file_path = USED_NEWS_FILE_RSS_DAILY if news_type == "daily" else USED_NEWS_FILE_RSS_WEEKLY
+def load_used_news(news_type: str = "daily") -> set:
+    """Load used news IDs"""
+    if news_type == "daily":
+        file_path = USED_NEWS_FILE_RSS_DAILY
+    elif news_type == "weekly":
+        file_path = USED_NEWS_FILE_RSS_WEEKLY
+    else:  # breaking
+        file_path = USED_NEWS_FILE_RSS_BREAKING
+    
     if file_path.exists():
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
@@ -186,7 +274,13 @@ def load_used_news(news_type: str = "daily") -> set:
 
 def save_used_news(used: set, news_type: str = "daily", max_keep: int = 500):
     """Save used news IDs"""
-    file_path = USED_NEWS_FILE_RSS_DAILY if news_type == "daily" else USED_NEWS_FILE_RSS_WEEKLY
+    if news_type == "daily":
+        file_path = USED_NEWS_FILE_RSS_DAILY
+    elif news_type == "weekly":
+        file_path = USED_NEWS_FILE_RSS_WEEKLY
+    else:  # breaking
+        file_path = USED_NEWS_FILE_RSS_BREAKING
+    
     used_list = list(used)[-max_keep:]
     with open(file_path, 'w', encoding='utf-8') as f:
         json.dump({"used": used_list}, f)
@@ -411,6 +505,116 @@ def fetch_rss_news_by_category(count: int = 16, news_type: str = "weekly") -> Li
     
     print(f"  [OK] Total: {len(all_news)} articles from {len(categories)} categories")
     return all_news[:count]
+
+
+# =============================================================================
+# BREAKING NEWS DETECTION
+# =============================================================================
+
+def detect_breaking_news(min_sources: int = 5) -> Optional[Dict]:
+    """
+    Detect breaking news by scanning all RSS feeds.
+    Returns breaking news if:
+    1. Contains breaking keywords AND
+    2. Found in 5+ different sources
+    
+    Returns None if no breaking news detected.
+    """
+    print(f"\n[BREAKING] Scanning for breaking news (min {min_sources} sources)...")
+    
+    # Load already reported breaking news
+    used_breaking = load_used_news("breaking")
+    
+    # Collect all news from all feeds
+    all_news = []
+    for category, feeds in RSS_FEEDS.items():
+        for source_name, url in feeds:
+            items = parse_feed(url, source_name, category)
+            all_news.extend(items)
+    
+    print(f"  [INFO] Scanned {len(all_news)} articles from all feeds")
+    
+    # Group similar news together
+    news_groups = []  # List of (representative_news, count, sources)
+    
+    for news in all_news:
+        title = news['title']
+        
+        # Skip if not breaking keyword
+        if not is_breaking_news(title, news.get('description', '')):
+            continue
+        
+        # Skip if already reported
+        news_id = get_news_id(title)
+        if news_id in used_breaking:
+            continue
+        
+        # Skip local news
+        if is_local_news(title, news.get('description', '')):
+            continue
+        
+        # Find matching group or create new one
+        found_group = False
+        for group in news_groups:
+            if titles_match(title, group[0]['title'], threshold=0.4):
+                group[1] += 1
+                group[2].add(news.get('source', 'Unknown'))
+                found_group = True
+                break
+        
+        if not found_group:
+            news_groups.append([news, 1, {news.get('source', 'Unknown')}])
+    
+    # Find news with 5+ sources
+    for group in news_groups:
+        news, count, sources = group
+        if len(sources) >= min_sources:
+            print(f"  [BREAKING] Found: {news['title'][:50]}...")
+            print(f"  [BREAKING] Sources ({len(sources)}): {', '.join(list(sources)[:5])}...")
+            
+            # Mark as used
+            used_breaking.add(get_news_id(news['title']))
+            save_used_news(used_breaking, "breaking")
+            
+            return news
+    
+    print(f"  [INFO] No breaking news detected (found {len(news_groups)} candidates)")
+    return None
+
+
+def fetch_breaking_news_details(breaking_news: Dict) -> List[Dict]:
+    """
+    Fetch more details about breaking news from multiple sources.
+    Returns list of related articles for comprehensive coverage.
+    """
+    print(f"\n[BREAKING] Gathering details for: {breaking_news['title'][:50]}...")
+    
+    related = [breaking_news]
+    all_titles = [breaking_news['title']]
+    
+    # Scan all feeds for related news
+    for category, feeds in RSS_FEEDS.items():
+        for source_name, url in feeds:
+            items = parse_feed(url, source_name, category)
+            
+            for item in items:
+                if titles_match(item['title'], breaking_news['title'], threshold=0.3):
+                    if not is_similar_news(item['title'], all_titles, threshold=0.7):
+                        related.append(item)
+                        all_titles.append(item['title'])
+                        print(f"  [+] {source_name}: {item['title'][:40]}...")
+                        
+                        if len(related) >= 5:  # Max 5 sources
+                            break
+            
+            if len(related) >= 5:
+                break
+        
+        if len(related) >= 5:
+            break
+    
+    print(f"  [OK] Gathered {len(related)} sources")
+    return related
 
 
 # =============================================================================
