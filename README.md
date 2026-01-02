@@ -1,28 +1,8 @@
-# 📰 AI News Automation Pipeline
+# 📰 AI News Automation Pipeline v2.2
 
 Automatically generates and uploads YouTube news content using AI.
 
 **GitHub**: https://github.com/quietload/ai-news-automation
-
-## 📋 Overview
-
-| Content | Schedule (KST) | Format | Duration |
-|---------|----------------|--------|----------|
-| **Daily Shorts (US)** | Mon-Fri 09:00 | Vertical (1080x1920) | ~60s |
-| **Daily Shorts (KR)** | Mon-Fri 21:00 | Vertical (1080x1920) | ~60s |
-| **Weekly Video** | Sat 22:00 | Horizontal (1920x1080) | ~4min |
-
-## 🚀 Features
-
-- ✅ Real-time news from 38+ RSS sources
-- ✅ AI text generation (GPT-5 mini with minimal reasoning)
-- ✅ AI image generation (GPT Image 1.5)
-- ✅ Text-to-speech (GPT-4o mini TTS - Marin voice)
-- ✅ Multi-language subtitles (EN, KO, JA, ZH, ES)
-- ✅ Auto-generated thumbnails (Weekly Video)
-- ✅ YouTube scheduled upload
-- ✅ Duplicate news prevention
-- ✅ 2x daily uploads (US + Korea prime time)
 
 ## 🛠️ Tech Stack
 
@@ -31,9 +11,29 @@ Automatically generates and uploads YouTube news content using AI.
 | Text Generation | GPT-5 mini (reasoning_effort: minimal) |
 | Image Generation | GPT Image 1.5 |
 | Text-to-Speech | GPT-4o mini TTS (Marin voice) |
-| Video Processing | FFmpeg |
+| News Source | 38 RSS feeds (real-time) |
 | Automation | n8n |
-| News Source | RSS Feeds (38 sources) |
+
+## 📊 Content Specs
+
+| Spec | Daily Shorts | Weekly Video |
+|------|--------------|--------------|
+| News Count | 6 stories | 16 stories (2 per category) |
+| Duration | ~60 seconds | ~4 minutes |
+| Resolution | 1080x1920 (9:16) | 1920x1080 (16:9) |
+| Narration | ~118 words | ~400 words |
+| Images | 2 per news | 3 per news |
+| Thumbnail | None (YouTube auto) | AI Generated |
+
+## 📅 Schedule
+
+| Time (KST) | Days | Content | Target Audience |
+|------------|------|---------|-----------------|
+| 11:00 → 12:00 | Tue-Sat | Daily Shorts (6 news) | 🇺🇸 US (Mon-Fri 10PM ET / 7PM PT) |
+| 23:00 → 00:00 | Mon-Fri | Daily Shorts (6 news) | 🇰🇷 Korea (Late Night) |
+| 11:00 → 12:00 | Sun | Weekly Video (16 news) | 🌏 Global |
+
+*First time = Generation, Second time = YouTube publish*
 
 ## 📁 Project Structure
 
@@ -43,17 +43,17 @@ news/
 ├── news_rss.py                     # RSS feed fetcher
 ├── upload_video.py                 # YouTube uploader
 │
-├── # Runner Scripts (RSS - Recommended)
-├── run_daily_shorts_rss_morning.py # Morning shorts (US time)
-├── run_daily_shorts_rss.py         # Evening shorts (KR time)
+├── # Runner Scripts
+├── run_daily_shorts_rss_morning.py # Noon Shorts (US primetime)
+├── run_daily_shorts_rss.py         # Midnight Shorts (Korea)
 ├── run_daily_shorts_rss_now.py     # Immediate upload
-├── run_weekly_video_rss.py         # Weekly video (scheduled)
-├── run_weekly_video_rss_now.py     # Weekly video (immediate)
+├── run_weekly_video_rss.py         # Weekly Video (scheduled)
+├── run_weekly_video_rss_now.py     # Weekly Video (immediate)
 │
 ├── # n8n Workflows
-├── n8n_daily_shorts_rss_morning_scheduled.json  # 08:00 KST
-├── n8n_daily_shorts_rss_scheduled.json          # 20:00 KST
-├── n8n_weekly_video_rss_scheduled.json          # Sat 21:00 KST
+├── n8n_daily_shorts_rss_morning_scheduled.json  # 11:00 KST (Tue-Sat)
+├── n8n_daily_shorts_rss_scheduled.json          # 23:00 KST (Mon-Fri)
+├── n8n_weekly_video_rss_scheduled.json          # 11:00 KST (Sun)
 │
 ├── .env                            # API keys
 ├── client_secrets.json             # YouTube OAuth
@@ -68,16 +68,14 @@ news/
 ### 1. Install Dependencies
 
 ```bash
-pip install requests python-dotenv pillow feedparser google-auth google-auth-oauthlib google-api-python-client openai
+pip install requests python-dotenv pillow feedparser openai google-auth google-auth-oauthlib google-api-python-client
 ```
 
 ### 2. Install FFmpeg
 
 ```bash
-# Windows (with Chocolatey)
+# Windows
 choco install ffmpeg
-
-# Or download from https://ffmpeg.org/download.html
 ```
 
 ### 3. Configure API Keys
@@ -127,31 +125,17 @@ python run_weekly_video_rss_now.py    # Weekly Video
 ### Automated (n8n)
 
 ```powershell
-# Start n8n
 $env:N8N_USER_FOLDER = "D:\workspace\news\n8n_data"
 npx n8n
 ```
 
-Import workflows:
-- `n8n_daily_shorts_rss_morning_scheduled.json` (US time)
-- `n8n_daily_shorts_rss_scheduled.json` (Korea time)
-- `n8n_weekly_video_rss_scheduled.json` (Saturday)
-
-## 📅 Schedule
-
-| Time (KST) | Days | Content | Target |
-|------------|------|---------|--------|
-| 11:00 → 12:00 | Tue-Sat | Daily Shorts (6 news) | 🇺🇸 US (Mon-Fri 10PM ET / 7PM PT) |
-| 23:00 → 00:00 | Mon-Fri | Daily Shorts (6 news) | 🇰🇷 Korea (Late Night) |
-| 11:00 → 12:00 | Sun | Weekly Video (16 news) | 🌏 Global |
-
-*First time = Generation, Second time = YouTube publish*
+Import workflows and set timezone to `Asia/Seoul`.
 
 ## 📰 News Sources (38 RSS Feeds)
 
 | Category | Sources |
 |----------|---------|
-| World | Korea Herald, Korea Times, Yonhap, Arirang, BBC, Al Jazeera, DW |
+| World | Korea Herald, Korea Times, Yonhap, BBC, Al Jazeera, DW |
 | Business | BBC, CNBC, Bloomberg, Financial Times, MarketWatch |
 | Technology | BBC, TechCrunch, Ars Technica, The Verge, Wired |
 | Science | BBC, Science Daily, Nature, New Scientist, Space.com |
@@ -164,22 +148,9 @@ Import workflows:
 
 | Item | Calculation | Cost |
 |------|-------------|------|
-| Daily Shorts (2x) | $0.50 × 2 × 22 days | ~$22 |
+| Daily Shorts | $0.50 × 2 × 22 days | ~$22 |
 | Weekly Video | $1.50 × 4 weeks | ~$6 |
 | **Total** | | **~$28** |
-
-*Based on GPT-5 mini + GPT Image 1.5 + GPT-4o mini TTS pricing*
-
-## 📊 Content Specs
-
-| Spec | Daily Shorts | Weekly Video |
-|------|--------------|--------------|
-| News Count | 6 stories | 16 stories (2 per category) |
-| Duration | ~60 seconds | ~4 minutes |
-| Resolution | 1080x1920 (9:16) | 1920x1080 (16:9) |
-| Narration | ~118 words | ~400 words |
-| Images | 2 per news | 3 per news |
-| Thumbnail | None (YouTube auto) | AI Generated |
 
 ## 📝 Output Files
 
@@ -194,21 +165,6 @@ output/
 ├── {timestamp}_video_subtitles_*.srt
 └── {timestamp}_summary.json
 ```
-
-## 🐛 Troubleshooting
-
-### YouTube API Quota Exceeded
-- Daily quota: 10,000 units (resets 17:00 KST)
-- Upload uses ~1,600 units
-- Wait until quota resets
-
-### FFmpeg Not Found
-```bash
-choco install ffmpeg
-```
-
-### n8n Timezone Issue
-- Set timezone to `Asia/Seoul` in workflow settings
 
 ## 📄 License
 
