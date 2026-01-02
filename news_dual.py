@@ -30,9 +30,9 @@ Usage:
     python news_dual.py --count 16 --video-only --by-category --use-rss
 
 Schedule:
-    - Noon Shorts: 11:30 KST → 12:00 KST (US prime time: ET 10PM, PT 7PM)
-    - Midnight Shorts: 23:30 KST → 00:00 KST (Korea late night)
-    - Weekly Video: Sun 11:30 KST → 12:00 KST
+    - Noon Shorts: 11:50 KST → 12:00 KST (US prime time: ET 10PM, PT 7PM)
+    - Midnight Shorts: 23:50 KST → 00:00 KST (Korea late night)
+    - Weekly Video: Sun 11:40 KST → 12:00 KST
 
 GitHub: https://github.com/quietload/ai-news-automation
 Version: 2.2

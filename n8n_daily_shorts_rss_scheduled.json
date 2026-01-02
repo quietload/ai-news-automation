@@ -7,13 +7,13 @@
           "interval": [
             {
               "triggerAtHour": 23,
-              "triggerAtMinute": 30
+              "triggerAtMinute": 50
             }
           ]
         }
       },
       "id": "1",
-      "name": "Daily 11:30PM",
+      "name": "Daily 11:50PM",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [250, 200]
@@ -65,7 +65,7 @@
     }
   ],
   "connections": {
-    "Daily 11:30PM": {
+    "Daily 11:50PM": {
       "main": [
         [
           {

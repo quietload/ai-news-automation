@@ -8,13 +8,13 @@
             {
               "triggerAtDay": 0,
               "triggerAtHour": 11,
-              "triggerAtMinute": 30
+              "triggerAtMinute": 40
             }
           ]
         }
       },
       "id": "1",
-      "name": "Sunday 11:30AM",
+      "name": "Sunday 11:40AM",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [250, 200]
@@ -31,7 +31,7 @@
     }
   ],
   "connections": {
-    "Sunday 11:30AM": {
+    "Sunday 11:40AM": {
       "main": [
         [
           {
