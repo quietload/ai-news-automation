@@ -263,21 +263,27 @@ def fetch_rss_news(count: int = 8, news_type: str = "daily") -> List[Dict]:
             if len([n for n in all_news if n['category'] == CATEGORY_NAMES.get(category)]) >= 2:
                 break  # Max 2 per category for diversity
     
-    # Select final news
+    # Select final news (카테고리당 1개씩)
     selected = []
+    selected_titles = []
     for category in categories:
         cat_name = CATEGORY_NAMES.get(category)
         cat_news = [n for n in all_news if n['category'] == cat_name]
         if cat_news:
             selected.append(cat_news[0])
+            selected_titles.append(cat_news[0]['title'])
             if len(selected) >= count:
                 break
     
-    # Fill remaining slots if needed
-    while len(selected) < count and all_news:
+    # Fill remaining slots if needed (부족하면 다른 카테고리에서 추가)
+    if len(selected) < count:
+        print(f"  [INFO] Need {count - len(selected)} more articles...")
         for news in all_news:
             if news not in selected:
-                selected.append(news)
+                if not is_similar_news(news['title'], selected_titles):
+                    selected.append(news)
+                    selected_titles.append(news['title'])
+                    print(f"  [FILL] {news['category']}: {news['title'][:40]}...")
                 if len(selected) >= count:
                     break
     
@@ -298,19 +304,21 @@ def fetch_rss_news_by_category(count: int = 16, news_type: str = "weekly") -> Li
     Fetch news by category (for Weekly Video)
     Returns balanced news across all categories
     Filters out: local news, similar articles
+    If a category is short, fills from other categories
     """
     print(f"\n[RSS] Fetching {count} news articles by category...")
     
     used_news = load_used_news(news_type)
     all_news = []
+    all_titles = []  # 전체 유사도 체크용
     categories = list(RSS_FEEDS.keys())
     per_category = (count + len(categories) - 1) // len(categories)  # Ceiling division
     
+    # 1차: 카테고리별로 수집
     for category in categories:
         feeds = RSS_FEEDS[category]
         random.shuffle(feeds)
         category_news = []
-        category_titles = []  # 유사도 체크용
         
         for source_name, url in feeds:
             if len(category_news) >= per_category:
@@ -330,19 +338,56 @@ def fetch_rss_news_by_category(count: int = 16, news_type: str = "weekly") -> Li
                     print(f"  [SKIP] Local: {item['title'][:40]}...")
                     continue
                 
-                # 3. 유사 기사 스킵
-                if is_similar_news(item['title'], category_titles):
+                # 3. 유사 기사 스킵 (전체 기준)
+                if is_similar_news(item['title'], all_titles):
                     print(f"  [SKIP] Similar: {item['title'][:40]}...")
                     continue
                 
                 category_news.append(item)
-                category_titles.append(item['title'])
+                all_titles.append(item['title'])
                 print(f"  [OK] {category}: {item['title'][:40]}... ({source_name})")
                 
                 if len(category_news) >= per_category:
                     break
         
         all_news.extend(category_news)
+    
+    # 2차: 부족하면 다른 카테고리에서 추가 수집
+    if len(all_news) < count:
+        print(f"  [INFO] Need {count - len(all_news)} more articles, searching other categories...")
+        random.shuffle(categories)
+        
+        for category in categories:
+            if len(all_news) >= count:
+                break
+                
+            feeds = RSS_FEEDS[category]
+            random.shuffle(feeds)
+            
+            for source_name, url in feeds:
+                if len(all_news) >= count:
+                    break
+                    
+                items = parse_feed(url, source_name, category)
+                
+                for item in items:
+                    news_id = get_news_id(item['title'])
+                    
+                    if news_id in used_news:
+                        continue
+                    if is_local_news(item['title'], item.get('description', '')):
+                        continue
+                    if is_similar_news(item['title'], all_titles):
+                        continue
+                    if item in all_news:
+                        continue
+                    
+                    all_news.append(item)
+                    all_titles.append(item['title'])
+                    print(f"  [FILL] {category}: {item['title'][:40]}... ({source_name})")
+                    
+                    if len(all_news) >= count:
+                        break
     
     # 순서 랜덤 섞기
     random.shuffle(all_news)
