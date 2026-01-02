@@ -20,6 +20,7 @@ Tech Stack:
 
 Features:
 - Real-time news from RSS feeds
+- Local/similar article filtering
 - AI-generated images (2-3 per news)
 - Multi-language subtitles (EN, KO, JA, ZH, ES)
 - Synchronized audio-image timing
@@ -40,7 +41,7 @@ Schedule:
     - Weekly Video: Sun 11:30 KST → 12:00 KST
 
 GitHub: https://github.com/quietload/ai-news-automation
-Version: 2.3
+Version: 2.4
 """
 
 import os

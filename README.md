@@ -1,4 +1,4 @@
-# 📰 AI News Automation Pipeline v2.3
+# 📰 AI News Automation Pipeline v2.4
 
 Automatically generates and uploads YouTube news content using AI.
 
@@ -144,6 +144,15 @@ Import workflows and set timezone to `Asia/Seoul`.
 | Sports | BBC, ESPN, Sky Sports, Sports Illustrated |
 | Entertainment | BBC, Variety, Hollywood Reporter, Entertainment Weekly |
 | Environment | BBC, Guardian, Climate News, Mongabay |
+
+## 🔍 News Filtering
+
+| Filter | Description |
+|--------|-------------|
+| Local News | Skips region-specific articles (US/UK/AU cities, local councils, school boards) |
+| Similar Articles | Skips articles with 50%+ title similarity (Jaccard) |
+| Auto-fill | If a category is short, fills from other categories |
+| Duplicates | Tracks used articles separately for daily/weekly |
 
 ## 💰 Monthly Cost Estimate
 

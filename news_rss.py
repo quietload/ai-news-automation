@@ -2,17 +2,29 @@
 """
 RSS News Fetcher
 ================
-Fetches real-time news from major global news RSS feeds.
+Fetches real-time news from 38 global RSS feeds.
 No delay, no API limits, completely free.
+
+Features:
+    - Local news filter: Skips region-specific articles (US cities, UK towns, etc.)
+    - Similar article filter: Skips articles with 50%+ title similarity
+    - Auto-fill: If a category is short, fills from other categories
+    - Duplicate prevention: Tracks used articles per daily/weekly
 
 Usage:
     from news_rss import fetch_rss_news, fetch_rss_news_by_category
     
-    # Get 10 news for Daily Shorts
-    news = fetch_rss_news(count=10)
+    # Daily Shorts: 6 diverse news
+    news = fetch_rss_news(count=6, news_type="daily")
     
-    # Get 20 news for Weekly Video (by category)
-    news = fetch_rss_news_by_category(count=20)
+    # Weekly Video: 16 news (2 per category)
+    news = fetch_rss_news_by_category(count=16, news_type="weekly")
+
+Log Examples:
+    [OK] technology: Apple announces AI... (TechCrunch)
+    [SKIP] Local: Florida governor signs...
+    [SKIP] Similar: Apple reveals new AI...
+    [FILL] business: Amazon reports Q4... (Bloomberg)
 """
 
 import feedparser
