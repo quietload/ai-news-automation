@@ -480,10 +480,7 @@ Structure:
 - What's next / developing (1 sentence)
 - Outro: "Stay tuned for updates"
 
-Output ONLY the narration. Aim for ~350 words."""
-- Quick outro: "Stay tuned for updates"
-
-Output ONLY the narration. ~120 words."""
+Output ONLY the narration. Stay under ~250 words."""
     else:
         system_prompt = f"""Write an engaging news narration for a weekly YouTube video.
 
@@ -1116,17 +1113,8 @@ def generate_description(news_list: list, is_weekly: bool = False) -> str:
         header = "AI News Daily | Today's Headlines (6 Stories)"
         stories_header = "Today's Stories:"
     
-    return f"""{header}
-
-{stories_header}
-
-{stories_text}
-
----
-Generated with AI
-
-#news #AI #globalNews #worldnews #breakingnews
-"""
+    description = f"{header}\n\n{stories_header}\n\n{stories_text}\n\n---\nGenerated with AI\n\n#news #AI #globalNews #worldnews #breakingnews"
+    return description
 
 
 def generate_thumbnail(news_list: list, output_path: Path, style: str = "shorts") -> Path:
@@ -1148,18 +1136,7 @@ def generate_thumbnail(news_list: list, output_path: Path, style: str = "shorts"
             "model": "gpt-5-mini",
             "messages": [{
                 "role": "system",
-                "content": f"""Create a DALL-E image prompt that combines these news topics into ONE dramatic scene.
-Format: {orientation}
-
-RULES:
-- Combine all topics into a single cohesive, dramatic scene
-- Photorealistic, cinematic quality, dramatic lighting
-- NO text, NO words, NO letters, NO numbers, NO faces
-- Show objects, symbols, or scenes representing the news
-- High contrast, vibrant colors, eye-catching
-- Under 100 words
-
-Example: If news is about tech, sports, weather: "Dramatic cinematic scene of a futuristic stadium under stormy skies with lightning, holographic displays showing data visualizations, sports equipment in foreground, photorealistic, dramatic lighting" """
+                "content": f"Create a DALL-E image prompt that combines these news topics into ONE dramatic scene. Format: {orientation}. RULES: Combine all topics into a single cohesive, dramatic scene. Photorealistic, cinematic quality, dramatic lighting. NO text, NO words, NO letters, NO numbers, NO faces. Show objects, symbols, or scenes representing the news. High contrast, vibrant colors, eye-catching. Under 100 words."
             }, {
                 "role": "user",
                 "content": f"News topics: {titles_summary}"
