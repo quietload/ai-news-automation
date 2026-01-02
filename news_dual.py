@@ -32,9 +32,9 @@ Usage:
     python news_dual.py --breaking-news temp.json              # Breaking
 
 Schedule:
-    - 11:50 → 12:00 KST (Tue-Sat): US Primetime Shorts
-    - 20:50 → 21:00 KST (Mon-Fri): Korea Primetime Shorts
-    - 11:30 → 12:00 KST (Sun): Weekly Video
+    - 11:50 - 12:00 KST (Tue-Sat): US Primetime Shorts
+    - 20:50 - 21:00 KST (Mon-Fri): Korea Primetime Shorts
+    - 11:30 - 12:00 KST (Sun): Weekly Video
     - Every 10min: Breaking News Detection
 
 GitHub: https://github.com/quietload/ai-news-automation
@@ -297,7 +297,7 @@ Output one prompt per line, no numbering."""
 
 def generate_image(prompt: str, output_path: Path, size: str, retry_count: int = 0) -> Path:
     """Generate image with GPT Image 1.5"""
-    # size 변환: DALL-E 형식 → gpt-image-1.5 형식
+    # size 변환: DALL-E 형식 -> gpt-image-1.5 형식
     # gpt-image-1.5는 auto, 1024x1024, 1536x1024, 1024x1536 지원
     if size == "1024x1792":  # Shorts (세로)
         img_size = "1024x1536"
@@ -1159,7 +1159,7 @@ RULES:
 - High contrast, vibrant colors, eye-catching
 - Under 100 words
 
-Example: If news is about tech, sports, weather → "Dramatic cinematic scene of a futuristic stadium under stormy skies with lightning, holographic displays showing data visualizations, sports equipment in foreground, photorealistic, dramatic lighting" """
+Example: If news is about tech, sports, weather: "Dramatic cinematic scene of a futuristic stadium under stormy skies with lightning, holographic displays showing data visualizations, sports equipment in foreground, photorealistic, dramatic lighting" """
             }, {
                 "role": "user",
                 "content": f"News topics: {titles_summary}"
