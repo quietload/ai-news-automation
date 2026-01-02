@@ -32,7 +32,7 @@ Automatically generates and uploads YouTube news content using AI.
 |------------|------|---------|-----------------|
 | 11:50 → 12:00 | Tue-Sat | Daily Shorts (6 news) | 🇺🇸 US (Mon-Fri 10PM ET / 7PM PT) |
 | 23:50 → 00:00 | Mon-Fri | Daily Shorts (6 news) | 🇰🇷 Korea (Late Night) |
-| 11:40 → 12:00 | Sun | Weekly Video (16 news) | 🌏 Global |
+| 11:30 → 12:00 | Sun | Weekly Video (16 news) | 🌏 Global |
 
 *First time = Generation, Second time = YouTube publish*
 
