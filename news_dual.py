@@ -1256,26 +1256,26 @@ def generate_thumbnail(news_list: list, output_path: Path, style: str = "shorts"
             font_title = font_large
             font_date = font_large
         
-        # 좌측 하단: "WEEKLY" (크게, 아래로)
+        # 좌측 상단: "WEEKLY" (크게, 살짝 아래로)
         text1 = "WEEKLY"
-        draw.text((53, height - 220 + 3), text1, font=font_title, fill="black")
-        draw.text((50, height - 220), text1, font=font_title, fill="#FF3333")
+        draw.text((53, 83), text1, font=font_title, fill="black")
+        draw.text((50, 80), text1, font=font_title, fill="#FF3333")
         
-        # 좌측 하단: "NEWS" (크게, 아래로)
+        # 좌측 상단: "NEWS" (크게, 살짝 아래로)
         text2 = "NEWS"
-        draw.text((53, height - 120 + 3), text2, font=font_title, fill="black")
-        draw.text((50, height - 120), text2, font=font_title, fill="white")
+        draw.text((53, 183), text2, font=font_title, fill="black")
+        draw.text((50, 180), text2, font=font_title, fill="white")
         
-        # 우측 상단: 날짜 (크게, 위로, 왼쪽으로)
+        # 우측 하단: 날짜 (크게, 살짝 위로 + 왼쪽으로)
         bbox_date = draw.textbbox((0, 0), today, font=font_date)
         x_date = width - (bbox_date[2] - bbox_date[0]) - 80
-        draw.text((x_date+3, 53), today, font=font_date, fill="black")
-        draw.text((x_date, 50), today, font=font_date, fill="white")
+        draw.text((x_date+3, height - 200 + 3), today, font=font_date, fill="black")
+        draw.text((x_date, height - 200), today, font=font_date, fill="white")
         
         bbox_year = draw.textbbox((0, 0), year, font=font_medium)
         x_year = width - (bbox_year[2] - bbox_year[0]) - 80
-        draw.text((x_year+2, 142), year, font=font_medium, fill="black")
-        draw.text((x_year, 140), year, font=font_medium, fill="#FFD700")
+        draw.text((x_year+2, height - 110 + 2), year, font=font_medium, fill="black")
+        draw.text((x_year, height - 110), year, font=font_medium, fill="#FFD700")
     
     # 4. 저장 (JPEG로 압축 - YouTube 썸네일 2MB 제한)
     img = img.convert("RGB")
