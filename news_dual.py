@@ -1502,12 +1502,13 @@ def main():
     with open(summary_file, 'w', encoding='utf-8') as f:
         json.dump(summary, f, indent=2, ensure_ascii=False)
     
-    # 사용한 뉴스 저장 (중복 방지) - Daily/Weekly 분리
-    news_type = "weekly" if args.by_category else "daily"
-    used_news = load_used_news(news_type)
-    for news in news_list:
-        used_news.add(get_news_id(news))
-    save_used_news(used_news, news_type)
+    # 사용한 뉴스 저장 (중복 방지) - RSS 사용 시 news_rss.py에서 저장하므로 스킵
+    if not args.use_rss:
+        news_type = "weekly" if args.by_category else "daily"
+        used_news = load_used_news(news_type)
+        for news in news_list:
+            used_news.add(get_news_id(news))
+        save_used_news(used_news, news_type)
     
     print(f"\n{'='*60}")
     print(f"[OK] Complete!")
