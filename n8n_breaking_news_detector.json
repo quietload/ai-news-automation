@@ -26,8 +26,7 @@
       "name": "Detect Breaking News",
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
-      "position": [500, 200],
-      "onError": "continueErrorOutput"
+      "position": [500, 200]
     },
     {
       "parameters": {
