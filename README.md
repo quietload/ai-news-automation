@@ -141,6 +141,24 @@ npx n8n
 
 Import workflows and set timezone to `Asia/Seoul`.
 
+### 📧 Email Notifications Setup
+
+1. In n8n, go to **Credentials** → **Add Credential** → **SMTP**
+2. Configure Gmail SMTP:
+   - Host: `smtp.gmail.com`
+   - Port: `465`
+   - User: `your-email@gmail.com`
+   - Password: [Gmail App Password](https://myaccount.google.com/apppasswords)
+   - SSL/TLS: `true`
+3. Update workflow JSON files:
+   - Replace `YOUR_EMAIL@gmail.com` with your email
+   - Replace `YOUR_SMTP_CREDENTIAL_ID` with your credential ID
+
+Email notifications:
+- ✅ Success: Job completed
+- ❌ Failure: Error details
+- 🔥 Breaking: Breaking news detected & generated
+
 ## 📰 News Sources (38 RSS Feeds)
 
 | Category | Sources |

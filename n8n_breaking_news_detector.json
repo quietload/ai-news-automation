@@ -20,13 +20,77 @@
     },
     {
       "parameters": {
-        "command": "cd D:\\workspace\\news && python run_breaking_news.py"
+        "command": "C:\\Users\\USER\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe D:\\workspace\\news\\run_breaking_news.py"
       },
       "id": "2",
       "name": "Detect Breaking News",
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
-      "position": [500, 200]
+      "position": [500, 200],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.stdout }}",
+              "rightValue": "BREAKING",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "3",
+      "name": "Has Breaking News?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [750, 200]
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_EMAIL@gmail.com",
+        "subject": "🔥 [News Automation] BREAKING NEWS Generated!",
+        "message": "Breaking News Shorts generated!\n\nTime: {{ $now.format('yyyy-MM-dd HH:mm:ss') }} KST\n\nOutput:\n{{ $json.stdout }}"
+      },
+      "id": "4",
+      "name": "Email Breaking",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [1000, 100],
+      "credentials": {
+        "smtp": {
+          "id": "YOUR_SMTP_CREDENTIAL_ID",
+          "name": "Gmail SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_EMAIL@gmail.com",
+        "subject": "❌ [News Automation] Breaking News Check - FAILED",
+        "message": "Breaking News detection FAILED!\n\nTime: {{ $now.format('yyyy-MM-dd HH:mm:ss') }} KST\n\nError:\n{{ $json.stderr }}\n\nPlease check the logs."
+      },
+      "id": "5",
+      "name": "Email Failure",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [750, 400],
+      "credentials": {
+        "smtp": {
+          "id": "YOUR_SMTP_CREDENTIAL_ID",
+          "name": "Gmail SMTP"
+        }
+      }
     }
   ],
   "connections": {
@@ -40,9 +104,39 @@
           }
         ]
       ]
+    },
+    "Detect Breaking News": {
+      "main": [
+        [
+          {
+            "node": "Has Breaking News?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Breaking News?": {
+      "main": [
+        [
+          {
+            "node": "Email Breaking",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
+    "executionOrder": "v1",
     "timezone": "Asia/Seoul"
   }
 }

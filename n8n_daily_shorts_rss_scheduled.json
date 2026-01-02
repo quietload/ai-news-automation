@@ -1,5 +1,5 @@
 {
-  "name": "News Automation - Daily Shorts RSS Midnight (Scheduled)",
+  "name": "News Automation - Daily Shorts RSS Evening (Scheduled)",
   "nodes": [
     {
       "parameters": {
@@ -29,7 +29,7 @@
           "conditions": [
             {
               "leftValue": "={{ $now.weekday }}",
-              "rightValue": 6,
+              "rightValue": 0,
               "operator": {
                 "type": "number",
                 "operation": "notEquals"
@@ -37,7 +37,7 @@
             },
             {
               "leftValue": "={{ $now.weekday }}",
-              "rightValue": 0,
+              "rightValue": 6,
               "operator": {
                 "type": "number",
                 "operation": "notEquals"
@@ -48,7 +48,7 @@
         }
       },
       "id": "2",
-      "name": "Skip Weekend",
+      "name": "Skip Sat-Sun (KR Weekend)",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [450, 200]
@@ -58,10 +58,47 @@
         "command": "C:\\Users\\USER\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe D:\\workspace\\news\\run_daily_shorts_rss.py"
       },
       "id": "3",
-      "name": "Run Daily Shorts RSS",
+      "name": "Run Daily Shorts RSS Evening",
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
-      "position": [700, 180]
+      "position": [700, 180],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_EMAIL@gmail.com",
+        "subject": "✅ [News Automation] Daily Shorts (Evening) - Success",
+        "message": "Daily Shorts (Evening) generated successfully!\n\nTime: {{ $now.format('yyyy-MM-dd HH:mm:ss') }} KST\nType: Korea Primetime Shorts\n\nOutput:\n{{ $json.stdout }}"
+      },
+      "id": "4",
+      "name": "Email Success",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [950, 100],
+      "credentials": {
+        "smtp": {
+          "id": "YOUR_SMTP_CREDENTIAL_ID",
+          "name": "Gmail SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_EMAIL@gmail.com",
+        "subject": "❌ [News Automation] Daily Shorts (Evening) - FAILED",
+        "message": "Daily Shorts (Evening) generation FAILED!\n\nTime: {{ $now.format('yyyy-MM-dd HH:mm:ss') }} KST\nType: Korea Primetime Shorts\n\nError:\n{{ $json.stderr }}\n\nPlease check the logs."
+      },
+      "id": "5",
+      "name": "Email Failure",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [950, 260],
+      "credentials": {
+        "smtp": {
+          "id": "YOUR_SMTP_CREDENTIAL_ID",
+          "name": "Gmail SMTP"
+        }
+      }
     }
   ],
   "connections": {
@@ -69,18 +106,36 @@
       "main": [
         [
           {
-            "node": "Skip Weekend",
+            "node": "Skip Sat-Sun (KR Weekend)",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Skip Weekend": {
+    "Skip Sat-Sun (KR Weekend)": {
       "main": [
         [
           {
-            "node": "Run Daily Shorts RSS",
+            "node": "Run Daily Shorts RSS Evening",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Daily Shorts RSS Evening": {
+      "main": [
+        [
+          {
+            "node": "Email Success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email Failure",
             "type": "main",
             "index": 0
           }

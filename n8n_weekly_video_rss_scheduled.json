@@ -27,7 +27,44 @@
       "name": "Run Weekly Video RSS",
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
-      "position": [500, 200]
+      "position": [500, 200],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_EMAIL@gmail.com",
+        "subject": "✅ [News Automation] Weekly Video - Success",
+        "message": "Weekly Video generated successfully!\n\nTime: {{ $now.format('yyyy-MM-dd HH:mm:ss') }} KST\nType: Weekly Global News Roundup\n\nOutput:\n{{ $json.stdout }}"
+      },
+      "id": "3",
+      "name": "Email Success",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [750, 100],
+      "credentials": {
+        "smtp": {
+          "id": "YOUR_SMTP_CREDENTIAL_ID",
+          "name": "Gmail SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_EMAIL@gmail.com",
+        "subject": "❌ [News Automation] Weekly Video - FAILED",
+        "message": "Weekly Video generation FAILED!\n\nTime: {{ $now.format('yyyy-MM-dd HH:mm:ss') }} KST\nType: Weekly Global News Roundup\n\nError:\n{{ $json.stderr }}\n\nPlease check the logs."
+      },
+      "id": "4",
+      "name": "Email Failure",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [750, 300],
+      "credentials": {
+        "smtp": {
+          "id": "YOUR_SMTP_CREDENTIAL_ID",
+          "name": "Gmail SMTP"
+        }
+      }
     }
   ],
   "connections": {
@@ -36,6 +73,24 @@
         [
           {
             "node": "Run Weekly Video RSS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Weekly Video RSS": {
+      "main": [
+        [
+          {
+            "node": "Email Success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email Failure",
             "type": "main",
             "index": 0
           }

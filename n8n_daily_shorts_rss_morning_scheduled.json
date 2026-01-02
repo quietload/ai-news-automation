@@ -61,7 +61,44 @@
       "name": "Run Daily Shorts RSS Morning",
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
-      "position": [700, 180]
+      "position": [700, 180],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_EMAIL@gmail.com",
+        "subject": "✅ [News Automation] Daily Shorts (Noon) - Success",
+        "message": "Daily Shorts (Noon) generated successfully!\n\nTime: {{ $now.format('yyyy-MM-dd HH:mm:ss') }} KST\nType: US Primetime Shorts\n\nOutput:\n{{ $json.stdout }}"
+      },
+      "id": "4",
+      "name": "Email Success",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [950, 100],
+      "credentials": {
+        "smtp": {
+          "id": "YOUR_SMTP_CREDENTIAL_ID",
+          "name": "Gmail SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_EMAIL@gmail.com",
+        "subject": "❌ [News Automation] Daily Shorts (Noon) - FAILED",
+        "message": "Daily Shorts (Noon) generation FAILED!\n\nTime: {{ $now.format('yyyy-MM-dd HH:mm:ss') }} KST\nType: US Primetime Shorts\n\nError:\n{{ $json.stderr }}\n\nPlease check the logs."
+      },
+      "id": "5",
+      "name": "Email Failure",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [950, 260],
+      "credentials": {
+        "smtp": {
+          "id": "YOUR_SMTP_CREDENTIAL_ID",
+          "name": "Gmail SMTP"
+        }
+      }
     }
   ],
   "connections": {
@@ -81,6 +118,24 @@
         [
           {
             "node": "Run Daily Shorts RSS Morning",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Daily Shorts RSS Morning": {
+      "main": [
+        [
+          {
+            "node": "Email Success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email Failure",
             "type": "main",
             "index": 0
           }
