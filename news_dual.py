@@ -446,18 +446,19 @@ def generate_narration_script(news_list: list, style: str = "short", is_saturday
     
     if style == "short":
         system_prompt = f"""Write a SHORT news narration for YouTube Shorts.
-STRICT LIMIT: Maximum 55 seconds when spoken (~116 words total).
+STRICT LIMIT: ~116 words total (55 seconds when spoken).
+
+Style:
+- Same charismatic news anchor personality as weekly videos
+- Confident, professional, but personable
+- No time for commentary or jokes, but keep the engaging tone
 
 Structure:
-- Quick intro (1 sentence): "Here's today's top news"
-- {len(news_list)} news stories: 1 sentence each (15 words per story)
-- Quick outro (1 sentence): "{outro}"
+- Quick intro: "Here's today's top news"
+- {len(news_list)} news stories: 1 concise sentence each
+- Quick outro: "{outro}"
 
-Rules:
-- Be concise but clear
-- No filler words
-- Total ~116 words
-Output ONLY the narration."""
+Output ONLY the narration. Stay within ~116 words."""
     else:
         system_prompt = f"""Write an engaging news narration for a weekly YouTube video.
 
