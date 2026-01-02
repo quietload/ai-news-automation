@@ -16,54 +16,91 @@ Automatically generates and uploads YouTube news content using AI.
 
 ## 📊 Content Specs
 
-| Spec | Daily Shorts | Weekly Video |
-|------|--------------|--------------|
-| News Count | 6 stories | 16 stories (2 per category) |
-| Duration | ~60 seconds | No limit |
-| Resolution | 1080x1920 (9:16) | 1920x1080 (16:9) |
-| Narration | ~116 words | No limit (with personality) |
-| Images | 2 per news | 3 per news |
-| Thumbnail | None (YouTube auto) | AI Generated |
-| Style | Charismatic anchor (concise) | Charismatic anchor + commentary/humor |
+| Spec | Daily Shorts | Weekly Video | Breaking Shorts |
+|------|--------------|--------------|-----------------|
+| News Count | 6 stories | 16 stories (2/category) | 1 story (deep-dive) |
+| Duration | ~60 seconds | No limit | ~60 seconds |
+| Resolution | 1080x1920 (9:16) | 1920x1080 (16:9) | 1080x1920 (9:16) |
+| Narration | ~116 words | No limit | ~120 words |
+| Images | 2 per news | 3 per news | 5 images |
+| Style | Charismatic anchor | + commentary/humor | Urgent news tone |
 
 ## 📅 Schedule
 
-| Time (KST) | Days | Content | Target Audience |
-|------------|------|---------|-----------------|
-| 11:50 → 12:00 | Tue-Sat | Daily Shorts (6 news) | 🇺🇸 US (Mon-Fri 10PM ET / 7PM PT) |
-| 20:50 → 21:00 | Mon-Fri | Daily Shorts (6 news) | 🇰🇷 Korea (Prime Time) |
-| 11:30 → 12:00 | Sun | Weekly Video (16 news) | 🌏 Global |
-| Every 10min | 24/7 | Breaking News (1 news) | 🌏 Global (on-demand) |
+| Time (KST) | Days | Content | Target |
+|------------|------|---------|--------|
+| 11:50 → 12:00 | Tue-Sat | Daily Shorts | 🇺🇸 US Primetime |
+| 20:50 → 21:00 | Mon-Fri | Daily Shorts | 🇰🇷 Korea Primetime |
+| 11:30 → 12:00 | Sun | Weekly Video | 🌏 Global |
+| Every 10min | 24/7 | Breaking News | 🌏 On-demand |
 
-*First time = Generation, Second time = YouTube publish*
+## 🔥 Breaking News
 
-### 🔥 Breaking News
+**Trigger Conditions:**
+- Breaking keywords (breaking, dies, war, earthquake, etc.) **AND**
+- 5+ different news sources reporting the same story
 
-Automatically detects and generates Shorts when:
-- Contains breaking keywords (breaking, dies, war, earthquake, etc.)
-- Found in **5+ different news sources**
+**Keywords:**
+```
+breaking, just in, urgent, developing, alert
+dies, dead, killed, assassination
+war, invasion, attack, explosion, bombing, missile
+earthquake, tsunami, hurricane, typhoon, wildfire
+crash, collapse, bankruptcy, default
+resigns, impeached, arrested, indicted
+record, historic, first ever, unprecedented
+```
 
-Single story deep-dive format (~120 words, 60 seconds).
+**Detection Flow:**
+```
+n8n (10min interval) → run_breaking_news.py → detect_breaking_news()
+    ↓
+Scan 38 RSS feeds → Filter breaking keywords → Group similar (40%)
+    ↓
+5+ sources? → Generate Shorts → Upload → Email alert
+```
+
+## 🔍 News Filtering
+
+| Filter | Description |
+|--------|-------------|
+| Local News | Skips US/UK/AU cities, local councils, school boards |
+| Similar Articles | Skips 50%+ title similarity (Jaccard) |
+| Auto-fill | Fills from other categories if short |
+| Duplicates | Tracks separately: daily/weekly/breaking |
 
 ## 📁 Project Structure
 
 ```
 news/
 ├── news_dual.py                    # Main generator
-├── news_rss.py                     # RSS feed fetcher
+├── news_rss.py                     # RSS fetcher + breaking detection
 ├── upload_video.py                 # YouTube uploader
 │
 ├── # Runner Scripts
-├── run_daily_shorts_rss_morning.py # Noon Shorts (US primetime)
-├── run_daily_shorts_rss.py         # Midnight Shorts (Korea)
-├── run_daily_shorts_rss_now.py     # Immediate upload
+├── run_daily_shorts_rss_morning.py # Noon Shorts (US)
+├── run_daily_shorts_rss.py         # Evening Shorts (Korea)
+├── run_daily_shorts_rss_now.py     # Immediate Shorts
 ├── run_weekly_video_rss.py         # Weekly Video (scheduled)
 ├── run_weekly_video_rss_now.py     # Weekly Video (immediate)
+├── run_breaking_news.py            # Breaking News detector
 │
 ├── # n8n Workflows
-├── n8n_daily_shorts_rss_morning_scheduled.json  # 11:00 KST (Tue-Sat)
-├── n8n_daily_shorts_rss_scheduled.json          # 23:00 KST (Mon-Fri)
-├── n8n_weekly_video_rss_scheduled.json          # 11:00 KST (Sun)
+├── n8n_daily_shorts_rss_morning_scheduled.json
+├── n8n_daily_shorts_rss_scheduled.json
+├── n8n_weekly_video_rss_scheduled.json
+├── n8n_breaking_news_detector.json
+│
+├── # Email Templates
+├── email_templates/
+│   ├── success.html                # ✅ Green - job completed
+│   ├── failure.html                # ❌ Red - error details
+│   └── breaking.html               # 🔥 Orange - breaking alert
+│
+├── # Tracking Files
+├── used_news_rss_daily.json        # Daily duplicates
+├── used_news_rss_weekly.json       # Weekly duplicates
+├── used_news_rss_breaking.json     # Breaking duplicates
 │
 ├── .env                            # API keys
 ├── client_secrets.json             # YouTube OAuth
@@ -91,7 +128,6 @@ choco install ffmpeg
 ### 3. Configure API Keys
 
 Create `.env` file:
-
 ```env
 OPENAI_API_KEY=sk-xxxxxxxxxxxxx
 ```
@@ -102,7 +138,7 @@ OPENAI_API_KEY=sk-xxxxxxxxxxxxx
 2. Enable YouTube Data API v3
 3. Create OAuth 2.0 credentials
 4. Download as `client_secrets.json`
-5. Run once to authorize:
+5. Authorize:
    ```bash
    python upload_video.py --file test.mp4 --title "Test"
    ```
@@ -118,18 +154,21 @@ python create_ending_images.py
 ### Manual Generation
 
 ```bash
-# Daily Shorts (6 news)
+# Daily Shorts
 python news_dual.py --count 6 --shorts-only --use-rss
 
-# Weekly Video (16 news, 2 per category)
+# Weekly Video
 python news_dual.py --count 16 --video-only --by-category --use-rss
+
+# Breaking News (check only)
+python run_breaking_news.py --dry-run
 ```
 
 ### Immediate Upload
 
 ```bash
-python run_daily_shorts_rss_now.py    # Shorts
-python run_weekly_video_rss_now.py    # Weekly Video
+python run_daily_shorts_rss_now.py
+python run_weekly_video_rss_now.py
 ```
 
 ### Automated (n8n)
@@ -139,27 +178,32 @@ $env:N8N_USER_FOLDER = "D:\workspace\news\n8n_data"
 npx n8n
 ```
 
-Import workflows and set timezone to `Asia/Seoul`.
+Import workflows → Set timezone `Asia/Seoul`
 
-### 📧 Email Notifications Setup
+## 📧 Email Notifications
 
-1. In n8n, go to **Credentials** → **Add Credential** → **SMTP**
-2. Configure Gmail SMTP:
+### Setup Gmail SMTP
+
+1. n8n → **Credentials** → **Add** → **SMTP**
+2. Configure:
    - Host: `smtp.gmail.com`
    - Port: `465`
-   - User: `your-email@gmail.com`
-   - Password: [Gmail App Password](https://myaccount.google.com/apppasswords)
-   - SSL/TLS: `true`
-3. Update workflow JSON files:
-   - Replace `YOUR_EMAIL@gmail.com` with your email
-   - Replace `YOUR_SMTP_CREDENTIAL_ID` with your credential ID
+   - User: your Gmail
+   - Password: [App Password](https://myaccount.google.com/apppasswords)
+   - SSL/TLS: true
+3. Update workflow JSONs:
+   - `YOUR_EMAIL@gmail.com` → your email
+   - `YOUR_SMTP_CREDENTIAL_ID` → credential ID
 
-Email notifications:
-- ✅ Success: Job completed
-- ❌ Failure: Error details
-- 🔥 Breaking: Breaking news detected & generated
+### Notification Types
 
-## 📰 News Sources (38 RSS Feeds)
+| Icon | Type | Description |
+|------|------|-------------|
+| ✅ | Success | Job completed with output |
+| ❌ | Failure | Error details + actions |
+| 🔥 | Breaking | Breaking news generated |
+
+## 📰 RSS Sources (38 feeds)
 
 | Category | Sources |
 |----------|---------|
@@ -172,22 +216,14 @@ Email notifications:
 | Entertainment | BBC, Variety, Hollywood Reporter, Entertainment Weekly |
 | Environment | BBC, Guardian, Climate News, Mongabay |
 
-## 🔍 News Filtering
-
-| Filter | Description |
-|--------|-------------|
-| Local News | Skips region-specific articles (US/UK/AU cities, local councils, school boards) |
-| Similar Articles | Skips articles with 50%+ title similarity (Jaccard) |
-| Auto-fill | If a category is short, fills from other categories |
-| Duplicates | Tracks used articles separately for daily/weekly |
-
-## 💰 Monthly Cost Estimate
+## 💰 Monthly Cost
 
 | Item | Calculation | Cost |
 |------|-------------|------|
 | Daily Shorts | $0.50 × 2 × 22 days | ~$22 |
 | Weekly Video | $1.50 × 4 weeks | ~$6 |
-| **Total** | | **~$28** |
+| Breaking | $0.50 × ~5/month | ~$2.50 |
+| **Total** | | **~$30** |
 
 ## 📝 Output Files
 

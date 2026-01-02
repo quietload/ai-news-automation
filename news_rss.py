@@ -1,35 +1,40 @@
 #!/usr/bin/env python3
 """
-RSS News Fetcher
-================
-Fetches real-time news from 38 global RSS feeds.
-No delay, no API limits, completely free.
+RSS News Fetcher & Breaking News Detector
+==========================================
 
-Features:
-    - Local news filter: Skips region-specific articles (US cities, UK towns, etc.)
-    - Similar article filter: Skips articles with 50%+ title similarity
-    - Auto-fill: If a category is short, fills from other categories
-    - Duplicate prevention: Tracks used articles per daily/weekly/breaking
-    - Breaking news detection: Monitors for major stories (5+ sources)
+38개 글로벌 RSS 피드에서 실시간 뉴스 수집.
+무료, 딜레이 없음, API 제한 없음.
+
+Functions:
+    fetch_rss_news(count, news_type)           # Daily Shorts용
+    fetch_rss_news_by_category(count, news_type)  # Weekly Video용
+    detect_breaking_news(min_sources)          # Breaking News 감지
+    fetch_breaking_news_details(breaking_news) # Breaking 상세 수집
+
+Filtering:
+    - Local News: US/UK/AU 도시, local council, school board 스킵
+    - Similar: 50%+ 제목 유사도 스킵 (Jaccard)
+    - Auto-fill: 카테고리 부족 시 다른 카테고리에서 보충
+    - Duplicates: daily/weekly/breaking 별도 추적
+
+Breaking News:
+    - Trigger: breaking keywords + 5개 이상 소스
+    - Keywords: breaking, dies, war, earthquake, resigns, etc.
+    - 40% 유사도로 동일 뉴스 그룹화
 
 Usage:
-    from news_rss import fetch_rss_news, fetch_rss_news_by_category, detect_breaking_news
+    from news_rss import fetch_rss_news, detect_breaking_news
     
-    # Daily Shorts: 6 diverse news
     news = fetch_rss_news(count=6, news_type="daily")
-    
-    # Weekly Video: 16 news (2 per category)
-    news = fetch_rss_news_by_category(count=16, news_type="weekly")
-    
-    # Breaking News: Detect major story
     breaking = detect_breaking_news(min_sources=5)
 
-Log Examples:
-    [OK] technology: Apple announces AI... (TechCrunch)
-    [SKIP] Local: Florida governor signs...
-    [SKIP] Similar: Apple reveals new AI...
-    [FILL] business: Amazon reports Q4... (Bloomberg)
-    [BREAKING] Found: Major earthquake hits...
+Log:
+    [OK] technology: Apple announces... (TechCrunch)
+    [SKIP] Local: Florida governor...
+    [SKIP] Similar: Apple reveals...
+    [FILL] business: Amazon reports...
+    [BREAKING] Found: Major earthquake...
 """
 
 import feedparser

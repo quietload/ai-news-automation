@@ -1,48 +1,43 @@
 #!/usr/bin/env python3
 """
-News Automation Pipeline - Daily Shorts, Weekly Video & Breaking News Generator
-================================================================================
+News Automation Pipeline v2.5
+=============================
 
-Automatically generates YouTube content from global news:
-- Daily Shorts: 6 news stories, vertical format, ~60 seconds, ~116 words (2x daily)
-- Weekly Video: 16 news stories (2 per category), horizontal format, no limit
-- Breaking News: Single story deep-dive, ~60 seconds, ~120 words (on-demand)
+YouTube 뉴스 콘텐츠 자동 생성 파이프라인
 
-Anchor Style:
-- Charismatic, professional, personable news anchor
-- Weekly Video: Free to add commentary, opinions, and light humor
-- Daily Shorts: Same personality but concise (no time for jokes)
+Content Types:
+    - Daily Shorts: 6개 뉴스, 세로형, ~60초, ~116 words (하루 2회)
+    - Weekly Video: 16개 뉴스 (카테고리별 2개), 가로형, 제한 없음
+    - Breaking News: 단일 뉴스 딥다이브, ~60초, ~120 words (온디맨드)
 
 Tech Stack:
-- Text generation: GPT-5 mini (reasoning_effort: minimal)
-- Image generation: GPT Image 1.5
-- Text-to-speech: GPT-4o mini TTS (Marin voice, news anchor style)
-- News source: 38 RSS feeds (real-time)
+    - Text: GPT-5 mini (reasoning_effort: minimal)
+    - Image: GPT Image 1.5
+    - TTS: GPT-4o mini TTS (Marin voice)
+    - News: 38 RSS feeds
 
 Features:
-- Real-time news from RSS feeds
-- Local/similar article filtering
-- AI-generated images (2-3 per news)
-- Multi-language subtitles (EN, KO, JA, ZH, ES)
-- Synchronized audio-image timing
-- Auto-generated thumbnails (Weekly Video)
-- YouTube scheduled upload support
-- Duplicate news prevention
+    - 실시간 RSS 뉴스 수집
+    - 로컬/유사 기사 필터링
+    - AI 이미지 생성 (뉴스당 2-3장)
+    - 다국어 자막 (EN, KO, JA, ZH, ES)
+    - 오디오-이미지 동기화
+    - 썸네일 자동 생성 (Weekly)
+    - YouTube 예약 업로드
+    - 중복 뉴스 방지
 
 Usage:
-    # Daily Shorts (6 news) with RSS
-    python news_dual.py --count 6 --shorts-only --use-rss
-    
-    # Weekly Video (16 news by category) with RSS
-    python news_dual.py --count 16 --video-only --by-category --use-rss
+    python news_dual.py --count 6 --shorts-only --use-rss      # Daily Shorts
+    python news_dual.py --count 16 --video-only --by-category --use-rss  # Weekly
+    python news_dual.py --breaking-news temp.json              # Breaking
 
 Schedule:
-    - Noon Shorts: 11:50 KST → 12:00 KST (US prime time: ET 10PM, PT 7PM)
-    - Evening Shorts: 20:50 KST → 21:00 KST (Korea prime time)
-    - Weekly Video: Sun 11:30 KST → 12:00 KST
+    - 11:50 → 12:00 KST (Tue-Sat): US Primetime Shorts
+    - 20:50 → 21:00 KST (Mon-Fri): Korea Primetime Shorts
+    - 11:30 → 12:00 KST (Sun): Weekly Video
+    - Every 10min: Breaking News Detection
 
 GitHub: https://github.com/quietload/ai-news-automation
-Version: 2.5
 """
 
 import os

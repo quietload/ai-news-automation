@@ -2,15 +2,25 @@
 """
 Breaking News Detector & Shorts Generator
 ==========================================
-Scans RSS feeds for breaking news and generates a Shorts video.
 
-Trigger conditions:
-- Contains breaking keywords (breaking, dies, war, earthquake, etc.)
-- Found in 5+ different news sources
+RSS 피드 스캔하여 속보 감지 및 Shorts 자동 생성.
+
+Trigger:
+    - Breaking 키워드 포함 (breaking, dies, war, earthquake, etc.)
+    - 5개 이상 소스에서 동일 뉴스 발견
+
+Flow:
+    1. detect_breaking_news(min_sources=5) 호출
+    2. 속보 발견 시 fetch_breaking_news_details() 로 상세 수집
+    3. news_dual.py --breaking-news 로 Shorts 생성
+    4. YouTube 즉시 업로드
 
 Usage:
-    python run_breaking_news.py              # Check and generate if found
-    python run_breaking_news.py --dry-run    # Check only, don't generate
+    python run_breaking_news.py              # 감지 & 생성
+    python run_breaking_news.py --dry-run    # 감지만 (생성 안함)
+
+Schedule:
+    n8n에서 10분마다 실행
 """
 
 import subprocess
