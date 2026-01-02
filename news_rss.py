@@ -112,6 +112,56 @@ def get_news_id(title: str) -> str:
     return hashlib.md5(title.encode()).hexdigest()[:16]
 
 
+# 지역/단체 한정 기사 필터링 키워드
+LOCAL_KEYWORDS = [
+    # 미국 지역
+    "florida", "texas", "california", "new york city", "nyc", "los angeles", "chicago",
+    "boston", "seattle", "denver", "atlanta", "miami", "phoenix", "detroit", "portland",
+    # 영국 지역
+    "london", "manchester", "birmingham", "liverpool", "scotland", "wales", "northern ireland",
+    # 호주 지역
+    "sydney", "melbourne", "brisbane", "perth", "adelaide",
+    # 특정 단체/기관 (글로벌 아닌 것)
+    "local council", "city council", "county", "municipality", "township",
+    "school board", "school district", "high school", "elementary school",
+    "local police", "sheriff", "state trooper",
+    # 스포츠 로컬
+    "minor league", "college football", "college basketball", "ncaa", "high school sports",
+    # 기타 로컬 표현
+    "residents say", "neighbors", "local community", "town hall", "local election",
+    "state legislature", "governor signs", "mayor announces",
+]
+
+
+def is_local_news(title: str, description: str = "") -> bool:
+    """Check if news is local/regional (not global interest)"""
+    text = (title + " " + description).lower()
+    for keyword in LOCAL_KEYWORDS:
+        if keyword in text:
+            return True
+    return False
+
+
+def is_similar_news(new_title: str, existing_titles: list, threshold: float = 0.5) -> bool:
+    """Check if news title is too similar to existing ones"""
+    new_words = set(new_title.lower().split())
+    
+    for existing in existing_titles:
+        existing_words = set(existing.lower().split())
+        
+        # Jaccard similarity
+        if not new_words or not existing_words:
+            continue
+        intersection = len(new_words & existing_words)
+        union = len(new_words | existing_words)
+        similarity = intersection / union
+        
+        if similarity >= threshold:
+            return True
+    
+    return False
+
+
 def load_used_news(news_type: str = "daily") -> set:
     """Load used news IDs"""
     file_path = USED_NEWS_FILE_RSS_DAILY if news_type == "daily" else USED_NEWS_FILE_RSS_WEEKLY
@@ -170,11 +220,13 @@ def fetch_rss_news(count: int = 8, news_type: str = "daily") -> List[Dict]:
     """
     Fetch news from RSS feeds (for Daily Shorts)
     Returns diverse news from all categories
+    Filters out: local news, similar articles
     """
     print(f"\n[RSS] Fetching {count} news articles...")
     
     used_news = load_used_news(news_type)
     all_news = []
+    all_titles = []  # 유사도 체크용
     categories = list(RSS_FEEDS.keys())
     random.shuffle(categories)
     
@@ -188,10 +240,25 @@ def fetch_rss_news(count: int = 8, news_type: str = "daily") -> List[Dict]:
             
             for item in items:
                 news_id = get_news_id(item['title'])
-                if news_id not in used_news:
-                    all_news.append(item)
-                    print(f"  [OK] {category}: {item['title'][:40]}... ({source_name})")
-                    break  # One per source
+                
+                # 1. 이미 사용한 뉴스 스킵
+                if news_id in used_news:
+                    continue
+                
+                # 2. 지역/단체 한정 기사 스킵
+                if is_local_news(item['title'], item.get('description', '')):
+                    print(f"  [SKIP] Local: {item['title'][:40]}...")
+                    continue
+                
+                # 3. 유사 기사 스킵
+                if is_similar_news(item['title'], all_titles):
+                    print(f"  [SKIP] Similar: {item['title'][:40]}...")
+                    continue
+                
+                all_news.append(item)
+                all_titles.append(item['title'])
+                print(f"  [OK] {category}: {item['title'][:40]}... ({source_name})")
+                break  # One per source
             
             if len([n for n in all_news if n['category'] == CATEGORY_NAMES.get(category)]) >= 2:
                 break  # Max 2 per category for diversity
@@ -230,6 +297,7 @@ def fetch_rss_news_by_category(count: int = 16, news_type: str = "weekly") -> Li
     """
     Fetch news by category (for Weekly Video)
     Returns balanced news across all categories
+    Filters out: local news, similar articles
     """
     print(f"\n[RSS] Fetching {count} news articles by category...")
     
@@ -242,6 +310,7 @@ def fetch_rss_news_by_category(count: int = 16, news_type: str = "weekly") -> Li
         feeds = RSS_FEEDS[category]
         random.shuffle(feeds)
         category_news = []
+        category_titles = []  # 유사도 체크용
         
         for source_name, url in feeds:
             if len(category_news) >= per_category:
@@ -251,11 +320,27 @@ def fetch_rss_news_by_category(count: int = 16, news_type: str = "weekly") -> Li
             
             for item in items:
                 news_id = get_news_id(item['title'])
-                if news_id not in used_news and item not in category_news:
-                    category_news.append(item)
-                    print(f"  [OK] {category}: {item['title'][:40]}... ({source_name})")
-                    if len(category_news) >= per_category:
-                        break
+                
+                # 1. 이미 사용한 뉴스 스킵
+                if news_id in used_news:
+                    continue
+                
+                # 2. 지역/단체 한정 기사 스킵
+                if is_local_news(item['title'], item.get('description', '')):
+                    print(f"  [SKIP] Local: {item['title'][:40]}...")
+                    continue
+                
+                # 3. 유사 기사 스킵
+                if is_similar_news(item['title'], category_titles):
+                    print(f"  [SKIP] Similar: {item['title'][:40]}...")
+                    continue
+                
+                category_news.append(item)
+                category_titles.append(item['title'])
+                print(f"  [OK] {category}: {item['title'][:40]}... ({source_name})")
+                
+                if len(category_news) >= per_category:
+                    break
         
         all_news.extend(category_news)
     
