@@ -1248,31 +1248,34 @@ def generate_thumbnail(news_list: list, output_path: Path, style: str = "shorts"
         today = datetime.now().strftime("%b %d").upper()
         year = datetime.now().strftime("%Y")
         
-        # 좌측 상단: "WEEKLY"
-        text1 = "WEEKLY"
-        draw.text((53, 53), text1, font=font_large, fill="black")
-        draw.text((50, 50), text1, font=font_large, fill="#FF3333")
-        
-        # 좌측: "NEWS"
-        text2 = "NEWS"
-        draw.text((53, 133), text2, font=font_large, fill="black")
-        draw.text((50, 130), text2, font=font_large, fill="white")
-        
-        # 우측 하단: 날짜
+        # 큰 폰트 설정
         try:
-            font_xlarge = ImageFont.truetype("C:/Windows/Fonts/arialbd.ttf", 72)
+            font_title = ImageFont.truetype("C:/Windows/Fonts/arialbd.ttf", 96)  # WEEKLY NEWS용
+            font_date = ImageFont.truetype("C:/Windows/Fonts/arialbd.ttf", 84)   # 날짜용
         except:
-            font_xlarge = font_large
+            font_title = font_large
+            font_date = font_large
         
-        bbox_date = draw.textbbox((0, 0), today, font=font_xlarge)
-        x_date = width - (bbox_date[2] - bbox_date[0]) - 50
-        draw.text((x_date+3, height - 180 + 3), today, font=font_xlarge, fill="black")
-        draw.text((x_date, height - 180), today, font=font_xlarge, fill="white")
+        # 좌측 하단: "WEEKLY" (크게, 아래로)
+        text1 = "WEEKLY"
+        draw.text((53, height - 220 + 3), text1, font=font_title, fill="black")
+        draw.text((50, height - 220), text1, font=font_title, fill="#FF3333")
+        
+        # 좌측 하단: "NEWS" (크게, 아래로)
+        text2 = "NEWS"
+        draw.text((53, height - 120 + 3), text2, font=font_title, fill="black")
+        draw.text((50, height - 120), text2, font=font_title, fill="white")
+        
+        # 우측 상단: 날짜 (크게, 위로, 왼쪽으로)
+        bbox_date = draw.textbbox((0, 0), today, font=font_date)
+        x_date = width - (bbox_date[2] - bbox_date[0]) - 80
+        draw.text((x_date+3, 53), today, font=font_date, fill="black")
+        draw.text((x_date, 50), today, font=font_date, fill="white")
         
         bbox_year = draw.textbbox((0, 0), year, font=font_medium)
-        x_year = width - (bbox_year[2] - bbox_year[0]) - 50
-        draw.text((x_year+2, height - 100 + 2), year, font=font_medium, fill="black")
-        draw.text((x_year, height - 100), year, font=font_medium, fill="#FFD700")
+        x_year = width - (bbox_year[2] - bbox_year[0]) - 80
+        draw.text((x_year+2, 142), year, font=font_medium, fill="black")
+        draw.text((x_year, 140), year, font=font_medium, fill="#FFD700")
     
     # 4. 저장 (JPEG로 압축 - YouTube 썸네일 2MB 제한)
     img = img.convert("RGB")
