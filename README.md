@@ -19,9 +19,9 @@ Automatically generates and uploads YouTube news content using AI.
 | Spec | Daily Shorts | Weekly Video | Breaking Shorts |
 |------|--------------|--------------|-----------------|
 | News Count | 6 stories | 16 stories (2/category) | 1 story (deep-dive) |
-| Duration | ~2-3 minutes | No limit | ~2-3 minutes |
+| Duration | ~2 minutes | No limit | ~2 minutes |
 | Resolution | 1080x1920 (9:16) | 1920x1080 (16:9) | 1080x1920 (9:16) |
-| Narration | ~350 words | No limit | ~350 words |
+| Narration | ~250 words | No limit | ~250 words |
 | Images | 2 per news | 3 per news | 5 images |
 | Style | Charismatic anchor | + commentary/humor | Urgent news tone |
 

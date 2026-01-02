@@ -6,9 +6,9 @@ News Automation Pipeline v2.5
 YouTube 뉴스 콘텐츠 자동 생성 파이프라인
 
 Content Types:
-    - Daily Shorts: 6개 뉴스, 세로형, ~2-3분, ~350 words (하루 2회)
+    - Daily Shorts: 6개 뉴스, 세로형, ~2분, ~250 words (하루 2회)
     - Weekly Video: 16개 뉴스 (카테고리별 2개), 가로형, 제한 없음
-    - Breaking News: 단일 뉴스 딥다이브, ~2-3분, ~350 words (온디맨드)
+    - Breaking News: 단일 뉴스 딥다이브, ~2분, ~250 words (온디맨드)
 
 Tech Stack:
     - Text: GPT-5 mini (reasoning_effort: minimal)
@@ -447,8 +447,8 @@ def generate_narration_script(news_list: list, style: str = "short", is_saturday
     outro = "See you Monday" if is_saturday else "Stay informed"
     
     if style == "short":
-        system_prompt = f"""Write a news narration for YouTube Shorts (up to 3 minutes).
-TARGET: ~350 words total (~2-3 minutes when spoken).
+        system_prompt = f"""Write a news narration for YouTube Shorts.
+TARGET: ~250 words total (under 2 minutes when spoken).
 
 Style:
 - Same charismatic news anchor personality as weekly videos
@@ -457,27 +457,27 @@ Style:
 
 Structure:
 - Engaging intro: "Here's today's top news"
-- {len(news_list)} news stories: 2-3 sentences each with brief context
+- {len(news_list)} news stories: 2 sentences each with brief context
 - Smooth transitions between stories
 - Quick outro: "{outro}"
 
-Output ONLY the narration. Aim for ~350 words."""
+Output ONLY the narration. Stay under ~250 words."""
     elif style == "breaking":
-        # Breaking News - 단일 뉴스 딥다이브 (최대 3분)
+        # Breaking News - 단일 뉴스 딥다이브 (2분 이내)
         system_prompt = f"""Write an URGENT breaking news narration for YouTube Shorts.
-TARGET: ~350 words total (~2-3 minutes when spoken).
+TARGET: ~250 words total (under 2 minutes when spoken).
 
 Style:
 - Urgent, authoritative breaking news anchor tone
-- This is a SINGLE major story - give it full depth and context
-- Professional but convey the significance and gravity
+- This is a SINGLE major story - give it depth and context
+- Professional but convey the significance
 
 Structure:
 - Urgent intro: "Breaking news" or "This just in"
-- What happened (3-4 sentences with details)
-- Background context (2-3 sentences)
-- Why it matters / impact (2-3 sentences)
-- What's next / developing (1-2 sentences)
+- What happened (2-3 sentences with details)
+- Background context (1-2 sentences)
+- Why it matters / impact (1-2 sentences)
+- What's next / developing (1 sentence)
 - Outro: "Stay tuned for updates"
 
 Output ONLY the narration. Aim for ~350 words."""
@@ -508,7 +508,7 @@ Output ONLY the narration."""
             "model": "gpt-5-mini",
             "messages": [{"role": "system", "content": system_prompt},
                         {"role": "user", "content": f"Create narration:\n\n{news_text}"}],
-            "max_completion_tokens": 800 if style == "long" else 600,
+            "max_completion_tokens": 800 if style == "long" else 500,
             "reasoning_effort": "minimal"
         },
         timeout=30
