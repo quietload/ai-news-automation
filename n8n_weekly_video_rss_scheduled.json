@@ -6,7 +6,7 @@
         "rule": {
           "interval": [
             {
-              "triggerAtDay": 6,
+              "triggerAtDay": 0,
               "triggerAtHour": 11,
               "triggerAtMinute": 0
             }
@@ -14,7 +14,7 @@
         }
       },
       "id": "1",
-      "name": "Saturday 11AM",
+      "name": "Sunday 11AM",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [250, 200]
@@ -31,7 +31,7 @@
     }
   ],
   "connections": {
-    "Saturday 11AM": {
+    "Sunday 11AM": {
       "main": [
         [
           {

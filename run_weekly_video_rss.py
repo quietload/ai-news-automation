@@ -34,12 +34,15 @@ def log(msg):
 
 
 def get_publish_time() -> str:
-    """KST 토요일 낮 12시 예약 게시"""
+    """KST 일요일 낮 12시 예약 게시"""
     now = datetime.now(KST)
     publish_time = now.replace(hour=12, minute=0, second=0, microsecond=0)
     
-    if now.hour >= 12:
-        publish_time += timedelta(days=7)
+    # 다음 일요일 찾기
+    days_until_sunday = (6 - now.weekday()) % 7 + 1
+    if days_until_sunday == 7 and now.hour < 12:
+        days_until_sunday = 0
+    publish_time += timedelta(days=days_until_sunday)
     
     return publish_time.isoformat()
 

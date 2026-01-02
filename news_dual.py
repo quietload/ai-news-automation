@@ -32,7 +32,7 @@ Usage:
 Schedule:
     - Noon Shorts: 11:00 KST → 12:00 KST (US prime time: ET 10PM, PT 7PM)
     - Midnight Shorts: 23:00 KST → 00:00 KST (Korea late night)
-    - Weekly Video: Sat 11:00 KST → 12:00 KST
+    - Weekly Video: Sun 11:00 KST → 12:00 KST
 
 GitHub: https://github.com/quietload/ai-news-automation
 Version: 2.2

@@ -143,7 +143,7 @@ Import workflows:
 |------------|------|---------|--------|
 | 11:00 → 12:00 | Tue-Sat | Daily Shorts (6 news) | 🇺🇸 US (Mon-Fri 10PM ET / 7PM PT) |
 | 23:00 → 00:00 | Mon-Fri | Daily Shorts (6 news) | 🇰🇷 Korea (Late Night) |
-| 11:00 → 12:00 | Sat | Weekly Video (16 news) | 🌏 Global |
+| 11:00 → 12:00 | Sun | Weekly Video (16 news) | 🌏 Global |
 
 *First time = Generation, Second time = YouTube publish*
 
