@@ -98,6 +98,70 @@ ENDING_VIDEO = ASSETS_DIR / "ending_video.png"
 USED_NEWS_FILE_DAILY = Path(__file__).parent / "used_news_daily.json"
 USED_NEWS_FILE_WEEKLY = Path(__file__).parent / "used_news_weekly.json"
 
+
+def generate_opening_image(output_path: Path, orientation: str = "vertical") -> Path:
+    """Generate opening image with today's date and season"""
+    today = datetime.now()
+    month = today.month
+    day = today.day
+    
+    # Season detection
+    if month in [12, 1, 2]:
+        season_desc = "snowy winter scene, soft snowflakes, cozy warm lighting"
+    elif month in [3, 4, 5]:
+        season_desc = "cherry blossoms, fresh green leaves, bright spring morning"
+    elif month in [6, 7, 8]:
+        season_desc = "bright sunny day, blue sky, refreshing summer vibes"
+    else:
+        season_desc = "golden autumn leaves, warm orange tones, cozy fall atmosphere"
+    
+    date_text = f"{month}/{day}"
+    
+    if orientation == "vertical":
+        size = SHORTS_SIZE
+        format_desc = "vertical 9:16"
+    else:
+        size = VIDEO_SIZE
+        format_desc = "horizontal 16:9"
+    
+    prompt = f"""Create a beautiful opening image for news broadcast.
+
+MUST INCLUDE:
+- Only the date "{date_text}" in large, stylish typography
+- NO other text, NO other words, NO titles, NO logos
+
+Style:
+- {season_desc}
+- Professional news broadcast aesthetic
+- Modern, clean design
+- {format_desc} format
+
+The ONLY text allowed is "{date_text}" - nothing else."""
+
+    response = requests.post(
+        f"{OPENAI_API_BASE}/images/generations",
+        headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
+        json={"model": "gpt-image-1.5", "prompt": prompt, "n": 1, "size": size, "quality": "high"},
+        timeout=120
+    )
+    
+    if response.status_code != 200:
+        raise Exception(f"Opening image error: {response.text}")
+    
+    data = response.json()["data"][0]
+    
+    if "b64_json" in data:
+        import base64
+        img_data = base64.b64decode(data["b64_json"])
+        with open(output_path, 'wb') as f:
+            f.write(img_data)
+    elif "url" in data:
+        img_response = requests.get(data["url"], timeout=60)
+        with open(output_path, 'wb') as f:
+            f.write(img_response.content)
+    
+    return output_path
+
 # 신뢰도 높은 글로벌 언론사 목록
 TRUSTED_SOURCES = [
     # 영국
@@ -1042,22 +1106,40 @@ def create_video(images: list, audio_path: Path, output_path: Path, resolution: 
     
     print(f"    [DEBUG] Audio duration: {audio_duration:.1f}s, Images: {len(images)}")
     
-    # Add ending image if exists
-    all_images = list(images)
+    # Build image list with opening and ending
+    all_images = []
     
-    # Shorts: 2초 엔딩, Video: 3초 엔딩
-    is_shorts = resolution[0] < resolution[1]  # 세로면 Shorts
+    # Shorts: 세로형, Video: 가로형
+    is_shorts = resolution[0] < resolution[1]
+    
+    # Opening image (generated with date)
+    opening_duration = 0
+    if is_shorts:
+        opening_path = output_path.parent / f"opening_{output_path.stem}.png"
+        try:
+            generate_opening_image(opening_path, "vertical")
+            all_images.append(opening_path)
+            opening_duration = 3.0  # 오프닝 3초
+            print(f"    [OK] Opening image generated")
+        except Exception as e:
+            print(f"    [WARN] Opening image failed: {e}")
+    
+    # Content images
+    all_images.extend(images)
+    
+    # Ending image
     ending_duration = 2.0 if is_shorts else 3.0
     
     if ending_image and ending_image.exists():
         all_images.append(ending_image)
-        # 콘텐츠 이미지들은 오디오 길이에 맞춤
-        duration_per_image = audio_duration / len(images)
+        # 콘텐츠 이미지들은 오디오 길이에서 오프닝 시간을 뺀 만큼
+        content_duration = audio_duration - opening_duration
+        duration_per_image = content_duration / len(images) if images else 5.0
     else:
-        duration_per_image = audio_duration / len(all_images)
-        ending_duration = duration_per_image
+        duration_per_image = audio_duration / len(images) if images else 5.0
+        ending_duration = 0
     
-    print(f"    [DEBUG] Duration per image: {duration_per_image:.2f}s, Total images (with ending): {len(all_images)}")
+    print(f"    [DEBUG] Duration per image: {duration_per_image:.2f}s, Total images: {len(all_images)}")
     
     # Create concat file
     concat_file = output_path.parent / f"concat_{output_path.stem}.txt"
@@ -1065,9 +1147,14 @@ def create_video(images: list, audio_path: Path, output_path: Path, resolution: 
         for i, img in enumerate(all_images):
             abs_path = str(img.resolve()).replace('\\', '/')
             f.write(f"file '{abs_path}'\n")
-            # Last image (ending) gets fixed duration
-            if ending_image and ending_image.exists() and i == len(all_images) - 1:
+            
+            # Opening image
+            if opening_duration > 0 and i == 0:
+                f.write(f"duration {opening_duration}\n")
+            # Ending image (last)
+            elif ending_image and ending_image.exists() and i == len(all_images) - 1:
                 f.write(f"duration {ending_duration}\n")
+            # Content images
             else:
                 f.write(f"duration {duration_per_image}\n")
         abs_path = str(all_images[-1].resolve()).replace('\\', '/')
@@ -1075,8 +1162,8 @@ def create_video(images: list, audio_path: Path, output_path: Path, resolution: 
     
     width, height = resolution
     
-    # 엔딩 포함 총 길이 계산
-    total_duration = audio_duration + ending_duration if (ending_image and ending_image.exists()) else audio_duration
+    # 총 길이 계산 (오디오 + 오프닝(무음) + 엔딩(무음))
+    total_duration = audio_duration + ending_duration
     
     cmd = [
         "ffmpeg", "-y",
@@ -1085,7 +1172,7 @@ def create_video(images: list, audio_path: Path, output_path: Path, resolution: 
         "-c:v", "libx264",
         "-vf", f"scale={width}:{height},setsar=1:1",
         "-c:a", "aac", "-b:a", "192k",
-        "-t", str(total_duration),  # -shortest 대신 총 길이 지정
+        "-t", str(total_duration),
         "-pix_fmt", "yuv420p", "-r", "30",
         str(output_path)
     ]
