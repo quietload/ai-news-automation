@@ -1,9 +1,5 @@
-feat: generate metadata txt file for manual YouTube upload
+fix: remove text from content images, use blur for faces
 
-Creates .txt file alongside video with:
-- Video file path
-- Title (100 char limit)  
-- Description
-- Thumbnail path (video only)
-- Subtitle file paths
-- Upload settings (category, privacy)
+- NO TEXT in content images (text was garbled)
+- Faces must be blurred/pixelated/shadow for portrait rights
+- Opening image still has bold text (thumbnail)

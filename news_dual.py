@@ -500,24 +500,18 @@ def generate_image_prompts(news: dict, count: int, orientation: str) -> list:
             "model": "gpt-5-mini",
             "messages": [{
                 "role": "system",
-                "content": f"""Create {count} realistic image prompts for news content.
+                "content": f"""Create {count} realistic image prompts for news.
 Format: {orient_desc}
 
-STYLE: Cinematic news photo with small text caption
-- Realistic, photojournalistic style
-- Small subtitle/caption text at bottom (like news broadcast lower-third)
-- NOT a thumbnail - this is content imagery
-- Dramatic lighting, professional photography
+STYLE: Cinematic photojournalism
+- Realistic, professional photography
+- NO TEXT, NO LETTERS, NO CAPTIONS
+- Dramatic lighting
 
-People in images:
-- OK: realistic people with small text caption near bottom
-- OK: back view, silhouette, crowd scenes
-- Small text overlay helps avoid portrait rights issues
-
-Examples:
-- Political news → Government building, news-style lower-third caption
-- Economic news → Stock market floor, subtle text overlay
-- Tech news → Server room or office, small caption at bottom
+People (portrait rights protection):
+- Faces must be: blurred, pixelated, in shadow, or not visible
+- OK: back view, silhouette, hands/body without face
+- NOT OK: clear recognizable faces
 
 Output one prompt per line, no numbering. Under 80 words each."""
             }, {
@@ -533,12 +527,12 @@ Output one prompt per line, no numbering. Under 80 words each."""
     if response.status_code == 200:
         content = response.json()["choices"][0]["message"]["content"].strip()
         prompts = [p.strip() for p in content.split('\n') if p.strip()]
-        return prompts[:count] if prompts else [f"Cinematic news photo, small caption at bottom, {orient_desc}: {title}"] * count
-    return [f"Cinematic news photo, small caption at bottom, {orient_desc}: {title}"] * count
+        return prompts[:count] if prompts else [f"Cinematic photo, no text, blurred faces, {orient_desc}"] * count
+    return [f"Cinematic photo, no text, blurred faces, {orient_desc}"] * count
 
 
 def generate_image_prompts_fallback(news: dict, count: int, orientation: str) -> list:
-    """Fallback: abstract images without text (original style)"""
+    """Fallback: abstract images"""
     orient_desc = "vertical portrait 9:16" if orientation == "vertical" else "horizontal landscape 16:9"
     category = news.get('category', 'news')
     return [
