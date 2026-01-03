@@ -24,7 +24,7 @@ Breaking News:
     - 키워드 기반 그룹핑: 동일 사건 다른 제목도 그룹핑
       (venezuela, ukraine, russia, china, iran, israel 등)
     - 40% 유사도 또는 동일 토픽 키워드로 그룹화
-    - Daily limit: 최대 3개/일
+    - Daily limit: 최대 1개/일
 
 Usage:
     from news_rss import fetch_rss_news, detect_breaking_news
@@ -136,7 +136,7 @@ USED_NEWS_FILE_RSS_WEEKLY = Path(__file__).parent / "used_news_rss_weekly.json"
 USED_NEWS_FILE_RSS_BREAKING = Path(__file__).parent / "used_news_rss_breaking.json"
 
 # Breaking news daily limit
-MAX_BREAKING_PER_DAY = 3
+MAX_BREAKING_PER_DAY = 1
 
 # Breaking News 키워드
 BREAKING_KEYWORDS = [

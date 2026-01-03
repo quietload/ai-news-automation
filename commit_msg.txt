@@ -1,3 +1,1 @@
-fix: add UTF-8 stdout/stderr encoding to news_rss.py
-
-Fixes UnicodeEncodeError when printing non-ASCII characters on Windows
+config: limit breaking news to 1 per day
