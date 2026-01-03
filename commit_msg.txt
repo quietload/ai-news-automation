@@ -1,11 +1,5 @@
-feat: add text overlay to news images with fallback
+fix: reduce subtitles to 5 languages for YouTube API quota
 
-New approach:
-- Images include headline as text overlay
-- More realistic images with people allowed
-- Text overlay helps avoid portrait rights issues
-
-Fallback:
-- If content policy error on individual image, retry with abstract style
-- Ensures image generation always succeeds
-- Logs "(with text)" or "(fallback)" for debugging
+- Reduced from 11 to 5 languages (en, ko, ja, zh, es)
+- YouTube API quota: video(1600) + 5 captions(2000) = 3600/day
+- Allows 2 videos per day instead of 1

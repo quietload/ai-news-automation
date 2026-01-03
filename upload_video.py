@@ -50,19 +50,13 @@ YOUTUBE_SCOPES = [
 YOUTUBE_API_SERVICE_NAME = "youtube"
 YOUTUBE_API_VERSION = "v3"
 
-# Language code mapping for subtitles
+# Language code mapping for subtitles (5개로 제한 - YouTube API 할당량)
 LANGUAGE_NAMES = {
     "en": "English",
     "ko": "Korean",
     "ja": "Japanese",
     "zh": "Chinese",
-    "es": "Spanish",
-    "hi": "Hindi",
-    "fr": "French",
-    "ar": "Arabic",
-    "pt": "Portuguese",
-    "id": "Indonesian",
-    "ru": "Russian",
+    "es": "Spanish"
 }
 
 MISSING_CLIENT_SECRETS_MESSAGE = f"""

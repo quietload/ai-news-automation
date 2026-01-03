@@ -76,20 +76,14 @@ OPENAI_API_BASE = "https://api.openai.com/v1"
 SHORTS_SIZE = "1024x1536"   # Vertical 2:3 (GPT Image 1.5 지원)
 VIDEO_SIZE = "1536x1024"    # Horizontal 3:2 (GPT Image 1.5 지원)
 
-# Subtitle languages
-LANGUAGES = ["en", "ko", "ja", "zh", "es", "hi", "pt", "id", "fr", "ar", "ru"]
+# Subtitle languages (5개로 제한 - YouTube API 할당량)
+LANGUAGES = ["en", "ko", "ja", "zh", "es"]
 LANGUAGE_NAMES = {
     "en": "English", 
     "ko": "Korean", 
     "ja": "Japanese", 
     "zh": "Chinese", 
-    "es": "Spanish",
-    "hi": "Hindi",
-    "pt": "Portuguese",
-    "id": "Indonesian",
-    "fr": "French",
-    "ar": "Arabic",
-    "ru": "Russian"
+    "es": "Spanish"
 }
 
 # Asset paths
