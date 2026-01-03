@@ -100,32 +100,44 @@ USED_NEWS_FILE_WEEKLY = Path(__file__).parent / "used_news_weekly.json"
 
 
 def generate_opening_image(output_path: Path, orientation: str = "vertical") -> Path:
-    """Generate opening image with today's date, holidays, and season"""
+    """Generate opening image with GPT determining today's theme"""
     today = datetime.now()
     month = today.month
     day = today.day
+    year = today.year
     date_text = f"{month}/{day}"
     
-    # Special days (fixed dates)
-    special_days = {
-        (1, 1): "New Year's Day celebration, fireworks, gold and red festive colors",
-        (2, 14): "Valentine's Day, hearts, pink and red romantic atmosphere",
-        (3, 17): "St. Patrick's Day, green shamrocks, Irish celebration",
-        (4, 1): "April Fools Day, playful colorful confetti, fun atmosphere",
-        (4, 22): "Earth Day, green nature, environmental theme",
-        (7, 4): "Independence Day USA, American flag, fireworks, red white blue",
-        (10, 31): "Halloween, pumpkins, spooky fun, orange and purple",
-        (11, 11): "Veterans Day, American flags, patriotic respect",
-        (12, 24): "Christmas Eve, Christmas tree, warm lights, snow",
-        (12, 25): "Christmas Day, Santa, gifts, red and green festive",
-        (12, 31): "New Year's Eve, countdown celebration, sparkles",
-    }
-    
-    # Check if special day
-    if (month, day) in special_days:
-        theme_desc = special_days[(month, day)]
-    else:
-        # Default season theme
+    # Ask GPT to determine today's theme
+    theme_prompt = f"""Today is {year}/{month}/{day}.
+
+What theme should today's image have? Consider:
+- Global holidays (Christmas, Halloween, Valentine's Day, Thanksgiving, etc.)
+- US holidays (Independence Day, Memorial Day, Labor Day, etc.)
+- Seasonal events (spring bloom, summer beach, fall harvest, winter snow)
+- Cultural events (Super Bowl week, Oscar season, etc.)
+- If nothing special, use the current season
+
+Reply with ONLY a short image theme description in English (one line, for image generation).
+Example: "Thanksgiving harvest, autumn colors, pumpkins and warm tones"
+Example: "Snowy winter scene, cozy warm lighting" """
+
+    try:
+        response = requests.post(
+            f"{OPENAI_API_BASE}/chat/completions",
+            headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
+            json={
+                "model": "gpt-4o-mini",
+                "messages": [{"role": "user", "content": theme_prompt}],
+                "temperature": 0.3
+            },
+            timeout=30
+        )
+        if response.status_code == 200:
+            theme_desc = response.json()["choices"][0]["message"]["content"].strip().strip('"')
+        else:
+            raise Exception("API error")
+    except:
+        # fallback to season
         if month in [12, 1, 2]:
             theme_desc = "snowy winter scene, soft snowflakes, cozy warm lighting"
         elif month in [3, 4, 5]:
@@ -134,6 +146,8 @@ def generate_opening_image(output_path: Path, orientation: str = "vertical") -> 
             theme_desc = "bright sunny day, blue sky, refreshing summer vibes"
         else:
             theme_desc = "golden autumn leaves, warm orange tones, cozy fall atmosphere"
+    
+    print(f"    Opening theme: {theme_desc[:50]}...")
     
     if orientation == "vertical":
         size = SHORTS_SIZE
