@@ -1,4 +1,3 @@
-fix: add UTF-8 encoding to subprocess calls
+fix: add UTF-8 stdout/stderr encoding to news_rss.py
 
-Fixes UnicodeDecodeError on Windows (cp949 codec)
-All run_*.py files now use encoding='utf-8' for subprocess.run()
+Fixes UnicodeEncodeError when printing non-ASCII characters on Windows
