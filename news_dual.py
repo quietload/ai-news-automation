@@ -493,8 +493,11 @@ def fetch_news_by_categories(categories: list = None, backup_per_category: int =
 
 
 def generate_image_prompts(news: dict, count: int, orientation: str) -> list:
-    """Generate DALL-E prompts"""
+    """Generate image prompts with text overlay (new style)"""
     orient_desc = "vertical portrait 9:16" if orientation == "vertical" else "horizontal landscape 16:9"
+    
+    # 짧은 헤드라인 추출
+    title = news.get('title', '')[:50]
     
     response = requests.post(
         f"{OPENAI_API_BASE}/chat/completions",
@@ -503,22 +506,26 @@ def generate_image_prompts(news: dict, count: int, orientation: str) -> list:
             "model": "gpt-5-mini",
             "messages": [{
                 "role": "system",
-                "content": f"""Create {count} DALL-E prompts for news photo.
+                "content": f"""Create {count} image prompts for news YouTube thumbnail.
 Format: {orient_desc}
 
-MANDATORY STYLE: 
-- Professional news photography, shot with DSLR camera
-- Real-world scene, NOT illustration, NOT digital art, NOT 3D render
-- Natural lighting, shallow depth of field, photojournalism style
-- Show real objects, locations, or scenes (no abstract concepts)
+STYLE: Bold YouTube thumbnail with TEXT OVERLAY
+- Include a short headline text in the image
+- Realistic photo background related to the news
+- Eye-catching, high contrast, dramatic lighting
+- Text should be large, bold, and readable
 
-RULES: 
-- No human faces or identifiable people
-- No text, logos, or watermarks
-- Under 80 words each
-- Start each prompt with "Professional news photograph of..."
+People in images:
+- OK: realistic people with text overlay near/covering faces
+- OK: back view, silhouette, crowd scenes
+- Text overlay helps avoid portrait rights issues
 
-Output one prompt per line, no numbering."""
+Examples:
+- Political news → Government building with bold headline text overlay
+- Economic news → Stock market display with dramatic headline
+- Tech news → Futuristic scene with tech headline
+
+Output one prompt per line, no numbering. Under 80 words each."""
             }, {
                 "role": "user",
                 "content": f"News: {news['title']}\n{news.get('description', '')[:200]}"
@@ -532,8 +539,19 @@ Output one prompt per line, no numbering."""
     if response.status_code == 200:
         content = response.json()["choices"][0]["message"]["content"].strip()
         prompts = [p.strip() for p in content.split('\n') if p.strip()]
-        return prompts[:count] if prompts else [f"Professional news photograph, {orient_desc}, photojournalism style: {news['title'][:50]}"] * count
-    return [f"Professional news photograph, {orient_desc}, photojournalism style: {news['title'][:50]}"] * count
+        return prompts[:count] if prompts else [f"News thumbnail with bold headline text, dramatic lighting, {orient_desc}: {title}"] * count
+    return [f"News thumbnail with bold headline text, dramatic lighting, {orient_desc}: {title}"] * count
+
+
+def generate_image_prompts_fallback(news: dict, count: int, orientation: str) -> list:
+    """Fallback: abstract images without text (original style)"""
+    orient_desc = "vertical portrait 9:16" if orientation == "vertical" else "horizontal landscape 16:9"
+    category = news.get('category', 'news')
+    return [
+        f"Abstract colorful background representing {category}, modern art style, no text, no faces, {orient_desc}",
+        f"Professional news photograph, cinematic lighting, no identifiable people, {orient_desc}",
+        f"Dramatic scene related to {category}, silhouette style, no text, {orient_desc}"
+    ][:count]
 
 
 def generate_image(prompt: str, output_path: Path, size: str, retry_count: int = 0) -> Path:
@@ -1644,9 +1662,18 @@ def main():
                 news_images = []
                 for j, prompt in enumerate(prompts, 1):
                     img_path = output_dir / f"{ts}_shorts_{len(used_news)+1}_{j}.png"
-                    generate_image(prompt, img_path, SHORTS_SIZE)
-                    news_images.append(img_path)
-                    print(f"    [OK] Image {j}/{shorts_images_per_news}")
+                    try:
+                        generate_image(prompt, img_path, SHORTS_SIZE)
+                        news_images.append(img_path)
+                        print(f"    [OK] Image {j}/{shorts_images_per_news} (with text)")
+                    except ContentPolicyError:
+                        # Fallback: 텍스트 없는 추상적 이미지
+                        print(f"    [RETRY] Image {j} policy error - trying fallback...")
+                        fallback_prompts = generate_image_prompts_fallback(news, shorts_images_per_news, "vertical")
+                        fallback_prompt = fallback_prompts[j-1] if j <= len(fallback_prompts) else fallback_prompts[0]
+                        generate_image(fallback_prompt, img_path, SHORTS_SIZE)
+                        news_images.append(img_path)
+                        print(f"    [OK] Image {j}/{shorts_images_per_news} (fallback)")
                 
                 shorts_images.extend(news_images)
                 if news not in used_news:
@@ -1689,9 +1716,17 @@ def main():
                     prompts = generate_image_prompts(news, count=3, orientation="horizontal")
                     for j, prompt in enumerate(prompts, 1):
                         img_path = output_dir / f"{ts}_video_{len(video_used_news)+1}_{j}.png"
-                        generate_image(prompt, img_path, VIDEO_SIZE)
-                        video_images.append(img_path)
-                        print(f"    [OK] Image {j}/3")
+                        try:
+                            generate_image(prompt, img_path, VIDEO_SIZE)
+                            video_images.append(img_path)
+                            print(f"    [OK] Image {j}/3 (with text)")
+                        except ContentPolicyError:
+                            print(f"    [RETRY] Image {j} policy error - trying fallback...")
+                            fallback_prompts = generate_image_prompts_fallback(news, 3, "horizontal")
+                            fallback_prompt = fallback_prompts[j-1] if j <= len(fallback_prompts) else fallback_prompts[0]
+                            generate_image(fallback_prompt, img_path, VIDEO_SIZE)
+                            video_images.append(img_path)
+                            print(f"    [OK] Image {j}/3 (fallback)")
                     
                     video_used_news.append(news)
                     
@@ -1709,9 +1744,17 @@ def main():
                     prompts = generate_image_prompts(news, count=3, orientation="horizontal")
                     for j, prompt in enumerate(prompts, 1):
                         img_path = output_dir / f"{ts}_video_{i}_{j}.png"
-                        generate_image(prompt, img_path, VIDEO_SIZE)
-                        video_images.append(img_path)
-                        print(f"    [OK] Image {j}/3")
+                        try:
+                            generate_image(prompt, img_path, VIDEO_SIZE)
+                            video_images.append(img_path)
+                            print(f"    [OK] Image {j}/3 (with text)")
+                        except ContentPolicyError:
+                            print(f"    [RETRY] Image {j} policy error - trying fallback...")
+                            fallback_prompts = generate_image_prompts_fallback(news, 3, "horizontal")
+                            fallback_prompt = fallback_prompts[j-1] if j <= len(fallback_prompts) else fallback_prompts[0]
+                            generate_image(fallback_prompt, img_path, VIDEO_SIZE)
+                            video_images.append(img_path)
+                            print(f"    [OK] Image {j}/3 (fallback)")
                 except ContentPolicyError as e:
                     print(f"    [SKIP] Policy violation for video image")
                 except Exception as e:
