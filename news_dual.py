@@ -527,24 +527,24 @@ Output one prompt per line, no numbering. Under 80 words each."""
 
 
 def generate_image_prompts_safe(news: dict, count: int, orientation: str) -> list:
-    """정책 위반 시 사용: 얼굴 블러/실루엣 버전"""
+    """정책 위반 시 사용: 얼굴 없이 (뒷모습/실루엣)"""
     orient_desc = "vertical portrait 9:16" if orientation == "vertical" else "horizontal landscape 16:9"
     title = news.get('title', '')[:30]
     return [
-        f"Cinematic photo related to {title}, faces blurred or pixelated, back view or silhouette, no text, {orient_desc}",
-        f"Dramatic scene, people in shadow or silhouette only, no recognizable faces, no text, {orient_desc}",
-        f"News scene with blurred figures, no clear faces visible, cinematic lighting, no text, {orient_desc}"
+        f"Cinematic photo related to {title}, back view or silhouette only, no visible faces, no text, {orient_desc}",
+        f"Dramatic scene, people from behind or in shadow, no recognizable faces, no text, {orient_desc}",
+        f"News scene with silhouettes, no clear faces visible, cinematic lighting, no text, {orient_desc}"
     ][:count]
 
 
 def generate_image_prompts_fallback(news: dict, count: int, orientation: str) -> list:
-    """최종 Fallback: 추상적 이미지"""
+    """최종 Fallback: 추상적 이미지 (사람 없음)"""
     orient_desc = "vertical portrait 9:16" if orientation == "vertical" else "horizontal landscape 16:9"
     category = news.get('category', 'news')
     return [
-        f"Abstract colorful background representing {category}, modern art style, no text, no faces, {orient_desc}",
-        f"Professional news photograph, cinematic lighting, no identifiable people, {orient_desc}",
-        f"Dramatic scene related to {category}, silhouette style, no text, {orient_desc}"
+        f"Abstract colorful background representing {category}, no text, no people, {orient_desc}",
+        f"Dramatic cinematic scene of objects or scenery, no people, no text, {orient_desc}",
+        f"Professional photograph of location or objects, no people, no text, {orient_desc}"
     ][:count]
 
 
@@ -1662,14 +1662,14 @@ def main():
                         news_images.append(img_path)
                         print(f"    [OK] Image {j}/{shorts_images_per_news}")
                     except ContentPolicyError:
-                        # 2차: 얼굴 블러 버전
-                        print(f"    [RETRY] Image {j} policy error - trying blur...")
+                        # 2차: 얼굴 없이 (뒷모습/실루엣)
+                        print(f"    [RETRY] Image {j} policy error - trying without face...")
                         try:
                             safe_prompts = generate_image_prompts_safe(news, shorts_images_per_news, "vertical")
                             safe_prompt = safe_prompts[j-1] if j <= len(safe_prompts) else safe_prompts[0]
                             generate_image(safe_prompt, img_path, SHORTS_SIZE)
                             news_images.append(img_path)
-                            print(f"    [OK] Image {j}/{shorts_images_per_news} (blur)")
+                            print(f"    [OK] Image {j}/{shorts_images_per_news} (no face)")
                         except ContentPolicyError:
                             # 3차: 추상적 이미지
                             print(f"    [RETRY] Still failed - using abstract...")
@@ -1725,13 +1725,13 @@ def main():
                             video_images.append(img_path)
                             print(f"    [OK] Image {j}/3")
                         except ContentPolicyError:
-                            print(f"    [RETRY] Image {j} policy error - trying blur...")
+                            print(f"    [RETRY] Image {j} policy error - trying without face...")
                             try:
                                 safe_prompts = generate_image_prompts_safe(news, 3, "horizontal")
                                 safe_prompt = safe_prompts[j-1] if j <= len(safe_prompts) else safe_prompts[0]
                                 generate_image(safe_prompt, img_path, VIDEO_SIZE)
                                 video_images.append(img_path)
-                                print(f"    [OK] Image {j}/3 (blur)")
+                                print(f"    [OK] Image {j}/3 (no face)")
                             except ContentPolicyError:
                                 print(f"    [RETRY] Still failed - using abstract...")
                                 fallback_prompts = generate_image_prompts_fallback(news, 3, "horizontal")
@@ -1761,13 +1761,13 @@ def main():
                             video_images.append(img_path)
                             print(f"    [OK] Image {j}/3")
                         except ContentPolicyError:
-                            print(f"    [RETRY] Image {j} policy error - trying blur...")
+                            print(f"    [RETRY] Image {j} policy error - trying without face...")
                             try:
                                 safe_prompts = generate_image_prompts_safe(news, 3, "horizontal")
                                 safe_prompt = safe_prompts[j-1] if j <= len(safe_prompts) else safe_prompts[0]
                                 generate_image(safe_prompt, img_path, VIDEO_SIZE)
                                 video_images.append(img_path)
-                                print(f"    [OK] Image {j}/3 (blur)")
+                                print(f"    [OK] Image {j}/3 (no face)")
                             except ContentPolicyError:
                                 print(f"    [RETRY] Still failed - using abstract...")
                                 fallback_prompts = generate_image_prompts_fallback(news, 3, "horizontal")

@@ -1,8 +1,6 @@
-feat: 3-stage image generation with progressive fallback
+fix: clarify image fallback - no face instead of blur
 
-1st: Normal realistic image
-2nd: If policy error → blur/silhouette version
-3rd: If still fails → abstract image
-
-This allows realistic images when possible, only applying
-face blur when content policy is triggered.
+3-stage image generation:
+1. Normal realistic (may include faces)
+2. Policy error → back view/silhouette (no visible faces)
+3. Still fails → abstract (no people)
