@@ -1,5 +1,8 @@
-fix: remove text from content images, use blur for faces
+feat: 3-stage image generation with progressive fallback
 
-- NO TEXT in content images (text was garbled)
-- Faces must be blurred/pixelated/shadow for portrait rights
-- Opening image still has bold text (thumbnail)
+1st: Normal realistic image
+2nd: If policy error → blur/silhouette version
+3rd: If still fails → abstract image
+
+This allows realistic images when possible, only applying
+face blur when content policy is triggered.

@@ -508,11 +508,6 @@ STYLE: Cinematic photojournalism
 - NO TEXT, NO LETTERS, NO CAPTIONS
 - Dramatic lighting
 
-People (portrait rights protection):
-- Faces must be: blurred, pixelated, in shadow, or not visible
-- OK: back view, silhouette, hands/body without face
-- NOT OK: clear recognizable faces
-
 Output one prompt per line, no numbering. Under 80 words each."""
             }, {
                 "role": "user",
@@ -527,12 +522,23 @@ Output one prompt per line, no numbering. Under 80 words each."""
     if response.status_code == 200:
         content = response.json()["choices"][0]["message"]["content"].strip()
         prompts = [p.strip() for p in content.split('\n') if p.strip()]
-        return prompts[:count] if prompts else [f"Cinematic photo, no text, blurred faces, {orient_desc}"] * count
-    return [f"Cinematic photo, no text, blurred faces, {orient_desc}"] * count
+        return prompts[:count] if prompts else [f"Cinematic photo, no text, realistic, {orient_desc}"] * count
+    return [f"Cinematic photo, no text, realistic, {orient_desc}"] * count
+
+
+def generate_image_prompts_safe(news: dict, count: int, orientation: str) -> list:
+    """정책 위반 시 사용: 얼굴 블러/실루엣 버전"""
+    orient_desc = "vertical portrait 9:16" if orientation == "vertical" else "horizontal landscape 16:9"
+    title = news.get('title', '')[:30]
+    return [
+        f"Cinematic photo related to {title}, faces blurred or pixelated, back view or silhouette, no text, {orient_desc}",
+        f"Dramatic scene, people in shadow or silhouette only, no recognizable faces, no text, {orient_desc}",
+        f"News scene with blurred figures, no clear faces visible, cinematic lighting, no text, {orient_desc}"
+    ][:count]
 
 
 def generate_image_prompts_fallback(news: dict, count: int, orientation: str) -> list:
-    """Fallback: abstract images"""
+    """최종 Fallback: 추상적 이미지"""
     orient_desc = "vertical portrait 9:16" if orientation == "vertical" else "horizontal landscape 16:9"
     category = news.get('category', 'news')
     return [
@@ -1651,17 +1657,27 @@ def main():
                 for j, prompt in enumerate(prompts, 1):
                     img_path = output_dir / f"{ts}_shorts_{len(used_news)+1}_{j}.png"
                     try:
+                        # 1차: 일반 리얼리스틱
                         generate_image(prompt, img_path, SHORTS_SIZE)
                         news_images.append(img_path)
-                        print(f"    [OK] Image {j}/{shorts_images_per_news} (with text)")
+                        print(f"    [OK] Image {j}/{shorts_images_per_news}")
                     except ContentPolicyError:
-                        # Fallback: 텍스트 없는 추상적 이미지
-                        print(f"    [RETRY] Image {j} policy error - trying fallback...")
-                        fallback_prompts = generate_image_prompts_fallback(news, shorts_images_per_news, "vertical")
-                        fallback_prompt = fallback_prompts[j-1] if j <= len(fallback_prompts) else fallback_prompts[0]
-                        generate_image(fallback_prompt, img_path, SHORTS_SIZE)
-                        news_images.append(img_path)
-                        print(f"    [OK] Image {j}/{shorts_images_per_news} (fallback)")
+                        # 2차: 얼굴 블러 버전
+                        print(f"    [RETRY] Image {j} policy error - trying blur...")
+                        try:
+                            safe_prompts = generate_image_prompts_safe(news, shorts_images_per_news, "vertical")
+                            safe_prompt = safe_prompts[j-1] if j <= len(safe_prompts) else safe_prompts[0]
+                            generate_image(safe_prompt, img_path, SHORTS_SIZE)
+                            news_images.append(img_path)
+                            print(f"    [OK] Image {j}/{shorts_images_per_news} (blur)")
+                        except ContentPolicyError:
+                            # 3차: 추상적 이미지
+                            print(f"    [RETRY] Still failed - using abstract...")
+                            fallback_prompts = generate_image_prompts_fallback(news, shorts_images_per_news, "vertical")
+                            fallback_prompt = fallback_prompts[j-1] if j <= len(fallback_prompts) else fallback_prompts[0]
+                            generate_image(fallback_prompt, img_path, SHORTS_SIZE)
+                            news_images.append(img_path)
+                            print(f"    [OK] Image {j}/{shorts_images_per_news} (abstract)")
                 
                 shorts_images.extend(news_images)
                 if news not in used_news:
@@ -1707,14 +1723,22 @@ def main():
                         try:
                             generate_image(prompt, img_path, VIDEO_SIZE)
                             video_images.append(img_path)
-                            print(f"    [OK] Image {j}/3 (with text)")
+                            print(f"    [OK] Image {j}/3")
                         except ContentPolicyError:
-                            print(f"    [RETRY] Image {j} policy error - trying fallback...")
-                            fallback_prompts = generate_image_prompts_fallback(news, 3, "horizontal")
-                            fallback_prompt = fallback_prompts[j-1] if j <= len(fallback_prompts) else fallback_prompts[0]
-                            generate_image(fallback_prompt, img_path, VIDEO_SIZE)
-                            video_images.append(img_path)
-                            print(f"    [OK] Image {j}/3 (fallback)")
+                            print(f"    [RETRY] Image {j} policy error - trying blur...")
+                            try:
+                                safe_prompts = generate_image_prompts_safe(news, 3, "horizontal")
+                                safe_prompt = safe_prompts[j-1] if j <= len(safe_prompts) else safe_prompts[0]
+                                generate_image(safe_prompt, img_path, VIDEO_SIZE)
+                                video_images.append(img_path)
+                                print(f"    [OK] Image {j}/3 (blur)")
+                            except ContentPolicyError:
+                                print(f"    [RETRY] Still failed - using abstract...")
+                                fallback_prompts = generate_image_prompts_fallback(news, 3, "horizontal")
+                                fallback_prompt = fallback_prompts[j-1] if j <= len(fallback_prompts) else fallback_prompts[0]
+                                generate_image(fallback_prompt, img_path, VIDEO_SIZE)
+                                video_images.append(img_path)
+                                print(f"    [OK] Image {j}/3 (abstract)")
                     
                     video_used_news.append(news)
                     
@@ -1735,14 +1759,22 @@ def main():
                         try:
                             generate_image(prompt, img_path, VIDEO_SIZE)
                             video_images.append(img_path)
-                            print(f"    [OK] Image {j}/3 (with text)")
+                            print(f"    [OK] Image {j}/3")
                         except ContentPolicyError:
-                            print(f"    [RETRY] Image {j} policy error - trying fallback...")
-                            fallback_prompts = generate_image_prompts_fallback(news, 3, "horizontal")
-                            fallback_prompt = fallback_prompts[j-1] if j <= len(fallback_prompts) else fallback_prompts[0]
-                            generate_image(fallback_prompt, img_path, VIDEO_SIZE)
-                            video_images.append(img_path)
-                            print(f"    [OK] Image {j}/3 (fallback)")
+                            print(f"    [RETRY] Image {j} policy error - trying blur...")
+                            try:
+                                safe_prompts = generate_image_prompts_safe(news, 3, "horizontal")
+                                safe_prompt = safe_prompts[j-1] if j <= len(safe_prompts) else safe_prompts[0]
+                                generate_image(safe_prompt, img_path, VIDEO_SIZE)
+                                video_images.append(img_path)
+                                print(f"    [OK] Image {j}/3 (blur)")
+                            except ContentPolicyError:
+                                print(f"    [RETRY] Still failed - using abstract...")
+                                fallback_prompts = generate_image_prompts_fallback(news, 3, "horizontal")
+                                fallback_prompt = fallback_prompts[j-1] if j <= len(fallback_prompts) else fallback_prompts[0]
+                                generate_image(fallback_prompt, img_path, VIDEO_SIZE)
+                                video_images.append(img_path)
+                                print(f"    [OK] Image {j}/3 (abstract)")
                 except ContentPolicyError as e:
                     print(f"    [SKIP] Policy violation for video image")
                 except Exception as e:
