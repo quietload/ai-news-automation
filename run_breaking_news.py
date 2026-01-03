@@ -117,7 +117,8 @@ def main():
         str(Path(__file__).parent / "news_dual.py"),
         "--count", "1",
         "--shorts-only",
-        "--breaking-news", str(temp_file)
+        "--breaking-news", str(temp_file),
+        "--upload"
     ]
     
     result = subprocess.run(cmd, capture_output=False)

@@ -1,6 +1,1 @@
-feat: add lock file to prevent duplicate breaking news runs
-
-- Creates breaking.lock when running
-- Skips if lock exists (< 30 min old)
-- Auto-removes stale locks (> 30 min)
-- Cleanup on exit via atexit
+fix: add --upload flag to breaking news generation
