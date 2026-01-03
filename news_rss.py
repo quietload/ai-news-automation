@@ -21,7 +21,9 @@ Filtering:
 Breaking News:
     - Trigger: breaking keywords + 5개 이상 소스
     - Keywords: breaking, dies, war, earthquake, resigns, etc.
-    - 40% 유사도로 동일 뉴스 그룹화
+    - 키워드 기반 그룹핑: 동일 사건 다른 제목도 그룹핑
+      (venezuela, ukraine, russia, china, iran, israel 등)
+    - 40% 유사도 또는 동일 토픽 키워드로 그룹화
     - Daily limit: 최대 3개/일
 
 Usage:

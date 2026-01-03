@@ -1,1 +1,6 @@
-fix: add all 11 languages to LANGUAGE_NAMES
+docs: update for v2.7 - keyword grouping and cleanup
+
+- Add keyword-based grouping docs for breaking news
+- Add lock file documentation
+- Update docstrings with topic keywords feature
+- Remove unused test files and backups

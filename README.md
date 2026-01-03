@@ -71,6 +71,15 @@ en, ko, ja, zh, es, hi, pt, id, fr, ar, ru
 
 **Keywords:** breaking, dies, war, earthquake, crash, resigns, etc.
 
+**Keyword-based Grouping:**
+- 동일 사건이 다른 제목으로 보도되어도 그룹핑
+- 국가/지역 키워드: venezuela, ukraine, russia, china, iran, israel 등
+- 예: "US strikes Venezuela" + "Maduro captured" + "Caracas explosions" → 동일 사건
+
+**Lock File:**
+- `breaking.lock` 생성하여 중복 실행 방지
+- 30분 이상 된 락은 자동 삭제
+
 ## 📁 Project Structure
 
 ```
