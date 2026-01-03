@@ -129,6 +129,7 @@ def upload_video(summary: dict):
     
     if result.returncode != 0:
         log(f"[FAIL] Upload failed with code {result.returncode}")
+        sys.exit(1)
     else:
         log("[OK] Upload scheduled successfully!")
 
@@ -145,9 +146,11 @@ def main():
             upload_video(summary)
         else:
             log("[FAIL] No video generated")
+            sys.exit(1)
     except Exception as e:
         log(f"[ERROR] {e}")
         log(traceback.format_exc())
+        sys.exit(1)
 
 
 if __name__ == "__main__":
