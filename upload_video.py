@@ -56,7 +56,13 @@ LANGUAGE_NAMES = {
     "ko": "Korean",
     "ja": "Japanese",
     "zh": "Chinese",
-    "es": "Spanish"
+    "es": "Spanish",
+    "hi": "Hindi",
+    "fr": "French",
+    "ar": "Arabic",
+    "pt": "Portuguese",
+    "id": "Indonesian",
+    "ru": "Russian",
 }
 
 MISSING_CLIENT_SECRETS_MESSAGE = f"""
