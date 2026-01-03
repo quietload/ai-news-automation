@@ -102,55 +102,15 @@ USED_NEWS_FILE_DAILY = Path(__file__).parent / "used_news_daily.json"
 USED_NEWS_FILE_WEEKLY = Path(__file__).parent / "used_news_weekly.json"
 
 
-def generate_opening_image(output_path: Path, orientation: str = "vertical") -> Path:
-    """Generate opening image with GPT determining today's theme"""
+def generate_opening_image(output_path: Path, orientation: str = "vertical", top_headline: str = "", total_count: int = 6) -> Path:
+    """Generate opening image with TOP headline highlight"""
     today = datetime.now()
     month = today.month
     day = today.day
-    year = today.year
     date_text = f"{month}/{day}"
     
-    # Ask GPT to determine today's theme
-    theme_prompt = f"""Today is {year}/{month}/{day}.
-
-What theme should today's image have? Consider:
-- Global holidays (Christmas, Halloween, Valentine's Day, Thanksgiving, etc.)
-- US holidays (Independence Day, Memorial Day, Labor Day, etc.)
-- Seasonal events (spring bloom, summer beach, fall harvest, winter snow)
-- Cultural events (Super Bowl week, Oscar season, etc.)
-- If nothing special, use the current season
-
-Reply with ONLY a short image theme description in English (one line, for image generation).
-Example: "Thanksgiving harvest, autumn colors, pumpkins and warm tones"
-Example: "Snowy winter scene, cozy warm lighting" """
-
-    try:
-        response = requests.post(
-            f"{OPENAI_API_BASE}/chat/completions",
-            headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
-            json={
-                "model": "gpt-4o-mini",
-                "messages": [{"role": "user", "content": theme_prompt}],
-                "temperature": 0.3
-            },
-            timeout=30
-        )
-        if response.status_code == 200:
-            theme_desc = response.json()["choices"][0]["message"]["content"].strip().strip('"')
-        else:
-            raise Exception("API error")
-    except:
-        # fallback to season
-        if month in [12, 1, 2]:
-            theme_desc = "snowy winter scene, soft snowflakes, cozy warm lighting"
-        elif month in [3, 4, 5]:
-            theme_desc = "cherry blossoms, fresh green leaves, bright spring morning"
-        elif month in [6, 7, 8]:
-            theme_desc = "bright sunny day, blue sky, refreshing summer vibes"
-        else:
-            theme_desc = "golden autumn leaves, warm orange tones, cozy fall atmosphere"
-    
-    print(f"    Opening theme: {theme_desc[:50]}...")
+    # 추가 뉴스 개수 (TOP 1개 제외)
+    more_count = total_count - 1 if total_count > 1 else 0
     
     if orientation == "vertical":
         size = SHORTS_SIZE
@@ -159,22 +119,27 @@ Example: "Snowy winter scene, cozy warm lighting" """
         size = VIDEO_SIZE
         format_desc = "horizontal 16:9"
     
-    prompt = f"""Create a beautiful opening image for news broadcast.
+    # 헤드라인이 너무 길면 줄이기
+    if len(top_headline) > 30:
+        top_headline = top_headline[:27] + "..."
+    
+    prompt = f"""Create a bold, attention-grabbing opening image for daily news.
 
-MUST INCLUDE TEXT (in this exact order, top to bottom):
-1. "DAILY NEWS" in bold, professional typography at top
-2. The date "{date_text}" in large, stylish typography below
+MUST INCLUDE TEXT (exact layout, top to bottom):
+1. "DAILY NEWS" - bold title at top
+2. "{date_text}" - date below title
+3. "{top_headline}" - LARGE, highlighted, center focus (this is today's top story!)
+4. "+{more_count} more stories" - smaller text at bottom
 
-NO other text, NO other words, NO titles, NO logos - ONLY these two texts.
-
-Theme: {theme_desc}
-
-Style:
-- Professional news broadcast aesthetic
-- Modern, clean design
+STYLE:
+- Eye-catching, YouTube thumbnail style
+- Bold colors, high contrast, professional news aesthetic
+- The headline "{top_headline}" should be the BIGGEST and most prominent
 - {format_desc} format
 
-The ONLY text allowed is "DAILY NEWS" and "{date_text}" - nothing else."""
+Make it look exciting and clickable! The viewer should want to know about this story."""
+
+    print(f"    Opening: TOP headline = {top_headline[:30]}...")
 
     response = requests.post(
         f"{OPENAI_API_BASE}/images/generations",
@@ -202,53 +167,32 @@ The ONLY text allowed is "DAILY NEWS" and "{date_text}" - nothing else."""
 
 
 def generate_breaking_opening_image(output_path: Path, news: dict, orientation: str = "vertical") -> Path:
-    """Generate urgent breaking news style opening image based on news content"""
+    """Generate urgent breaking news opening image with headline highlight"""
     today = datetime.now()
     month = today.month
     day = today.day
     date_text = f"{month}/{day}"
     
-    news_title = news.get('title', '')[:100]
-    news_category = news.get('category', '')
+    news_title = news.get('title', '')
     
-    # Ask GPT to determine breaking news visual theme
-    theme_prompt = f"""This is BREAKING NEWS. Generate an urgent, attention-grabbing image theme.
-
-News headline: "{news_title}"
-Category: {news_category}
-
-Create a dramatic visual theme that matches this breaking news:
-- For disasters/accidents: emergency colors, dramatic atmosphere
-- For political news: official, serious government vibes  
-- For war/conflict: somber, urgent military tones
-- For economic crisis: financial charts, market tension
-- For celebrity death: respectful, memorial atmosphere
-- For sports: victory/defeat dramatic moment
-
-Reply with ONLY a short urgent image theme description in English (one line).
-Must include: "BREAKING NEWS" urgent feel, dramatic lighting, attention-grabbing.
-Example: "Breaking news urgent alert, red and black dramatic colors, emergency broadcast style"
-Example: "Breaking financial crisis, stock market crash visualization, urgent red tones" """
-
+    # 헤드라인 간결하게 (GPT로 요약)
     try:
         response = requests.post(
             f"{OPENAI_API_BASE}/chat/completions",
             headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
             json={
                 "model": "gpt-4o-mini",
-                "messages": [{"role": "user", "content": theme_prompt}],
-                "temperature": 0.5
+                "messages": [{"role": "user", "content": f"Summarize this headline in 3-5 impactful words for a thumbnail. Just the summary, nothing else:\n\n{news_title}"}],
+                "temperature": 0.3
             },
             timeout=30
         )
         if response.status_code == 200:
-            theme_desc = response.json()["choices"][0]["message"]["content"].strip().strip('"')
+            short_headline = response.json()["choices"][0]["message"]["content"].strip().strip('"')
         else:
-            theme_desc = "Breaking news urgent alert, red and black dramatic colors, emergency broadcast style"
+            short_headline = news_title[:30]
     except:
-        theme_desc = "Breaking news urgent alert, red and black dramatic colors, emergency broadcast style"
-    
-    print(f"    Breaking theme: {theme_desc[:50]}...")
+        short_headline = news_title[:30]
     
     if orientation == "vertical":
         size = SHORTS_SIZE
@@ -257,23 +201,23 @@ Example: "Breaking financial crisis, stock market crash visualization, urgent re
         size = VIDEO_SIZE
         format_desc = "horizontal 16:9"
     
-    prompt = f"""Create an URGENT breaking news opening image.
+    print(f"    Breaking: {short_headline}")
+    
+    prompt = f"""Create an URGENT, attention-grabbing BREAKING NEWS opening image.
 
-MUST INCLUDE TEXT (in this exact order, top to bottom):
-1. "BREAKING NEWS" in bold, urgent red/white typography at top
-2. The date "{date_text}" in large, bold typography below
+MUST INCLUDE TEXT (exact layout, top to bottom):
+1. "BREAKING" - bold, urgent red/white at top
+2. "{date_text}" - date below
+3. "{short_headline}" - LARGE, dramatic, center focus (this is the breaking story!)
 
-NO other text, NO headlines, NO logos - ONLY these two texts.
-
-Theme: {theme_desc}
-
-Style:
-- URGENT breaking news broadcast feel
-- Dramatic, attention-grabbing
-- Professional news aesthetic
+STYLE:
+- URGENT breaking news feel, red/black dramatic colors
+- Eye-catching, YouTube thumbnail style
+- The headline "{short_headline}" should be HUGE and prominent
+- Professional emergency broadcast aesthetic
 - {format_desc} format
 
-The ONLY text allowed is "BREAKING NEWS" and "{date_text}" - nothing else."""
+Make it look URGENT! The viewer must click to know what happened."""
 
     response = requests.post(
         f"{OPENAI_API_BASE}/images/generations",
@@ -298,16 +242,6 @@ The ONLY text allowed is "BREAKING NEWS" and "{date_text}" - nothing else."""
             f.write(img_response.content)
     
     return output_path
-
-
-def generate_breaking_opening_image(output_path: Path, news: dict, orientation: str = "vertical") -> Path:
-    """Generate urgent breaking news style opening image based on news content"""
-    today = datetime.now()
-    month = today.month
-    day = today.day
-    date_text = f"{month}/{day}"
-    
-    news_title = news.get('title', '')[:100]
     news_category = news.get('category', '')
     
     # Ask GPT to determine breaking news visual theme
@@ -1332,11 +1266,13 @@ def create_synced_video(news_images: dict, audio_segments: list, audio_path: Pat
     return output_path
 
 
-def create_video(images: list, audio_path: Path, output_path: Path, resolution: tuple, ending_image: Path = None, breaking_news: dict = None) -> Path:
+def create_video(images: list, audio_path: Path, output_path: Path, resolution: tuple, ending_image: Path = None, breaking_news: dict = None, top_news: dict = None, total_news_count: int = 6) -> Path:
     """Create video from images and audio
     
     Args:
-        breaking_news: If provided, generates breaking news style opening with news context
+        breaking_news: If provided, generates breaking news style opening
+        top_news: First news item for opening image headline
+        total_news_count: Total number of news stories
     """
     
     # Get audio duration
@@ -1361,7 +1297,9 @@ def create_video(images: list, audio_path: Path, output_path: Path, resolution: 
             if breaking_news:
                 generate_breaking_opening_image(opening_path, breaking_news, "vertical")
             else:
-                generate_opening_image(opening_path, "vertical")
+                # 일반 Shorts: 첫 번째 뉴스 헤드라인 강조
+                top_headline = top_news.get('title', '')[:50] if top_news else "Today's Top Stories"
+                generate_opening_image(opening_path, "vertical", top_headline=top_headline, total_count=total_news_count)
             all_images.append(opening_path)
             opening_duration = 3.0  # 오프닝 3초
             print(f"    [OK] Opening image generated")
@@ -1800,9 +1738,9 @@ def main():
         
         print(f"\n[6/8] Creating Shorts video...")
         shorts_video = output_dir / f"{ts}_Shorts.mp4"
-        # 브레이킹 뉴스면 첫 번째 뉴스 정보 전달
-        breaking_context = news_list[0] if is_breaking else None
-        create_video(shorts_images, shorts_audio, shorts_video, (1080, 1920), ENDING_SHORTS, breaking_context)
+        # 첫 번째 뉴스를 오프닝 이미지용으로 전달
+        top_news = news_list[0] if news_list else None
+        create_video(shorts_images, shorts_audio, shorts_video, (1080, 1920), ENDING_SHORTS, breaking_news=top_news if is_breaking else None, top_news=top_news, total_news_count=len(news_list))
         print(f"  [OK] Shorts: {shorts_video.name}")
         
         # Shorts는 썸네일 업로드 불가 (영상에서 프레임 선택 방식)

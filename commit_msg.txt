@@ -1,1 +1,14 @@
-fix: add detailed error logging for breaking news generation
+feat: highlight TOP keyword/headline in opening images
+
+korean-trend-shorts:
+- "KOREAN ISSUE" + date + TOP keyword + "+N개 이슈"
+- Eye-catching YouTube thumbnail style
+
+news (Daily Shorts):  
+- "DAILY NEWS" + date + TOP headline + "+N more stories"
+- Professional news thumbnail style
+
+news (Breaking):
+- "BREAKING" + date + summarized headline
+- GPT summarizes headline to 3-5 impactful words
+- Urgent red/black dramatic style
