@@ -74,13 +74,19 @@ SHORTS_SIZE = "1024x1792"   # Vertical 9:16
 VIDEO_SIZE = "1792x1024"    # Horizontal 16:9
 
 # Subtitle languages
-LANGUAGES = ["en", "ko", "ja", "zh", "es"]
+LANGUAGES = ["en", "ko", "ja", "zh", "es", "hi", "pt", "id", "fr", "ar", "ru"]
 LANGUAGE_NAMES = {
     "en": "English", 
     "ko": "Korean", 
     "ja": "Japanese", 
     "zh": "Chinese", 
-    "es": "Spanish"
+    "es": "Spanish",
+    "hi": "Hindi",
+    "pt": "Portuguese",
+    "id": "Indonesian",
+    "fr": "French",
+    "ar": "Arabic",
+    "ru": "Russian"
 }
 
 # Asset paths
@@ -1113,7 +1119,9 @@ def generate_description(news_list: list, is_weekly: bool = False) -> str:
         header = "AI News Daily | Today's Headlines (6 Stories)"
         stories_header = "Today's Stories:"
     
-    description = f"{header}\n\n{stories_header}\n\n{stories_text}\n\n---\nGenerated with AI\n\n#news #AI #globalNews #worldnews #breakingnews"
+    subtitle_langs = "🌍 Subtitles: English, 한국어, 日本語, 中文, Español, हिन्दी, Português, Bahasa Indonesia, Français, العربية, Русский"
+    
+    description = f"{header}\n\n{subtitle_langs}\n\n{stories_header}\n\n{stories_text}\n\n---\nGenerated with AI\n\n#news #AI #globalNews #worldnews #breakingnews"
     return description
 
 

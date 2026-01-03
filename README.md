@@ -25,6 +25,22 @@ Automatically generates and uploads YouTube news content using AI.
 | Images | 2 per news | 3 per news | 5 images |
 | Style | Charismatic anchor | + commentary/humor | Urgent news tone |
 
+## 🌍 Subtitles (11 Languages)
+
+| Code | Language |
+|------|----------|
+| en | English |
+| ko | 한국어 (Korean) |
+| ja | 日本語 (Japanese) |
+| zh | 中文 (Chinese) |
+| es | Español (Spanish) |
+| hi | हिन्दी (Hindi) |
+| pt | Português (Portuguese) |
+| id | Bahasa Indonesia |
+| fr | Français (French) |
+| ar | العربية (Arabic) |
+| ru | Русский (Russian) |
+
 ## 📅 Schedule
 
 | Time (KST) | Days | Content | Target |
