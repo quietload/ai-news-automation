@@ -22,6 +22,7 @@ Breaking News:
     - Trigger: breaking keywords + 5개 이상 소스
     - Keywords: breaking, dies, war, earthquake, resigns, etc.
     - 40% 유사도로 동일 뉴스 그룹화
+    - Daily limit: 최대 3개/일
 
 Usage:
     from news_rss import fetch_rss_news, detect_breaking_news
@@ -124,6 +125,9 @@ CATEGORY_NAMES = {
 USED_NEWS_FILE_RSS_DAILY = Path(__file__).parent / "used_news_rss_daily.json"
 USED_NEWS_FILE_RSS_WEEKLY = Path(__file__).parent / "used_news_rss_weekly.json"
 USED_NEWS_FILE_RSS_BREAKING = Path(__file__).parent / "used_news_rss_breaking.json"
+
+# Breaking news daily limit
+MAX_BREAKING_PER_DAY = 3
 
 # Breaking News 키워드
 BREAKING_KEYWORDS = [
@@ -259,8 +263,6 @@ def is_similar_news(new_title: str, existing_titles: list, threshold: float = 0.
     return False
 
 
-def load_used_news(news_type: str = "daily") -> set:
-    """Load used news IDs"""
 def load_used_news(news_type: str = "daily") -> set:
     """Load used news IDs"""
     if news_type == "daily":
@@ -516,16 +518,59 @@ def fetch_rss_news_by_category(count: int = 16, news_type: str = "weekly") -> Li
 # BREAKING NEWS DETECTION
 # =============================================================================
 
+def get_today_breaking_count() -> int:
+    """Get how many breaking news were generated today"""
+    if not USED_NEWS_FILE_RSS_BREAKING.exists():
+        return 0
+    
+    with open(USED_NEWS_FILE_RSS_BREAKING, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    
+    today = datetime.now().strftime('%Y-%m-%d')
+    daily_counts = data.get('daily_counts', {})
+    return daily_counts.get(today, 0)
+
+
+def increment_today_breaking_count():
+    """Increment today's breaking news count"""
+    data = {}
+    if USED_NEWS_FILE_RSS_BREAKING.exists():
+        with open(USED_NEWS_FILE_RSS_BREAKING, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    
+    today = datetime.now().strftime('%Y-%m-%d')
+    daily_counts = data.get('daily_counts', {})
+    
+    # Clean old dates (keep only last 7 days)
+    week_ago = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
+    daily_counts = {k: v for k, v in daily_counts.items() if k >= week_ago}
+    
+    daily_counts[today] = daily_counts.get(today, 0) + 1
+    data['daily_counts'] = daily_counts
+    
+    with open(USED_NEWS_FILE_RSS_BREAKING, 'w', encoding='utf-8') as f:
+        json.dump(data, f)
+
+
 def detect_breaking_news(min_sources: int = 5) -> Optional[Dict]:
     """
     Detect breaking news by scanning all RSS feeds.
     Returns breaking news if:
     1. Contains breaking keywords AND
     2. Found in 5+ different sources
+    3. Daily limit not exceeded (max 3 per day)
     
     Returns None if no breaking news detected.
     """
     print(f"\n[BREAKING] Scanning for breaking news (min {min_sources} sources)...")
+    
+    # Check daily limit
+    today_count = get_today_breaking_count()
+    if today_count >= MAX_BREAKING_PER_DAY:
+        print(f"  [LIMIT] Daily limit reached ({today_count}/{MAX_BREAKING_PER_DAY}). Skipping...")
+        return None
+    
+    print(f"  [INFO] Today's breaking count: {today_count}/{MAX_BREAKING_PER_DAY}")
     
     # Load already reported breaking news
     used_breaking = load_used_news("breaking")
@@ -580,6 +625,9 @@ def detect_breaking_news(min_sources: int = 5) -> Optional[Dict]:
             # Mark as used
             used_breaking.add(get_news_id(news['title']))
             save_used_news(used_breaking, "breaking")
+            
+            # Increment daily count
+            increment_today_breaking_count()
             
             return news
     

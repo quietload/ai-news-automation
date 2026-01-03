@@ -55,6 +55,7 @@ Automatically generates and uploads YouTube news content using AI.
 **Trigger Conditions:**
 - Breaking keywords (breaking, dies, war, earthquake, etc.) **AND**
 - 5+ different news sources reporting the same story
+- **Daily limit: Max 3 per day**
 
 **Keywords:**
 ```
