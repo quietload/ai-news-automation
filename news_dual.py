@@ -1,30 +1,33 @@
 #!/usr/bin/env python3
 """
-News Automation Pipeline v2.5
+News Automation Pipeline v2.6
 =============================
 
 YouTube 뉴스 콘텐츠 자동 생성 파이프라인
 
 Content Types:
-    - Daily Shorts: 6개 뉴스, 세로형, ~2분, ~250 words (하루 2회)
-    - Weekly Video: 16개 뉴스 (카테고리별 2개), 가로형, 제한 없음
-    - Breaking News: 단일 뉴스 딥다이브, ~2분, ~250 words (온디맨드)
+    - Daily Shorts: 6개 뉴스, 세로형, ~2분 (하루 2회)
+    - Weekly Video: 16개 뉴스 (카테고리별 2개), 가로형
+    - Breaking News: 단일 뉴스 딥다이브, ~2분 (온디맨드)
 
 Tech Stack:
-    - Text: GPT-5 mini (reasoning_effort: minimal)
-    - Image: GPT Image 1.5
-    - TTS: GPT-4o mini TTS (Marin voice)
+    - Script: GPT-5 mini (reasoning_effort: minimal)
+    - Image: GPT Image 1.5 (오프닝 + 뉴스당 2-3장 + 엔딩)
+    - TTS: GPT-4o mini TTS (Marin voice, 세그먼트별)
     - News: 38 RSS feeds
 
 Features:
-    - 실시간 RSS 뉴스 수집
-    - 로컬/유사 기사 필터링
-    - AI 이미지 생성 (뉴스당 2-3장)
-    - 다국어 자막 (EN, KO, JA, ZH, ES)
-    - 오디오-이미지 동기화
+    - GPT 기반 오프닝 이미지 (기념일/계절/브레이킹 자동 판단)
+    - 세그먼트 기반 TTS (정확한 오디오-이미지 싱크)
+    - 11개 언어 자막 (en, ko, ja, zh, es, hi, pt, id, fr, ar, ru)
+    - 브레이킹 뉴스 전용 긴박한 오프닝 테마
+    - 중복 뉴스 방지 (Daily/Weekly 분리 관리)
     - 썸네일 자동 생성 (Weekly)
-    - YouTube 예약 업로드
-    - 중복 뉴스 방지
+
+Video Structure:
+    1. 오프닝 이미지 (날짜 + 기념일/계절 또는 브레이킹 테마) - 3초
+    2. 뉴스별 이미지 - 오디오 길이에 맞춤
+    3. 엔딩 이미지 (구독/좋아요) - 2초(Shorts) / 3초(Video)
 
 Usage:
     python news_dual.py --count 6 --shorts-only --use-rss      # Daily Shorts
@@ -32,9 +35,9 @@ Usage:
     python news_dual.py --breaking-news temp.json              # Breaking
 
 Schedule:
-    - 11:50 - 12:00 KST (Tue-Sat): US Primetime Shorts
-    - 20:50 - 21:00 KST (Mon-Fri): Korea Primetime Shorts
-    - 11:30 - 12:00 KST (Sun): Weekly Video
+    - 11:50 KST (Tue-Sat): US Primetime Shorts
+    - 20:50 KST (Mon-Fri): Korea Primetime Shorts
+    - 11:30 KST (Sun): Weekly Video
     - Every 10min: Breaking News Detection
 
 GitHub: https://github.com/quietload/ai-news-automation

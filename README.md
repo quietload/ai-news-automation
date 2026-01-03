@@ -1,4 +1,4 @@
-# 📰 AI News Automation Pipeline v2.5
+# 📰 AI News Automation Pipeline v2.6
 
 Automatically generates and uploads YouTube news content using AI.
 
@@ -8,157 +8,124 @@ Automatically generates and uploads YouTube news content using AI.
 
 | Component | Technology |
 |-----------|------------|
-| Text Generation | GPT-5 mini (reasoning_effort: minimal) |
-| Image Generation | GPT Image 1.5 |
-| Text-to-Speech | GPT-4o mini TTS (Marin voice) |
-| News Source | 38 RSS feeds (real-time) |
+| Script | GPT-5 mini (reasoning_effort: minimal) |
+| Image | GPT Image 1.5 (오프닝 + 뉴스 + 엔딩) |
+| TTS | GPT-4o mini TTS (Marin voice, 세그먼트별) |
+| News | 38 RSS feeds |
 | Automation | n8n |
+
+## 🎬 Video Structure
+
+```
+┌─────────────────────────────────────┐
+│  오프닝 이미지 (날짜 + 기념일/계절)    │  ← 3초
+│  ※ 브레이킹: 뉴스 헤드라인 기반 테마   │
+├─────────────────────────────────────┤
+│  뉴스별 이미지들                      │  ← 오디오 길이에 맞춤
+├─────────────────────────────────────┤
+│  엔딩 이미지 (구독/좋아요)            │  ← 2초(Shorts) / 3초(Video)
+└─────────────────────────────────────┘
+```
 
 ## 📊 Content Specs
 
 | Spec | Daily Shorts | Weekly Video | Breaking Shorts |
 |------|--------------|--------------|-----------------|
-| News Count | 6 stories | 16 stories (2/category) | 1 story (deep-dive) |
+| News Count | 6 stories | 16 stories | 1 story (deep-dive) |
 | Duration | ~2 minutes | No limit | ~2 minutes |
-| Resolution | 1080x1920 (9:16) | 1920x1080 (16:9) | 1080x1920 (9:16) |
-| Narration | ~250 words | No limit | ~250 words |
+| Resolution | 1080x1920 | 1920x1080 | 1080x1920 |
 | Images | 2 per news | 3 per news | 5 images |
-| Style | Charismatic anchor | + commentary/humor | Urgent news tone |
+| Opening | 기념일/계절 | - | 긴박한 속보 테마 |
+
+## 🎯 Smart Opening Image
+
+GPT가 오늘 날짜를 분석하여 테마 자동 결정:
+
+**일반 Shorts/Video:**
+- 기념일: Christmas, Halloween, Valentine's Day, etc.
+- 계절: 봄 벚꽃, 여름 해변, 가을 단풍, 겨울 눈
+
+**Breaking News:**
+- GPT가 뉴스 헤드라인 분석
+- 재난 → 긴급 빨간색
+- 정치 → 공식적 분위기
+- 경제 위기 → 시장 긴장감
+- 유명인 사망 → 추모 분위기
 
 ## 🌍 Subtitles (11 Languages)
 
-| Code | Language |
-|------|----------|
-| en | English |
-| ko | 한국어 (Korean) |
-| ja | 日本語 (Japanese) |
-| zh | 中文 (Chinese) |
-| es | Español (Spanish) |
-| hi | हिन्दी (Hindi) |
-| pt | Português (Portuguese) |
-| id | Bahasa Indonesia |
-| fr | Français (French) |
-| ar | العربية (Arabic) |
-| ru | Русский (Russian) |
+en, ko, ja, zh, es, hi, pt, id, fr, ar, ru
 
 ## 📅 Schedule
 
-| Time (KST) | Days | Content | Target |
-|------------|------|---------|--------|
-| 11:50 - 12:00 | Tue-Sat | Daily Shorts | 🇺🇸 US Primetime |
-| 20:50 - 21:00 | Mon-Fri | Daily Shorts | 🇰🇷 Korea Primetime |
-| 11:30 - 12:00 | Sun | Weekly Video | 🌏 Global |
-| Every 10min | 24/7 | Breaking News | 🌏 On-demand |
+| Time (KST) | Days | Content |
+|------------|------|---------|
+| 11:50 | Tue-Sat | Daily Shorts (US) |
+| 20:50 | Mon-Fri | Daily Shorts (Korea) |
+| 11:30 | Sun | Weekly Video |
+| Every 10min | 24/7 | Breaking News |
 
 ## 🔥 Breaking News
 
-**Trigger Conditions:**
-- Breaking keywords (breaking, dies, war, earthquake, etc.) **AND**
-- 5+ different news sources reporting the same story
-- **Daily limit: Max 3 per day**
+**Trigger:** Breaking keywords + 5+ sources reporting same story
 
-**Keywords:**
-```
-breaking, just in, urgent, developing, alert
-dies, dead, killed, assassination
-war, invasion, attack, explosion, bombing, missile
-earthquake, tsunami, hurricane, typhoon, wildfire
-crash, collapse, bankruptcy, default
-resigns, impeached, arrested, indicted
-record, historic, first ever, unprecedented
-```
-
-**Detection Flow:**
-```
-n8n (10min interval) -> run_breaking_news.py -> detect_breaking_news()
-    |
-Scan 38 RSS feeds -> Filter breaking keywords -> Group similar (40%)
-    |
-5+ sources? -> Generate Shorts -> Upload -> Email alert
-```
-
-## 🔍 News Filtering
-
-| Filter | Description |
-|--------|-------------|
-| Local News | Skips US/UK/AU cities, local councils, school boards |
-| Similar Articles | Skips 50%+ title similarity (Jaccard) |
-| Auto-fill | Fills from other categories if short |
-| Duplicates | Tracks separately: daily/weekly/breaking |
+**Keywords:** breaking, dies, war, earthquake, crash, resigns, etc.
 
 ## 📁 Project Structure
 
 ```
 news/
-├── news_dual.py                    # Main generator
-├── news_rss.py                     # RSS fetcher + breaking detection
-├── upload_video.py                 # YouTube uploader
+├── news_dual.py                    # 메인 생성기
+│   ├── generate_opening_image()        # GPT 기반 오프닝 테마
+│   ├── generate_breaking_opening_image()  # 속보용 긴박한 테마
+│   ├── generate_segmented_audio()      # 세그먼트별 TTS
+│   └── create_video()                  # 오프닝/엔딩 포함 영상
+├── news_rss.py                     # RSS 수집 + 속보 감지
+├── upload_video.py                 # YouTube 업로드
 │
 ├── # Runner Scripts
-├── run_daily_shorts_rss_morning.py # Noon Shorts (US)
-├── run_daily_shorts_rss.py         # Evening Shorts (Korea)
-├── run_daily_shorts_rss_now.py     # Immediate Shorts
-├── run_weekly_video_rss.py         # Weekly Video (scheduled)
-├── run_weekly_video_rss_now.py     # Weekly Video (immediate)
-├── run_breaking_news.py            # Breaking News detector
+├── run_daily_shorts_rss_morning.py
+├── run_daily_shorts_rss.py
+├── run_weekly_video_rss.py
+├── run_breaking_news.py
 │
 ├── # n8n Workflows
-├── n8n_daily_shorts_rss_morning_scheduled.json
-├── n8n_daily_shorts_rss_scheduled.json
-├── n8n_weekly_video_rss_scheduled.json
-├── n8n_breaking_news_detector.json
+├── n8n_*.json
 │
-├── # Email Templates
-├── email_templates/
-│   ├── success.html                # ✅ Green - job completed
-│   ├── failure.html                # ❌ Red - error details
-│   └── breaking.html               # 🔥 Orange - breaking alert
+├── # Tracking
+├── used_news_daily.json
+├── used_news_weekly.json
 │
-├── # Tracking Files
-├── used_news_rss_daily.json        # Daily duplicates
-├── used_news_rss_weekly.json       # Weekly duplicates
-├── used_news_rss_breaking.json     # Breaking duplicates
-│
-├── .env                            # API keys
-├── client_secrets.json             # YouTube OAuth
-├── assets/                         # Ending images
-├── output/                         # Generated content
-├── logs/                           # Execution logs
-└── n8n_data/                       # n8n database
+├── assets/
+│   ├── ending_shorts.png           # 세로 엔딩
+│   └── ending_video.png            # 가로 엔딩
+└── output/                         # 생성된 영상
 ```
 
 ## ⚙️ Setup
 
-### 1. Install Dependencies
+### 1. Install
 
 ```bash
 pip install requests python-dotenv pillow feedparser openai google-auth google-auth-oauthlib google-api-python-client
 ```
 
-### 2. Install FFmpeg
+### 2. FFmpeg
 
 ```bash
-# Windows
-choco install ffmpeg
+choco install ffmpeg  # Windows
 ```
 
-### 3. Configure API Keys
+### 3. API Keys (.env)
 
-Create `.env` file:
 ```env
 OPENAI_API_KEY=sk-xxxxxxxxxxxxx
 ```
 
-### 4. YouTube OAuth Setup
+### 4. YouTube OAuth
 
-1. Create project in [Google Cloud Console](https://console.cloud.google.com/)
-2. Enable YouTube Data API v3
-3. Create OAuth 2.0 credentials
-4. Download as `client_secrets.json`
-5. Authorize:
-   ```bash
-   python upload_video.py --file test.mp4 --title "Test"
-   ```
+1. Google Cloud Console → YouTube Data API v3
+2. OAuth 2.0 credentials → `client_secrets.json`
 
 ### 5. Create Ending Images
 
@@ -168,8 +135,6 @@ python create_ending_images.py
 
 ## 🎮 Usage
 
-### Manual Generation
-
 ```bash
 # Daily Shorts
 python news_dual.py --count 6 --shorts-only --use-rss
@@ -177,84 +142,25 @@ python news_dual.py --count 6 --shorts-only --use-rss
 # Weekly Video
 python news_dual.py --count 16 --video-only --by-category --use-rss
 
-# Breaking News (check only)
-python run_breaking_news.py --dry-run
+# Breaking News
+python run_breaking_news.py
 ```
-
-### Immediate Upload
-
-```bash
-python run_daily_shorts_rss_now.py
-python run_weekly_video_rss_now.py
-```
-
-### Automated (n8n)
-
-```powershell
-$env:N8N_USER_FOLDER = "D:\workspace\news\n8n_data"
-npx n8n
-```
-
-Import workflows → Set timezone `Asia/Seoul`
 
 ## 📧 Email Notifications
 
-### Setup Gmail SMTP
-
-1. n8n → **Credentials** → **Add** → **SMTP**
-2. Configure:
-   - Host: `smtp.gmail.com`
-   - Port: `465`
-   - User: your Gmail
-   - Password: [App Password](https://myaccount.google.com/apppasswords)
-   - SSL/TLS: true
-3. Update workflow JSONs:
-   - `YOUR_EMAIL@gmail.com` → your email
-   - `YOUR_SMTP_CREDENTIAL_ID` → credential ID
-
-### Notification Types
-
-| Icon | Type | Description |
-|------|------|-------------|
-| ✅ | Success | Job completed with output |
-| ❌ | Failure | Error details + actions |
-| 🔥 | Breaking | Breaking news generated |
+| Icon | Type |
+|------|------|
+| ✅ | Success |
+| ❌ | Failure |
+| 🔥 | Breaking |
 
 ## 📰 RSS Sources (38 feeds)
 
-| Category | Sources |
-|----------|---------|
-| World | Korea Herald, Korea Times, Yonhap, BBC, Al Jazeera, DW |
-| Business | BBC, CNBC, Bloomberg, Financial Times, MarketWatch |
-| Technology | BBC, TechCrunch, Ars Technica, The Verge, Wired |
-| Science | BBC, Science Daily, Nature, New Scientist, Space.com |
-| Health | BBC, WebMD, Medical News Today |
-| Sports | BBC, ESPN, Sky Sports, Sports Illustrated |
-| Entertainment | BBC, Variety, Hollywood Reporter, Entertainment Weekly |
-| Environment | BBC, Guardian, Climate News, Mongabay |
+World, Business, Technology, Science, Health, Sports, Entertainment, Environment
 
 ## 💰 Monthly Cost
 
-| Item | Calculation | Cost |
-|------|-------------|------|
-| Daily Shorts | $0.50 × 2 × 22 days | ~$22 |
-| Weekly Video | $1.50 × 4 weeks | ~$6 |
-| Breaking | $0.50 × ~5/month | ~$2.50 |
-| **Total** | | **~$30** |
-
-## 📝 Output Files
-
-```
-output/
-├── {timestamp}_Shorts.mp4
-├── {timestamp}_shorts_*.png
-├── {timestamp}_shorts_subtitles_*.srt
-├── {timestamp}_Video.mp4
-├── {timestamp}_video_*.png
-├── {timestamp}_video_thumbnail.jpg
-├── {timestamp}_video_subtitles_*.srt
-└── {timestamp}_summary.json
-```
+~$30 (Daily $22 + Weekly $6 + Breaking $2.50)
 
 ## 📄 License
 

@@ -1,0 +1,6 @@
+docs: update README and docstrings for v2.6
+
+- Updated docstring with new features (opening image, breaking theme)
+- Reorganized README with video structure diagram
+- Added smart opening image documentation
+- Cleaned up content specs table
