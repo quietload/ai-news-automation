@@ -1,6 +1,5 @@
-docs: update for v2.7 - keyword grouping and cleanup
+feat: add title text to opening images
 
-- Add keyword-based grouping docs for breaking news
-- Add lock file documentation
-- Update docstrings with topic keywords feature
-- Remove unused test files and backups
+- Daily Shorts: "DAILY NEWS" + date
+- Breaking News: "BREAKING NEWS" + date  
+- Korean Trend Shorts: "KOREAN ISSUE" + date

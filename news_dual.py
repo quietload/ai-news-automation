@@ -161,9 +161,11 @@ Example: "Snowy winter scene, cozy warm lighting" """
     
     prompt = f"""Create a beautiful opening image for news broadcast.
 
-MUST INCLUDE:
-- Only the date "{date_text}" in large, stylish typography
-- NO other text, NO other words, NO titles, NO logos
+MUST INCLUDE TEXT (in this exact order, top to bottom):
+1. "DAILY NEWS" in bold, professional typography at top
+2. The date "{date_text}" in large, stylish typography below
+
+NO other text, NO other words, NO titles, NO logos - ONLY these two texts.
 
 Theme: {theme_desc}
 
@@ -172,7 +174,7 @@ Style:
 - Modern, clean design
 - {format_desc} format
 
-The ONLY text allowed is "{date_text}" - nothing else."""
+The ONLY text allowed is "DAILY NEWS" and "{date_text}" - nothing else."""
 
     response = requests.post(
         f"{OPENAI_API_BASE}/images/generations",
@@ -257,9 +259,11 @@ Example: "Breaking financial crisis, stock market crash visualization, urgent re
     
     prompt = f"""Create an URGENT breaking news opening image.
 
-MUST INCLUDE:
-- Only the date "{date_text}" in large, bold typography
-- NO other text, NO headlines, NO logos
+MUST INCLUDE TEXT (in this exact order, top to bottom):
+1. "BREAKING NEWS" in bold, urgent red/white typography at top
+2. The date "{date_text}" in large, bold typography below
+
+NO other text, NO headlines, NO logos - ONLY these two texts.
 
 Theme: {theme_desc}
 
@@ -269,7 +273,7 @@ Style:
 - Professional news aesthetic
 - {format_desc} format
 
-The ONLY text allowed is "{date_text}" - nothing else."""
+The ONLY text allowed is "BREAKING NEWS" and "{date_text}" - nothing else."""
 
     response = requests.post(
         f"{OPENAI_API_BASE}/images/generations",
@@ -354,9 +358,11 @@ Example: "Breaking financial crisis, stock market crash visualization, urgent re
     
     prompt = f"""Create an URGENT breaking news opening image.
 
-MUST INCLUDE:
-- Only the date "{date_text}" in large, bold typography
-- NO other text, NO headlines, NO logos
+MUST INCLUDE TEXT (in this exact order, top to bottom):
+1. "BREAKING NEWS" in bold, urgent red/white typography at top
+2. The date "{date_text}" in large, bold typography below
+
+NO other text, NO headlines, NO logos - ONLY these two texts.
 
 Theme: {theme_desc}
 
@@ -366,7 +372,7 @@ Style:
 - Professional news aesthetic
 - {format_desc} format
 
-The ONLY text allowed is "{date_text}" - nothing else."""
+The ONLY text allowed is "BREAKING NEWS" and "{date_text}" - nothing else."""
 
     response = requests.post(
         f"{OPENAI_API_BASE}/images/generations",
