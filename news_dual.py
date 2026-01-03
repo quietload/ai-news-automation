@@ -100,22 +100,40 @@ USED_NEWS_FILE_WEEKLY = Path(__file__).parent / "used_news_weekly.json"
 
 
 def generate_opening_image(output_path: Path, orientation: str = "vertical") -> Path:
-    """Generate opening image with today's date and season"""
+    """Generate opening image with today's date, holidays, and season"""
     today = datetime.now()
     month = today.month
     day = today.day
-    
-    # Season detection
-    if month in [12, 1, 2]:
-        season_desc = "snowy winter scene, soft snowflakes, cozy warm lighting"
-    elif month in [3, 4, 5]:
-        season_desc = "cherry blossoms, fresh green leaves, bright spring morning"
-    elif month in [6, 7, 8]:
-        season_desc = "bright sunny day, blue sky, refreshing summer vibes"
-    else:
-        season_desc = "golden autumn leaves, warm orange tones, cozy fall atmosphere"
-    
     date_text = f"{month}/{day}"
+    
+    # Special days (fixed dates)
+    special_days = {
+        (1, 1): "New Year's Day celebration, fireworks, gold and red festive colors",
+        (2, 14): "Valentine's Day, hearts, pink and red romantic atmosphere",
+        (3, 17): "St. Patrick's Day, green shamrocks, Irish celebration",
+        (4, 1): "April Fools Day, playful colorful confetti, fun atmosphere",
+        (4, 22): "Earth Day, green nature, environmental theme",
+        (7, 4): "Independence Day USA, American flag, fireworks, red white blue",
+        (10, 31): "Halloween, pumpkins, spooky fun, orange and purple",
+        (11, 11): "Veterans Day, American flags, patriotic respect",
+        (12, 24): "Christmas Eve, Christmas tree, warm lights, snow",
+        (12, 25): "Christmas Day, Santa, gifts, red and green festive",
+        (12, 31): "New Year's Eve, countdown celebration, sparkles",
+    }
+    
+    # Check if special day
+    if (month, day) in special_days:
+        theme_desc = special_days[(month, day)]
+    else:
+        # Default season theme
+        if month in [12, 1, 2]:
+            theme_desc = "snowy winter scene, soft snowflakes, cozy warm lighting"
+        elif month in [3, 4, 5]:
+            theme_desc = "cherry blossoms, fresh green leaves, bright spring morning"
+        elif month in [6, 7, 8]:
+            theme_desc = "bright sunny day, blue sky, refreshing summer vibes"
+        else:
+            theme_desc = "golden autumn leaves, warm orange tones, cozy fall atmosphere"
     
     if orientation == "vertical":
         size = SHORTS_SIZE
@@ -130,8 +148,9 @@ MUST INCLUDE:
 - Only the date "{date_text}" in large, stylish typography
 - NO other text, NO other words, NO titles, NO logos
 
+Theme: {theme_desc}
+
 Style:
-- {season_desc}
 - Professional news broadcast aesthetic
 - Modern, clean design
 - {format_desc} format
