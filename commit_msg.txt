@@ -1,1 +1,1 @@
-fix: lower breaking news similarity threshold to 35%
+fix: add detailed error logging for breaking news generation

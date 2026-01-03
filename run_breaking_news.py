@@ -121,12 +121,18 @@ def main():
         "--upload"
     ]
     
-    result = subprocess.run(cmd, capture_output=False)
+    result = subprocess.run(cmd, capture_output=True, text=True)
     
     if result.returncode == 0:
         log("[OK] Breaking News Shorts generated successfully!")
+        if result.stdout:
+            log(result.stdout[-500:])  # 마지막 500자만
     else:
         log(f"[ERROR] Generation failed with code {result.returncode}")
+        if result.stderr:
+            log(f"[STDERR] {result.stderr[-1000:]}")  # 에러 로그
+        if result.stdout:
+            log(f"[STDOUT] {result.stdout[-500:]}")
     
     # Cleanup temp file
     if temp_file.exists():
