@@ -195,6 +195,104 @@ The ONLY text allowed is "{date_text}" - nothing else."""
     
     return output_path
 
+
+def generate_breaking_opening_image(output_path: Path, news: dict, orientation: str = "vertical") -> Path:
+    """Generate urgent breaking news style opening image based on news content"""
+    today = datetime.now()
+    month = today.month
+    day = today.day
+    date_text = f"{month}/{day}"
+    
+    news_title = news.get('title', '')[:100]
+    news_category = news.get('category', '')
+    
+    # Ask GPT to determine breaking news visual theme
+    theme_prompt = f"""This is BREAKING NEWS. Generate an urgent, attention-grabbing image theme.
+
+News headline: "{news_title}"
+Category: {news_category}
+
+Create a dramatic visual theme that matches this breaking news:
+- For disasters/accidents: emergency colors, dramatic atmosphere
+- For political news: official, serious government vibes  
+- For war/conflict: somber, urgent military tones
+- For economic crisis: financial charts, market tension
+- For celebrity death: respectful, memorial atmosphere
+- For sports: victory/defeat dramatic moment
+
+Reply with ONLY a short urgent image theme description in English (one line).
+Must include: "BREAKING NEWS" urgent feel, dramatic lighting, attention-grabbing.
+Example: "Breaking news urgent alert, red and black dramatic colors, emergency broadcast style"
+Example: "Breaking financial crisis, stock market crash visualization, urgent red tones" """
+
+    try:
+        response = requests.post(
+            f"{OPENAI_API_BASE}/chat/completions",
+            headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
+            json={
+                "model": "gpt-4o-mini",
+                "messages": [{"role": "user", "content": theme_prompt}],
+                "temperature": 0.5
+            },
+            timeout=30
+        )
+        if response.status_code == 200:
+            theme_desc = response.json()["choices"][0]["message"]["content"].strip().strip('"')
+        else:
+            theme_desc = "Breaking news urgent alert, red and black dramatic colors, emergency broadcast style"
+    except:
+        theme_desc = "Breaking news urgent alert, red and black dramatic colors, emergency broadcast style"
+    
+    print(f"    Breaking theme: {theme_desc[:50]}...")
+    
+    if orientation == "vertical":
+        size = SHORTS_SIZE
+        format_desc = "vertical 9:16"
+    else:
+        size = VIDEO_SIZE
+        format_desc = "horizontal 16:9"
+    
+    prompt = f"""Create an URGENT breaking news opening image.
+
+MUST INCLUDE:
+- Only the date "{date_text}" in large, bold typography
+- NO other text, NO headlines, NO logos
+
+Theme: {theme_desc}
+
+Style:
+- URGENT breaking news broadcast feel
+- Dramatic, attention-grabbing
+- Professional news aesthetic
+- {format_desc} format
+
+The ONLY text allowed is "{date_text}" - nothing else."""
+
+    response = requests.post(
+        f"{OPENAI_API_BASE}/images/generations",
+        headers={"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"},
+        json={"model": "gpt-image-1.5", "prompt": prompt, "n": 1, "size": size, "quality": "high"},
+        timeout=120
+    )
+    
+    if response.status_code != 200:
+        raise Exception(f"Breaking opening image error: {response.text}")
+    
+    data = response.json()["data"][0]
+    
+    if "b64_json" in data:
+        import base64
+        img_data = base64.b64decode(data["b64_json"])
+        with open(output_path, 'wb') as f:
+            f.write(img_data)
+    elif "url" in data:
+        img_response = requests.get(data["url"], timeout=60)
+        with open(output_path, 'wb') as f:
+            f.write(img_response.content)
+    
+    return output_path
+
+
 # 신뢰도 높은 글로벌 언론사 목록
 TRUSTED_SOURCES = [
     # 영국
@@ -1128,8 +1226,12 @@ def create_synced_video(news_images: dict, audio_segments: list, audio_path: Pat
     return output_path
 
 
-def create_video(images: list, audio_path: Path, output_path: Path, resolution: tuple, ending_image: Path = None) -> Path:
-    """Create video from images and audio"""
+def create_video(images: list, audio_path: Path, output_path: Path, resolution: tuple, ending_image: Path = None, breaking_news: dict = None) -> Path:
+    """Create video from images and audio
+    
+    Args:
+        breaking_news: If provided, generates breaking news style opening with news context
+    """
     
     # Get audio duration
     probe_cmd = ["ffprobe", "-v", "error", "-show_entries", "format=duration",
@@ -1145,12 +1247,15 @@ def create_video(images: list, audio_path: Path, output_path: Path, resolution: 
     # Shorts: 세로형, Video: 가로형
     is_shorts = resolution[0] < resolution[1]
     
-    # Opening image (generated with date)
+    # Opening image
     opening_duration = 0
     if is_shorts:
         opening_path = output_path.parent / f"opening_{output_path.stem}.png"
         try:
-            generate_opening_image(opening_path, "vertical")
+            if breaking_news:
+                generate_breaking_opening_image(opening_path, breaking_news, "vertical")
+            else:
+                generate_opening_image(opening_path, "vertical")
             all_images.append(opening_path)
             opening_duration = 3.0  # 오프닝 3초
             print(f"    [OK] Opening image generated")
@@ -1589,7 +1694,9 @@ def main():
         
         print(f"\n[6/8] Creating Shorts video...")
         shorts_video = output_dir / f"{ts}_Shorts.mp4"
-        create_video(shorts_images, shorts_audio, shorts_video, (1080, 1920), ENDING_SHORTS)
+        # 브레이킹 뉴스면 첫 번째 뉴스 정보 전달
+        breaking_context = news_list[0] if is_breaking else None
+        create_video(shorts_images, shorts_audio, shorts_video, (1080, 1920), ENDING_SHORTS, breaking_context)
         print(f"  [OK] Shorts: {shorts_video.name}")
         
         # Shorts는 썸네일 업로드 불가 (영상에서 프레임 선택 방식)
