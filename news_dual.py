@@ -500,24 +500,24 @@ def generate_image_prompts(news: dict, count: int, orientation: str) -> list:
             "model": "gpt-5-mini",
             "messages": [{
                 "role": "system",
-                "content": f"""Create {count} image prompts for news YouTube thumbnail.
+                "content": f"""Create {count} realistic image prompts for news content.
 Format: {orient_desc}
 
-STYLE: Bold YouTube thumbnail with TEXT OVERLAY
-- Include a short headline text in the image
-- Realistic photo background related to the news
-- Eye-catching, high contrast, dramatic lighting
-- Text should be large, bold, and readable
+STYLE: Cinematic news photo with small text caption
+- Realistic, photojournalistic style
+- Small subtitle/caption text at bottom (like news broadcast lower-third)
+- NOT a thumbnail - this is content imagery
+- Dramatic lighting, professional photography
 
 People in images:
-- OK: realistic people with text overlay near/covering faces
+- OK: realistic people with small text caption near bottom
 - OK: back view, silhouette, crowd scenes
-- Text overlay helps avoid portrait rights issues
+- Small text overlay helps avoid portrait rights issues
 
 Examples:
-- Political news → Government building with bold headline text overlay
-- Economic news → Stock market display with dramatic headline
-- Tech news → Futuristic scene with tech headline
+- Political news → Government building, news-style lower-third caption
+- Economic news → Stock market floor, subtle text overlay
+- Tech news → Server room or office, small caption at bottom
 
 Output one prompt per line, no numbering. Under 80 words each."""
             }, {
@@ -533,8 +533,8 @@ Output one prompt per line, no numbering. Under 80 words each."""
     if response.status_code == 200:
         content = response.json()["choices"][0]["message"]["content"].strip()
         prompts = [p.strip() for p in content.split('\n') if p.strip()]
-        return prompts[:count] if prompts else [f"News thumbnail with bold headline text, dramatic lighting, {orient_desc}: {title}"] * count
-    return [f"News thumbnail with bold headline text, dramatic lighting, {orient_desc}: {title}"] * count
+        return prompts[:count] if prompts else [f"Cinematic news photo, small caption at bottom, {orient_desc}: {title}"] * count
+    return [f"Cinematic news photo, small caption at bottom, {orient_desc}: {title}"] * count
 
 
 def generate_image_prompts_fallback(news: dict, count: int, orientation: str) -> list:
