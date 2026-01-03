@@ -242,7 +242,7 @@ def same_topic(title1: str, title2: str, desc1: str = "", desc2: str = "") -> bo
     Uses both title similarity AND keyword-based matching.
     """
     # 1. 제목 유사도 체크 (기존 방식)
-    if titles_match(title1, title2, threshold=0.4):
+    if titles_match(title1, title2, threshold=0.35):
         return True
     
     # 2. 키워드 기반 체크 (새로운 방식)

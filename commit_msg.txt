@@ -1,5 +1,1 @@
-feat: add title text to opening images
-
-- Daily Shorts: "DAILY NEWS" + date
-- Breaking News: "BREAKING NEWS" + date  
-- Korean Trend Shorts: "KOREAN ISSUE" + date
+fix: lower breaking news similarity threshold to 35%
