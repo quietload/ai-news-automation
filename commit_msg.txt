@@ -1,6 +1,7 @@
-docs: update README and docstrings for v2.6
+feat: add keyword-based grouping for breaking news detection
 
-- Updated docstring with new features (opening image, breaking theme)
-- Reorganized README with video structure diagram
-- Added smart opening image documentation
-- Cleaned up content specs table
+- Added TOPIC_KEYWORDS for country/region-based grouping
+- New functions: get_topic_key(), same_topic()
+- Breaking news now groups by topic (venezuela, ukraine, etc.)
+- Fixes issue where same event reported differently wasn't grouped
+- Venezuela attack news now correctly detected (5 sources)

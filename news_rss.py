@@ -159,6 +159,19 @@ MAJOR_ENTITIES = [
     "united nations", "un", "who", "nato", "federal reserve", "fed",
 ]
 
+# 키워드 기반 그룹핑을 위한 주제 키워드 (같은 사건으로 묶을 키워드 조합)
+TOPIC_KEYWORDS = {
+    # 국가/지역명 + 관련 키워드들
+    "venezuela": ["maduro", "caracas", "venezuelan"],
+    "ukraine": ["kyiv", "kiev", "zelensky", "ukrainian"],
+    "russia": ["moscow", "putin", "russian", "kremlin"],
+    "china": ["beijing", "chinese", "xi jinping"],
+    "iran": ["tehran", "iranian"],
+    "israel": ["gaza", "hamas", "palestinian", "tel aviv", "israeli"],
+    "north korea": ["pyongyang", "kim jong"],
+    "taiwan": ["taipei", "taiwanese"],
+}
+
 
 # =============================================================================
 # UTILITY FUNCTIONS
@@ -198,6 +211,44 @@ def is_breaking_news(title: str, description: str = "") -> bool:
     for keyword in BREAKING_KEYWORDS:
         if keyword in text:
             return True
+    
+    return False
+
+
+def get_topic_key(title: str, description: str = "") -> str:
+    """
+    Extract topic key for keyword-based grouping.
+    Returns topic key if found, empty string otherwise.
+    """
+    text = (title + " " + description).lower()
+    
+    for main_keyword, related_keywords in TOPIC_KEYWORDS.items():
+        # 메인 키워드 또는 관련 키워드 중 하나라도 있으면
+        all_keywords = [main_keyword] + related_keywords
+        if any(kw in text for kw in all_keywords):
+            # 브레이킹 키워드도 있는지 확인
+            has_breaking = any(bk in text for bk in BREAKING_KEYWORDS)
+            if has_breaking:
+                return main_keyword
+    
+    return ""
+
+
+def same_topic(title1: str, title2: str, desc1: str = "", desc2: str = "") -> bool:
+    """
+    Check if two articles are about the same topic.
+    Uses both title similarity AND keyword-based matching.
+    """
+    # 1. 제목 유사도 체크 (기존 방식)
+    if titles_match(title1, title2, threshold=0.4):
+        return True
+    
+    # 2. 키워드 기반 체크 (새로운 방식)
+    topic1 = get_topic_key(title1, desc1)
+    topic2 = get_topic_key(title2, desc2)
+    
+    if topic1 and topic2 and topic1 == topic2:
+        return True
     
     return False
 
@@ -589,9 +640,10 @@ def detect_breaking_news(min_sources: int = 5) -> Optional[Dict]:
     
     for news in all_news:
         title = news['title']
+        desc = news.get('description', '')
         
         # Skip if not breaking keyword
-        if not is_breaking_news(title, news.get('description', '')):
+        if not is_breaking_news(title, desc):
             continue
         
         # Skip if already reported
@@ -600,13 +652,13 @@ def detect_breaking_news(min_sources: int = 5) -> Optional[Dict]:
             continue
         
         # Skip local news
-        if is_local_news(title, news.get('description', '')):
+        if is_local_news(title, desc):
             continue
         
-        # Find matching group or create new one
+        # Find matching group or create new one (using same_topic for better grouping)
         found_group = False
         for group in news_groups:
-            if titles_match(title, group[0]['title'], threshold=0.4):
+            if same_topic(title, group[0]['title'], desc, group[0].get('description', '')):
                 group[1] += 1
                 group[2].add(news.get('source', 'Unknown'))
                 found_group = True
