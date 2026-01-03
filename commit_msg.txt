@@ -1,7 +1,6 @@
-feat: add keyword-based grouping for breaking news detection
+feat: add lock file to prevent duplicate breaking news runs
 
-- Added TOPIC_KEYWORDS for country/region-based grouping
-- New functions: get_topic_key(), same_topic()
-- Breaking news now groups by topic (venezuela, ukraine, etc.)
-- Fixes issue where same event reported differently wasn't grouped
-- Venezuela attack news now correctly detected (5 sources)
+- Creates breaking.lock when running
+- Skips if lock exists (< 30 min old)
+- Auto-removes stale locks (> 30 min)
+- Cleanup on exit via atexit

@@ -25,6 +25,7 @@ Schedule:
 
 import subprocess
 import sys
+import atexit
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -38,6 +39,9 @@ KST = ZoneInfo("Asia/Seoul")
 LOG_FILE = Path(__file__).parent / "logs" / f"breaking_{datetime.now(KST).strftime('%Y%m%d')}.log"
 LOG_FILE.parent.mkdir(exist_ok=True)
 
+# Lock file to prevent duplicate runs
+LOCK_FILE = Path(__file__).parent / "breaking.lock"
+
 
 def log(msg):
     """Log to console and file"""
@@ -46,7 +50,28 @@ def log(msg):
         f.write(f"{datetime.now(KST).strftime('%H:%M:%S')} {msg}\n")
 
 
+def cleanup_lock():
+    """Remove lock file on exit"""
+    if LOCK_FILE.exists():
+        LOCK_FILE.unlink()
+
+
 def main():
+    # Check if already running
+    if LOCK_FILE.exists():
+        # Check if lock is stale (older than 30 minutes)
+        lock_age = datetime.now().timestamp() - LOCK_FILE.stat().st_mtime
+        if lock_age < 1800:  # 30 minutes
+            print(f"[SKIP] Breaking news generator already running (lock age: {lock_age/60:.1f}min)")
+            return
+        else:
+            print(f"[WARN] Stale lock detected ({lock_age/60:.1f}min), removing...")
+            LOCK_FILE.unlink()
+    
+    # Create lock file
+    LOCK_FILE.touch()
+    atexit.register(cleanup_lock)
+    
     log(f"\n{'='*60}")
     log(f"Breaking News Detector")
     log(f"Time: {datetime.now(KST).strftime('%Y-%m-%d %H:%M:%S KST')}")
