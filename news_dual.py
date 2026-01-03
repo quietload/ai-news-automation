@@ -1781,14 +1781,34 @@ def main():
         print(f"  [OK] Shorts: {shorts_video.name}")
         
         # Shorts는 썸네일 업로드 불가 (영상에서 프레임 선택 방식)
+        shorts_title = f"Today's Top News - {datetime.now().strftime('%b %d')} #shorts"
+        shorts_description = generate_description(news_list)
         
         results["shorts"] = {
             "video": str(shorts_video),
             "thumbnail": None,  # Shorts는 썸네일 없음
             "subtitles": {k: str(v) for k, v in shorts_srt.items()},
-            "title": f"Today's Top News - {datetime.now().strftime('%b %d')} #shorts",
-            "description": generate_description(news_list)
+            "title": shorts_title,
+            "description": shorts_description
         }
+        
+        # 수동 업로드용 메타데이터 파일 생성
+        metadata_path = shorts_video.with_suffix('.txt')
+        with open(metadata_path, 'w', encoding='utf-8') as f:
+            f.write("=" * 60 + "\n")
+            f.write("YouTube 수동 업로드 정보 (Shorts)\n")
+            f.write("=" * 60 + "\n\n")
+            f.write(f"[영상 파일]\n{shorts_video}\n\n")
+            f.write(f"[제목] (100자 제한)\n{shorts_title[:100]}\n\n")
+            f.write(f"[설명]\n{shorts_description}\n\n")
+            f.write(f"[자막 파일]\n")
+            for lang, sub_path in shorts_srt.items():
+                f.write(f"  - {lang}: {sub_path}\n")
+            f.write(f"\n[업로드 설정]\n")
+            f.write(f"  - 공개 상태: 공개 (public)\n")
+            f.write(f"  - 카테고리: 뉴스/정치 (25)\n")
+            f.write(f"  - Shorts: 자동 감지됨 (세로 영상)\n")
+        print(f"  [OK] Metadata: {metadata_path.name}")
     
     # 6-8. Generate Video (with synced audio)
     if generate_video and video_images:
@@ -1845,13 +1865,34 @@ def main():
             video_thumb = None
             print(f"  [WARN] Thumbnail failed: {e}")
         
+        video_title = f"Weekly News Roundup - {datetime.now().strftime('%b %d, %Y')}"
+        video_description = generate_description(news_list, is_weekly=True)
+        
         results["video"] = {
             "video": str(video_file),
             "thumbnail": str(video_thumb) if video_thumb else None,
             "subtitles": {k: str(v) for k, v in video_srt.items()},
-            "title": f"Weekly News Roundup - {datetime.now().strftime('%b %d, %Y')}",
-            "description": generate_description(news_list, is_weekly=True)
+            "title": video_title,
+            "description": video_description
         }
+        
+        # 수동 업로드용 메타데이터 파일 생성
+        metadata_path = video_file.with_suffix('.txt')
+        with open(metadata_path, 'w', encoding='utf-8') as f:
+            f.write("=" * 60 + "\n")
+            f.write("YouTube 수동 업로드 정보 (Video)\n")
+            f.write("=" * 60 + "\n\n")
+            f.write(f"[영상 파일]\n{video_file}\n\n")
+            f.write(f"[제목] (100자 제한)\n{video_title[:100]}\n\n")
+            f.write(f"[설명]\n{video_description}\n\n")
+            f.write(f"[썸네일]\n{video_thumb if video_thumb else '없음'}\n\n")
+            f.write(f"[자막 파일]\n")
+            for lang, sub_path in video_srt.items():
+                f.write(f"  - {lang}: {sub_path}\n")
+            f.write(f"\n[업로드 설정]\n")
+            f.write(f"  - 공개 상태: 공개 (public)\n")
+            f.write(f"  - 카테고리: 뉴스/정치 (25)\n")
+        print(f"  [OK] Metadata: {metadata_path.name}")
     
     # Save summary
     summary = {

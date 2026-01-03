@@ -1,4 +1,9 @@
-fix: use subtle caption text for content images
+feat: generate metadata txt file for manual YouTube upload
 
-Opening image: Bold, large text (thumbnail style)
-Content images: Small caption at bottom (news lower-third style)
+Creates .txt file alongside video with:
+- Video file path
+- Title (100 char limit)  
+- Description
+- Thumbnail path (video only)
+- Subtitle file paths
+- Upload settings (category, privacy)
