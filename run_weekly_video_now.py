@@ -38,7 +38,8 @@ def run_video():
         [sys.executable, "news_dual.py", "--count", "16", "--video-only", "--by-category", "--output", "./output"],
         cwd=Path(__file__).parent,
         capture_output=True,
-        text=True
+        text=True,
+        encoding="utf-8"
     )
     
     if result.stdout:
@@ -92,7 +93,8 @@ def upload_video(video_path: str, title: str, description: str,
         cmd,
         cwd=Path(__file__).parent,
         capture_output=True,
-        text=True
+        text=True,
+        encoding="utf-8"
     )
     
     if result.stdout:

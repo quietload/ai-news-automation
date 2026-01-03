@@ -41,7 +41,8 @@ def run_shorts():
         [sys.executable, "news_dual.py", "--count", "8", "--shorts-only", "--output", "./output"],
         cwd=Path(__file__).parent,
         capture_output=True,
-        text=True
+        text=True,
+        encoding="utf-8"
     )
     
     if result.stdout:
@@ -91,7 +92,8 @@ def upload_to_youtube(video_path: str, title: str, description: str,
         cmd,
         cwd=Path(__file__).parent,
         capture_output=True,
-        text=True
+        text=True,
+        encoding="utf-8"
     )
     
     if result.returncode != 0:
@@ -129,7 +131,8 @@ def upload_to_instagram(video_path: str, caption: str, video_url: str = None) ->
         cmd,
         cwd=Path(__file__).parent,
         capture_output=True,
-        text=True
+        text=True,
+        encoding="utf-8"
     )
     
     if result.returncode != 0:

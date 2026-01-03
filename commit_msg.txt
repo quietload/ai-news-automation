@@ -1,6 +1,4 @@
-fix: clarify image fallback - no face instead of blur
+fix: add UTF-8 encoding to subprocess calls
 
-3-stage image generation:
-1. Normal realistic (may include faces)
-2. Policy error → back view/silhouette (no visible faces)
-3. Still fails → abstract (no people)
+Fixes UnicodeDecodeError on Windows (cp949 codec)
+All run_*.py files now use encoding='utf-8' for subprocess.run()
