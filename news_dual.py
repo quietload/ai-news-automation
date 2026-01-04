@@ -785,15 +785,47 @@ Output ONLY the narration."""
 def generate_segmented_narration(news_list: list, style: str = "long", is_saturday: bool = False) -> list:
     """Generate narration segments per news for synced video - returns list of {text, news_index}"""
     
-    outro = "See you Monday" if is_saturday else "Stay informed. See you next time."
+    # 다양한 인트로/아웃트로 (랜덤 선택)
+    import random
+    
+    if is_saturday:
+        outros = [
+            "That's the week in news. See you Monday!",
+            "Thanks for joining us this week. See you Monday!",
+            "That wraps up this week's news. Have a great weekend, see you Monday!",
+            "And that's your weekly update. Enjoy your weekend, see you Monday!",
+            "That's all for this week. See you Monday!"
+        ]
+    else:
+        outros = [
+            "Stay informed. See you next time.",
+            "That's your daily update. Stay informed!",
+            "Thanks for watching. See you tomorrow!",
+            "And that's today's news. Stay tuned for more!",
+            "That's all for now. See you next time!"
+        ]
+    outro = random.choice(outros)
     
     segments = []
     
-    # 인트로
+    # 인트로 (스타일별 다양한 옵션)
     if style == "long":
-        intro = "Welcome to this week's global news roundup. Here are the top stories from around the world."
+        intros = [
+            "Welcome to this week's global news roundup. Here are the top stories from around the world.",
+            "Hello and welcome! Let's dive into this week's biggest stories from across the globe.",
+            "Good to have you with us! Here's your weekly news roundup with the top global headlines.",
+            "Welcome back! It's time for your weekly news update. Let's get into it.",
+            "Hi everyone! Here are the stories that made headlines this week around the world."
+        ]
     else:
-        intro = "Here's today's top news."
+        intros = [
+            "Here's today's top news.",
+            "Let's get into today's headlines.",
+            "Here's what you need to know today.",
+            "Good day! Here are today's top stories.",
+            "Welcome! Let's catch up on today's news."
+        ]
+    intro = random.choice(intros)
     segments.append({"text": intro, "type": "intro", "news_index": -1})
     
     # 각 뉴스별 나레이션

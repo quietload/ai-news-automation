@@ -1,6 +1,7 @@
-feat: cluster similar articles together within categories
+feat: add variety to intro/outro for daily and weekly news
 
-- Same category news grouped together
-- Similar articles (30%+ word overlap) clustered within category
-- Cluster order randomized for variety
-- Article order within cluster also randomized
+- 5 different intros for weekly (long style)
+- 5 different intros for daily (short style)  
+- 5 different outros for Saturday (weekend)
+- 5 different outros for weekdays
+- Randomly selected each time
