@@ -61,7 +61,8 @@
       "name": "Run Daily Shorts RSS Evening",
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
-      "position": [700, 180]
+      "position": [700, 180],
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {

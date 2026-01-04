@@ -31,7 +31,8 @@
       "name": "Run Weekly Video RSS",
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
-      "position": [500, 200]
+      "position": [500, 200],
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {

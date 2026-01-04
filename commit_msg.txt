@@ -1,5 +1,4 @@
-config: update Korea Shorts generation time to 21:50
+fix: add onError continueRegularOutput to all Execute Command nodes
 
-- n8n trigger: 20:50 → 21:50 KST
-- Publish at 22:00 KST
-- Updated README schedule table
+Prevents n8n from throwing error on non-zero exit codes.
+Allows proper exitCode check for success/failure email routing.
