@@ -667,8 +667,21 @@ def get_today_breaking_count() -> int:
     return daily_counts.get(today, 0)
 
 
-def increment_today_breaking_count():
-    """Increment today's breaking news count"""
+def get_today_breaking_titles() -> List[str]:
+    """Get titles of breaking news generated today"""
+    if not USED_NEWS_FILE_RSS_BREAKING.exists():
+        return []
+    
+    with open(USED_NEWS_FILE_RSS_BREAKING, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    
+    today = datetime.now().strftime('%Y-%m-%d')
+    daily_titles = data.get('daily_titles', {})
+    return daily_titles.get(today, [])
+
+
+def increment_today_breaking_count(title: str = ""):
+    """Increment today's breaking news count and save title"""
     data = {}
     if USED_NEWS_FILE_RSS_BREAKING.exists():
         with open(USED_NEWS_FILE_RSS_BREAKING, 'r', encoding='utf-8') as f:
@@ -676,13 +689,23 @@ def increment_today_breaking_count():
     
     today = datetime.now().strftime('%Y-%m-%d')
     daily_counts = data.get('daily_counts', {})
+    daily_titles = data.get('daily_titles', {})
     
     # Clean old dates (keep only last 7 days)
     week_ago = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
     daily_counts = {k: v for k, v in daily_counts.items() if k >= week_ago}
+    daily_titles = {k: v for k, v in daily_titles.items() if k >= week_ago}
     
     daily_counts[today] = daily_counts.get(today, 0) + 1
+    
+    # Save title
+    if today not in daily_titles:
+        daily_titles[today] = []
+    if title:
+        daily_titles[today].append(title)
+    
     data['daily_counts'] = daily_counts
+    data['daily_titles'] = daily_titles
     
     with open(USED_NEWS_FILE_RSS_BREAKING, 'w', encoding='utf-8') as f:
         json.dump(data, f)
@@ -703,7 +726,12 @@ def detect_breaking_news(min_sources: int = 5) -> Optional[Dict]:
     # Check daily limit
     today_count = get_today_breaking_count()
     if today_count >= MAX_BREAKING_PER_DAY:
+        today_titles = get_today_breaking_titles()
         print(f"  [LIMIT] Daily limit reached ({today_count}/{MAX_BREAKING_PER_DAY}). Skipping...")
+        if today_titles:
+            print(f"  [LIMIT] Today's breaking news:")
+            for i, title in enumerate(today_titles, 1):
+                print(f"          {i}. {title[:60]}...")
         return None
     
     print(f"  [INFO] Today's breaking count: {today_count}/{MAX_BREAKING_PER_DAY}")
@@ -763,8 +791,8 @@ def detect_breaking_news(min_sources: int = 5) -> Optional[Dict]:
             used_breaking.add(get_news_id(news['title']))
             save_used_news(used_breaking, "breaking")
             
-            # Increment daily count
-            increment_today_breaking_count()
+            # Increment daily count and save title
+            increment_today_breaking_count(news['title'])
             
             return news
     

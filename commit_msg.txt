@@ -1,11 +1,4 @@
-feat: add voice rotation for daily and weekly news
+feat: log today's breaking news title when limit reached
 
-Daily:
-- Morning (US primetime): marin
-- Evening (Korea primetime): cedar
-
-Weekly:
-- Even weeks: marin
-- Odd weeks: cedar
-
-Added --voice argument to news_dual.py
+When daily breaking news limit is reached, now shows which
+article(s) were already generated today.
