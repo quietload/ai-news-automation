@@ -1,10 +1,6 @@
-feat: use US Eastern time for display dates
+config: change US publish time from 22:00 to 21:00 EST
 
-Changed display dates from local (KST) to US Eastern time:
-- Opening images date text (1/4 format)
-- Breaking news opening date
-- Thumbnail date text
-- Video/Shorts title date (e.g., "Today's Top News - Jan 04")
+- Daily Shorts (US): KST 12:00 → KST 11:00 (EST 21:00)
+- Weekly Video: KST 12:00 → KST 11:00 (EST 21:00 Saturday)
 
-File timestamps still use local time (for file management).
-Target audience is US, so display should match their timezone.
+US primetime 9 PM is better engagement time.
