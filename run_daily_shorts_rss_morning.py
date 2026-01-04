@@ -49,8 +49,9 @@ def run_shorts():
     log("[1/2] Generating Morning Shorts with RSS (6 news)...")
     log("=" * 60)
     
+    # 오전(모닝)은 marin 목소리
     result = subprocess.run(
-        [sys.executable, "news_dual.py", "--count", "6", "--shorts-only", "--use-rss", "--output", "./output"],
+        [sys.executable, "news_dual.py", "--count", "6", "--shorts-only", "--use-rss", "--voice", "marin", "--output", "./output"],
         cwd=Path(__file__).parent,
         capture_output=True,
         text=True,

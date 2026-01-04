@@ -1,7 +1,11 @@
-feat: add variety to intro/outro for daily and weekly news
+feat: add voice rotation for daily and weekly news
 
-- 5 different intros for weekly (long style)
-- 5 different intros for daily (short style)  
-- 5 different outros for Saturday (weekend)
-- 5 different outros for weekdays
-- Randomly selected each time
+Daily:
+- Morning (US primetime): marin
+- Evening (Korea primetime): cedar
+
+Weekly:
+- Even weeks: marin
+- Odd weeks: cedar
+
+Added --voice argument to news_dual.py

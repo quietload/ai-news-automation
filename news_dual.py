@@ -1628,11 +1628,15 @@ def main():
     parser.add_argument("--by-category", action="store_true", help="Fetch 1 news per category (for weekly video)")
     parser.add_argument("--use-rss", action="store_true", help="Use RSS feeds instead of NewsData.io (real-time, no delay)")
     parser.add_argument("--breaking-news", type=str, help="Path to breaking news JSON file (single story, 60s deep dive)")
+    parser.add_argument("--voice", type=str, default="marin", help="TTS voice (marin, cedar, coral, nova)")
     args = parser.parse_args()
     
     output_dir = Path(args.output)
     output_dir.mkdir(parents=True, exist_ok=True)
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    
+    # 선택된 voice 출력
+    print(f"[INFO] Using TTS voice: {args.voice}")
     
     generate_shorts = not args.video_only
     generate_video = not args.shorts_only
@@ -1839,7 +1843,7 @@ def main():
         
         print(f"\n[5/8] Generating Shorts audio...")
         shorts_audio = output_dir / f"{ts}_shorts_audio.mp3"
-        generate_tts(shorts_script, shorts_audio)
+        generate_tts(shorts_script, shorts_audio, voice=args.voice)
         print(f"  [OK] Audio saved")
         
         shorts_srt = generate_subtitles(shorts_script, output_dir, f"{ts}_shorts", shorts_audio)
@@ -1903,7 +1907,7 @@ def main():
         
         # 세그먼트별 TTS 생성
         print(f"  Generating segmented audio...")
-        audio_segments = generate_segmented_audio(audio_segments, output_dir, f"{ts}_video")
+        audio_segments = generate_segmented_audio(audio_segments, output_dir, f"{ts}_video", voice=args.voice)
         total_duration = sum(seg["duration"] for seg in audio_segments)
         print(f"  [OK] Total audio: {total_duration:.1f}s")
         

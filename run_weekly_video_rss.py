@@ -52,8 +52,14 @@ def run_video():
     log("[1/2] Generating Weekly Video with RSS (16 news)...")
     log("=" * 60)
     
+    # 격주로 voice 변경: 짝수 주 = marin, 홀수 주 = cedar
+    from datetime import datetime
+    week_number = datetime.now().isocalendar()[1]
+    voice = "marin" if week_number % 2 == 0 else "cedar"
+    log(f"  Week {week_number}: Using voice '{voice}'")
+    
     result = subprocess.run(
-        [sys.executable, "news_dual.py", "--count", "16", "--video-only", "--by-category", "--use-rss", "--output", "./output"],
+        [sys.executable, "news_dual.py", "--count", "16", "--video-only", "--by-category", "--use-rss", "--voice", voice, "--output", "./output"],
         cwd=Path(__file__).parent,
         capture_output=True,
         text=True,
