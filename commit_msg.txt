@@ -1,1 +1,5 @@
-feat: add email notification on breaking news upload failure
+fix: use reconfigure() instead of TextIOWrapper for UTF-8 stdout
+
+TextIOWrapper causes "I/O operation on closed file" error when
+called via subprocess with capture_output=True.
+reconfigure() is safer and handles edge cases gracefully.

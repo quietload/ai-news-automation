@@ -47,10 +47,13 @@ import os
 import sys
 import io
 
-# Windows 콘솔 UTF-8 인코딩 설정
-if sys.platform == 'win32':
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+# Windows 콘솔 UTF-8 인코딩 설정 (직접 실행 시에만)
+if sys.platform == 'win32' and sys.stdout and hasattr(sys.stdout, 'buffer'):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+        sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+    except:
+        pass  # subprocess에서 호출 시 실패할 수 있음
 
 import json
 import time

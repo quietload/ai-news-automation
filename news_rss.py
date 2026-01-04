@@ -46,14 +46,18 @@ import json
 import random
 import sys
 import io
+import os
 from pathlib import Path
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional
 
-# Windows 콘솔 UTF-8 출력 설정
-if sys.platform == 'win32':
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+# Windows 콘솔 UTF-8 출력 설정 (직접 실행 시에만)
+if sys.platform == 'win32' and sys.stdout and hasattr(sys.stdout, 'buffer'):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+        sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+    except:
+        pass  # subprocess에서 호출 시 실패할 수 있음
 
 # =============================================================================
 # RSS FEED SOURCES (Global, English, Trusted)
