@@ -327,6 +327,78 @@ def is_similar_news(new_title: str, existing_titles: list, threshold: float = 0.
     return False
 
 
+def get_similarity_score(title1: str, title2: str) -> float:
+    """Calculate Jaccard similarity between two titles"""
+    words1 = set(title1.lower().split())
+    words2 = set(title2.lower().split())
+    
+    if not words1 or not words2:
+        return 0.0
+    
+    intersection = len(words1 & words2)
+    union = len(words1 | words2)
+    return intersection / union
+
+
+def group_news_by_similarity(news_list: List[Dict], similarity_threshold: float = 0.3) -> List[Dict]:
+    """
+    Group news by category, then cluster similar articles together within each category.
+    
+    1. Group by category (random category order)
+    2. Within each category, cluster similar articles together
+    3. Shuffle cluster order within category for variety
+    """
+    if not news_list:
+        return news_list
+    
+    # 1. 카테고리별로 분류
+    categories = list(set(news.get('category', 'Unknown') for news in news_list))
+    random.shuffle(categories)
+    
+    result = []
+    
+    for category in categories:
+        cat_news = [n for n in news_list if n.get('category', 'Unknown') == category]
+        
+        if len(cat_news) <= 1:
+            result.extend(cat_news)
+            continue
+        
+        # 2. 비슷한 기사끼리 클러스터링
+        clusters = []
+        used = set()
+        
+        for i, news in enumerate(cat_news):
+            if i in used:
+                continue
+            
+            # 새 클러스터 시작
+            cluster = [news]
+            used.add(i)
+            
+            # 비슷한 기사 찾기
+            for j, other in enumerate(cat_news):
+                if j in used:
+                    continue
+                
+                # 클러스터 내 기사들과 비교
+                for clustered in cluster:
+                    if get_similarity_score(news['title'], other['title']) >= similarity_threshold:
+                        cluster.append(other)
+                        used.add(j)
+                        break
+            
+            clusters.append(cluster)
+        
+        # 3. 클러스터 순서 랜덤, 클러스터 내 순서도 랜덤
+        random.shuffle(clusters)
+        for cluster in clusters:
+            random.shuffle(cluster)
+            result.extend(cluster)
+    
+    return result
+
+
 def load_used_news(news_type: str = "daily") -> set:
     """Load used news IDs"""
     if news_type == "daily":
@@ -464,16 +536,8 @@ def fetch_rss_news(count: int = 8, news_type: str = "daily") -> List[Dict]:
                 if len(selected) >= count:
                     break
     
-    # 카테고리별로 그룹화하되, 카테고리 순서와 카테고리 내 순서는 랜덤
-    categories_order = list(set(news['category'] for news in selected))
-    random.shuffle(categories_order)
-    
-    grouped = []
-    for cat in categories_order:
-        cat_news = [n for n in selected if n['category'] == cat]
-        random.shuffle(cat_news)
-        grouped.extend(cat_news)
-    selected = grouped
+    # 카테고리별로 그룹화 + 비슷한 기사끼리 클러스터링
+    selected = group_news_by_similarity(selected)
     
     # Save used news
     for news in selected:
@@ -574,16 +638,8 @@ def fetch_rss_news_by_category(count: int = 16, news_type: str = "weekly") -> Li
                     if len(all_news) >= count:
                         break
     
-    # 카테고리별로 그룹화하되, 카테고리 순서와 카테고리 내 순서는 랜덤
-    categories_order = list(set(news['category'] for news in all_news))
-    random.shuffle(categories_order)
-    
-    grouped = []
-    for cat in categories_order:
-        cat_news = [n for n in all_news if n['category'] == cat]
-        random.shuffle(cat_news)
-        grouped.extend(cat_news)
-    all_news = grouped
+    # 카테고리별로 그룹화 + 비슷한 기사끼리 클러스터링
+    all_news = group_news_by_similarity(all_news)
     
     # Save used news
     for news in all_news:

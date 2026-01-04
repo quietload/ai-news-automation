@@ -1,4 +1,6 @@
-fix: group news by category instead of complete random shuffle
+feat: cluster similar articles together within categories
 
-Same category news now appear together.
-Category order is still randomized for variety.
+- Same category news grouped together
+- Similar articles (30%+ word overlap) clustered within category
+- Cluster order randomized for variety
+- Article order within cluster also randomized
