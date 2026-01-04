@@ -68,7 +68,7 @@
         "rule": {
           "interval": [
             {
-              "triggerAtDay": 6,
+              "triggerAtDay": [6],
               "triggerAtHour": 17,
               "triggerAtMinute": 0
             }

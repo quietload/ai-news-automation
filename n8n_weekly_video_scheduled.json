@@ -6,7 +6,7 @@
         "rule": {
           "interval": [
             {
-              "triggerAtDay": 6,
+              "triggerAtDay": [6],
               "triggerAtHour": 20,
               "triggerAtMinute": 0
             }

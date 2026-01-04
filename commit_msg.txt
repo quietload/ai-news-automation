@@ -1,4 +1,4 @@
-fix: correct weekday values for n8n Luxon (Sun=7, not 0)
+fix: triggerAtDay must be array in n8n schedule trigger
 
-n8n uses Luxon where weekday: Mon=1, Tue=2...Sat=6, Sun=7
-Previous values used Python convention (Sun=0) which was wrong
+Changed triggerAtDay from number to array format
+Fixes "days.join is not a function" error on workflow activation
