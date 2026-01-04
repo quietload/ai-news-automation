@@ -1,9 +1,9 @@
-docs: update subtitle languages from 11 to 5
+feat: include YouTube description in email notification logs
 
-Changed from: en, ko, ja, zh, es, hi, pt, id, fr, ar, ru
-Changed to: en, ko, ja, zh, es
+Added [YouTube Description] section to stdout output so n8n
+can include it in email notifications.
 
-Updated in:
-- news_dual.py docstring
-- news_dual.py description generator
-- README.md
+Updated files:
+- run_daily_shorts_rss.py
+- run_daily_shorts_rss_morning.py
+- run_weekly_video_rss.py

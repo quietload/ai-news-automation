@@ -98,6 +98,13 @@ def upload_video(summary: dict):
     publish_time = get_publish_time()
     log(f"  Publish time: {publish_time}")
     
+    # YouTube 설명 출력 (메일에 포함용)
+    log("\n" + "=" * 60)
+    log("[YouTube Description]")
+    log("=" * 60)
+    log(video["description"])
+    log("=" * 60 + "\n")
+    
     cmd = [
         sys.executable, "upload_video.py",
         "--file", video_path,
