@@ -1,1 +1,1 @@
-config: limit breaking news to 1 per day
+feat: add email notification on breaking news upload failure
