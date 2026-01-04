@@ -29,7 +29,7 @@
           "conditions": [
             {
               "leftValue": "={{ $now.weekday }}",
-              "rightValue": 0,
+              "rightValue": 6,
               "operator": {
                 "type": "number",
                 "operation": "notEquals"
@@ -37,7 +37,7 @@
             },
             {
               "leftValue": "={{ $now.weekday }}",
-              "rightValue": 6,
+              "rightValue": 7,
               "operator": {
                 "type": "number",
                 "operation": "notEquals"

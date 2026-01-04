@@ -1,5 +1,4 @@
-fix: use reconfigure() instead of TextIOWrapper for UTF-8 stdout
+fix: correct weekday values for n8n Luxon (Sun=7, not 0)
 
-TextIOWrapper causes "I/O operation on closed file" error when
-called via subprocess with capture_output=True.
-reconfigure() is safer and handles edge cases gracefully.
+n8n uses Luxon where weekday: Mon=1, Tue=2...Sat=6, Sun=7
+Previous values used Python convention (Sun=0) which was wrong

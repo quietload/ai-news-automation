@@ -22,7 +22,10 @@
     },
     {
       "parameters": {
-        "command": "C:\\Users\\USER\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe D:\\workspace\\news\\run_weekly_video_rss.py"
+        "command": "C:\\Users\\USER\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe D:\\workspace\\news\\run_weekly_video_rss.py",
+        "options": {
+          "timeout": 3600000
+        }
       },
       "id": "2",
       "name": "Run Weekly Video RSS",
