@@ -1,1 +1,5 @@
-config: change Korea Shorts publish time from 21:00 to 22:00 KST
+config: update Korea Shorts generation time to 21:50
+
+- n8n trigger: 20:50 → 21:50 KST
+- Publish at 22:00 KST
+- Updated README schedule table

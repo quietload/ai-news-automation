@@ -72,12 +72,12 @@ en, ko, ja, zh, es
 
 ## 📅 Schedule (n8n Luxon weekday: Mon=1...Sun=7)
 
-| Time (KST) | Days | Content | Skip |
-|------------|------|---------|------|
-| 11:50 | Tue-Sat | Daily Shorts (US) | 일/월 (US 주말) |
-| 20:50 | Mon-Fri | Daily Shorts (Korea) | 토/일 (KR 주말) |
-| 11:30 | Sun | Weekly Video | - |
-| Every 10min | 24/7 | Breaking News (max 1/day) | - |
+| Time (KST) | Publish (KST) | Days | Content | US Time |
+|------------|---------------|------|---------|---------|
+| 11:50 | 12:00 | Tue-Sat | Daily Shorts (US) | 22:00 EST / 19:00 PST |
+| 21:50 | 22:00 | Mon-Fri | Daily Shorts (Korea) | - |
+| 11:30 | 12:00 | Sun | Weekly Video | 22:00 EST Sat |
+| Every 10min | Immediate | 24/7 | Breaking News (max 1/day) | - |
 
 ## 🔥 Breaking News
 
