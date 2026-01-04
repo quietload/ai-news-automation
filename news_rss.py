@@ -464,8 +464,16 @@ def fetch_rss_news(count: int = 8, news_type: str = "daily") -> List[Dict]:
                 if len(selected) >= count:
                     break
     
-    # 순서 랜덤 섞기
-    random.shuffle(selected)
+    # 카테고리별로 그룹화하되, 카테고리 순서와 카테고리 내 순서는 랜덤
+    categories_order = list(set(news['category'] for news in selected))
+    random.shuffle(categories_order)
+    
+    grouped = []
+    for cat in categories_order:
+        cat_news = [n for n in selected if n['category'] == cat]
+        random.shuffle(cat_news)
+        grouped.extend(cat_news)
+    selected = grouped
     
     # Save used news
     for news in selected:
@@ -566,8 +574,16 @@ def fetch_rss_news_by_category(count: int = 16, news_type: str = "weekly") -> Li
                     if len(all_news) >= count:
                         break
     
-    # 순서 랜덤 섞기
-    random.shuffle(all_news)
+    # 카테고리별로 그룹화하되, 카테고리 순서와 카테고리 내 순서는 랜덤
+    categories_order = list(set(news['category'] for news in all_news))
+    random.shuffle(categories_order)
+    
+    grouped = []
+    for cat in categories_order:
+        cat_news = [n for n in all_news if n['category'] == cat]
+        random.shuffle(cat_news)
+        grouped.extend(cat_news)
+    all_news = grouped
     
     # Save used news
     for news in all_news:

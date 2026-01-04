@@ -1,4 +1,4 @@
-fix: add onError continueRegularOutput to all Execute Command nodes
+fix: group news by category instead of complete random shuffle
 
-Prevents n8n from throwing error on non-zero exit codes.
-Allows proper exitCode check for success/failure email routing.
+Same category news now appear together.
+Category order is still randomized for variety.
