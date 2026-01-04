@@ -491,11 +491,12 @@ def parse_feed(url: str, source_name: str, category: str) -> List[Dict]:
 # MAIN FETCH FUNCTIONS
 # =============================================================================
 
-def fetch_rss_news(count: int = 8, news_type: str = "daily") -> List[Dict]:
+def fetch_rss_news(count: int = 8, news_type: str = "daily", dry_run: bool = False) -> List[Dict]:
     """
     Fetch news from RSS feeds (for Daily Shorts)
     Returns diverse news from all categories, sorted by newest first
     Filters out: local news, similar articles
+    dry_run=True이면 used_news 파일에 저장하지 않음
     """
     print(f"\n[RSS] Fetching {count} news articles (newest first)...")
     
@@ -575,18 +576,22 @@ def fetch_rss_news(count: int = 8, news_type: str = "daily") -> List[Dict]:
     # Save used news
     for news in selected:
         used_news.add(get_news_id(news['title']))
-    save_used_news(used_news, news_type)
+    if not dry_run:
+        save_used_news(used_news, news_type)
+    else:
+        print("  [DRY RUN] Skipping save_used_news")
     
     print(f"  [OK] Total: {len(selected)} articles selected")
     return selected[:count]
 
 
-def fetch_rss_news_by_category(count: int = 16, news_type: str = "weekly") -> List[Dict]:
+def fetch_rss_news_by_category(count: int = 16, news_type: str = "weekly", dry_run: bool = False) -> List[Dict]:
     """
     Fetch news by category (for Weekly Video)
     Returns balanced news across all categories, newest first
     Filters out: local news, similar articles
     If a category is short, fills from other categories
+    dry_run=True이면 used_news 파일에 저장하지 않음
     """
     print(f"\n[RSS] Fetching {count} news articles by category (newest first)...")
     
@@ -671,7 +676,10 @@ def fetch_rss_news_by_category(count: int = 16, news_type: str = "weekly") -> Li
     # Save used news
     for news in selected:
         used_news.add(get_news_id(news['title']))
-    save_used_news(used_news, news_type)
+    if not dry_run:
+        save_used_news(used_news, news_type)
+    else:
+        print("  [DRY RUN] Skipping save_used_news")
     
     print(f"  [OK] Total: {len(selected)} articles from {len(categories)} categories")
     return selected[:count]

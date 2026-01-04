@@ -1629,6 +1629,7 @@ def main():
     parser.add_argument("--use-rss", action="store_true", help="Use RSS feeds instead of NewsData.io (real-time, no delay)")
     parser.add_argument("--breaking-news", type=str, help="Path to breaking news JSON file (single story, 60s deep dive)")
     parser.add_argument("--voice", type=str, default="marin", help="TTS voice (marin, cedar, coral, nova)")
+    parser.add_argument("--dry-run", action="store_true", help="Test mode - don't save used_news")
     args = parser.parse_args()
     
     output_dir = Path(args.output)
@@ -1671,9 +1672,9 @@ def main():
         # RSS 피드 사용 (실시간, 딜레이 없음)
         from news_rss import fetch_rss_news, fetch_rss_news_by_category
         if args.by_category:
-            all_news = fetch_rss_news_by_category(count=args.count, news_type="weekly")
+            all_news = fetch_rss_news_by_category(count=args.count, news_type="weekly", dry_run=args.dry_run)
         else:
-            all_news = fetch_rss_news(count=args.count, news_type="daily")
+            all_news = fetch_rss_news(count=args.count, news_type="daily", dry_run=args.dry_run)
     elif args.by_category:
         # NewsData.io 카테고리별 (주간 비디오용)
         all_news = fetch_news_by_categories(ALL_CATEGORIES)
