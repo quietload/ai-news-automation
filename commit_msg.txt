@@ -1,6 +1,5 @@
-config: change US publish time from 22:00 to 21:00 EST
+config: revert US publish time to 22:00 EST (19:00 PST)
 
-- Daily Shorts (US): KST 12:00 → KST 11:00 (EST 21:00)
-- Weekly Video: KST 12:00 → KST 11:00 (EST 21:00 Saturday)
-
-US primetime 9 PM is better engagement time.
+Better for both coasts:
+- EST 22:00: East coast primetime
+- PST 19:00: West coast primetime start

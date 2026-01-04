@@ -34,11 +34,11 @@ def log(msg):
 
 
 def get_publish_time() -> str:
-    """KST 오전 11시 예약 게시 (US 프라임타임 21:00 EST)"""
+    """KST 정오 12시 예약 게시 (US 프라임타임 22:00 EST / 19:00 PST)"""
     now = datetime.now(KST)
-    publish_time = now.replace(hour=11, minute=0, second=0, microsecond=0)
+    publish_time = now.replace(hour=12, minute=0, second=0, microsecond=0)
     
-    if now.hour >= 11:
+    if now.hour >= 12:
         publish_time += timedelta(days=1)
     
     return publish_time.isoformat()
