@@ -1,7 +1,1 @@
-feat: improve breaking news log to distinguish detection vs limit
-
-Now clearly shows:
-- [DETECTED] Breaking news found but...
-- [SKIP] Daily limit reached - shows what was already generated
-- [GENERATE] Proceeding with generation
-- [NONE] No breaking news detected at all
+fix: show message when breaking title not recorded

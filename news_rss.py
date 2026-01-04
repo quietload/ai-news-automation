@@ -785,6 +785,8 @@ def detect_breaking_news(min_sources: int = 5) -> Optional[Dict]:
                     print(f"  [SKIP] Already generated today:")
                     for i, title in enumerate(today_titles, 1):
                         print(f"          {i}. {title[:60]}...")
+                else:
+                    print(f"  [SKIP] (Title not recorded - generated before this update)")
                 return None
             
             print(f"  [GENERATE] Proceeding with breaking news generation...")
