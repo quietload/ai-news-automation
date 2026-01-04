@@ -1,4 +1,7 @@
-feat: log today's breaking news title when limit reached
+feat: improve breaking news log to distinguish detection vs limit
 
-When daily breaking news limit is reached, now shows which
-article(s) were already generated today.
+Now clearly shows:
+- [DETECTED] Breaking news found but...
+- [SKIP] Daily limit reached - shows what was already generated
+- [GENERATE] Proceeding with generation
+- [NONE] No breaking news detected at all

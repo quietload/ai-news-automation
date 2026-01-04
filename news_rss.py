@@ -717,23 +717,13 @@ def detect_breaking_news(min_sources: int = 5) -> Optional[Dict]:
     Returns breaking news if:
     1. Contains breaking keywords AND
     2. Found in 5+ different sources
-    3. Daily limit not exceeded (max 3 per day)
+    3. Daily limit not exceeded (max 1 per day)
     
-    Returns None if no breaking news detected.
+    Returns None if no breaking news detected or limit reached.
     """
     print(f"\n[BREAKING] Scanning for breaking news (min {min_sources} sources)...")
     
-    # Check daily limit
     today_count = get_today_breaking_count()
-    if today_count >= MAX_BREAKING_PER_DAY:
-        today_titles = get_today_breaking_titles()
-        print(f"  [LIMIT] Daily limit reached ({today_count}/{MAX_BREAKING_PER_DAY}). Skipping...")
-        if today_titles:
-            print(f"  [LIMIT] Today's breaking news:")
-            for i, title in enumerate(today_titles, 1):
-                print(f"          {i}. {title[:60]}...")
-        return None
-    
     print(f"  [INFO] Today's breaking count: {today_count}/{MAX_BREAKING_PER_DAY}")
     
     # Load already reported breaking news
@@ -784,8 +774,20 @@ def detect_breaking_news(min_sources: int = 5) -> Optional[Dict]:
     for group in news_groups:
         news, count, sources = group
         if len(sources) >= min_sources:
-            print(f"  [BREAKING] Found: {news['title'][:50]}...")
-            print(f"  [BREAKING] Sources ({len(sources)}): {', '.join(list(sources)[:5])}...")
+            print(f"  [DETECTED] Breaking news found: {news['title'][:60]}...")
+            print(f"  [DETECTED] Sources ({len(sources)}): {', '.join(list(sources)[:5])}...")
+            
+            # Check daily limit AFTER detecting
+            if today_count >= MAX_BREAKING_PER_DAY:
+                today_titles = get_today_breaking_titles()
+                print(f"  [SKIP] Daily limit reached ({today_count}/{MAX_BREAKING_PER_DAY}) - NOT generating")
+                if today_titles:
+                    print(f"  [SKIP] Already generated today:")
+                    for i, title in enumerate(today_titles, 1):
+                        print(f"          {i}. {title[:60]}...")
+                return None
+            
+            print(f"  [GENERATE] Proceeding with breaking news generation...")
             
             # Mark as used
             used_breaking.add(get_news_id(news['title']))
@@ -796,7 +798,7 @@ def detect_breaking_news(min_sources: int = 5) -> Optional[Dict]:
             
             return news
     
-    print(f"  [INFO] No breaking news detected (found {len(news_groups)} candidates)")
+    print(f"  [NONE] No breaking news detected (checked {len(news_groups)} candidates, need {min_sources}+ sources)")
     return None
 
 
