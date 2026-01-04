@@ -1,5 +1,6 @@
-fix: stricter breaking news detection
+fix: sort RSS news by publish time (newest first)
 
-1. Remove "urgent" keyword (too common from news agencies)
-2. Increase min sources from 5 to 8
-3. Exclude reaction/criticism articles (slams, criticizes, etc.)
+- parse_feed now extracts publish timestamp from RSS
+- fetch_rss_news sorts all articles by time before selection
+- fetch_rss_news_by_category also sorts by newest first
+- Ensures latest breaking news gets priority
