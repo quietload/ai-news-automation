@@ -144,8 +144,8 @@ MAX_BREAKING_PER_DAY = 1
 
 # Breaking News 키워드
 BREAKING_KEYWORDS = [
-    # 속보 표현
-    "breaking", "just in", "urgent", "developing", "alert",
+    # 속보 표현 (urgent 제외 - 통신사 태그로 너무 자주 사용됨)
+    "breaking", "just in", "developing", "alert",
     # 사망/사고
     "dies", "dead", "killed", "assassination", "assassinated",
     # 전쟁/공격
@@ -158,6 +158,14 @@ BREAKING_KEYWORDS = [
     "resigns", "resigned", "impeached", "arrested", "indicted",
     # 역사적 사건
     "record", "historic", "first ever", "unprecedented",
+]
+
+# 브레이킹 뉴스 제외 키워드 (비난/반응 기사는 브레이킹 아님)
+BREAKING_EXCLUDE_KEYWORDS = [
+    "slams", "slam", "criticizes", "criticize", "condemns", "condemn",
+    "blasts", "blast", "denounces", "denounce", "rejects", "reject",
+    "warns", "warn", "urges", "urge", "calls for", "responds", "response",
+    "reacts", "reaction", "says", "said", "claims", "comments",
 ]
 
 # 주요 인물/기관 (이들 관련 뉴스는 가중치)
@@ -218,9 +226,15 @@ def titles_match(title1: str, title2: str, threshold: float = 0.5) -> bool:
 
 
 def is_breaking_news(title: str, description: str = "") -> bool:
-    """Check if news contains breaking keywords"""
+    """Check if news contains breaking keywords and not exclude keywords"""
     text = (title + " " + description).lower()
     
+    # 제외 키워드 체크 (비난/반응 기사는 브레이킹 아님)
+    for keyword in BREAKING_EXCLUDE_KEYWORDS:
+        if keyword in text:
+            return False
+    
+    # 브레이킹 키워드 체크
     for keyword in BREAKING_KEYWORDS:
         if keyword in text:
             return True
@@ -711,12 +725,12 @@ def increment_today_breaking_count(title: str = ""):
         json.dump(data, f)
 
 
-def detect_breaking_news(min_sources: int = 5) -> Optional[Dict]:
+def detect_breaking_news(min_sources: int = 8) -> Optional[Dict]:
     """
     Detect breaking news by scanning all RSS feeds.
     Returns breaking news if:
     1. Contains breaking keywords AND
-    2. Found in 5+ different sources
+    2. Found in 8+ different sources
     3. Daily limit not exceeded (max 1 per day)
     
     Returns None if no breaking news detected or limit reached.
