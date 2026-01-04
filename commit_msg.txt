@@ -1,5 +1,1 @@
-config: revert US publish time to 22:00 EST (19:00 PST)
-
-Better for both coasts:
-- EST 22:00: East coast primetime
-- PST 19:00: West coast primetime start
+config: change Korea Shorts publish time from 21:00 to 22:00 KST
