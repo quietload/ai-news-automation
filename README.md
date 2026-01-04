@@ -1,4 +1,4 @@
-# 📰 AI News Automation Pipeline v2.6
+# 📰 AI News Automation Pipeline v2.7
 
 Automatically generates and uploads YouTube news content using AI.
 
@@ -10,9 +10,16 @@ Automatically generates and uploads YouTube news content using AI.
 |-----------|------------|
 | Script | GPT-5 mini (reasoning_effort: minimal) |
 | Image | GPT Image 1.5 (오프닝 + 뉴스 + 엔딩) |
-| TTS | GPT-4o mini TTS (Marin voice, 세그먼트별) |
+| TTS | GPT-4o mini TTS (3-voice rotation) |
 | News | 38 RSS feeds |
 | Automation | n8n |
+
+## 🎙️ TTS Voice Rotation
+
+3명의 AI 앵커가 번갈아 진행:
+- **Marin** (Leader): 메인 앵커, 오프닝/클로징
+- **Coral** (Friendly): 친근한 스타일
+- **Nova** (Analyst): 분석적 스타일
 
 ## 🎬 Video Structure
 
@@ -44,6 +51,7 @@ GPT가 오늘 날짜를 분석하여 테마 자동 결정:
 **일반 Shorts/Video:**
 - 기념일: Christmas, Halloween, Valentine's Day, etc.
 - 계절: 봄 벚꽃, 여름 해변, 가을 단풍, 겨울 눈
+- TOP 헤드라인 강조 (첫 번째 뉴스 제목)
 
 **Breaking News:**
 - GPT가 뉴스 헤드라인 분석
@@ -52,18 +60,24 @@ GPT가 오늘 날짜를 분석하여 테마 자동 결정:
 - 경제 위기 → 시장 긴장감
 - 유명인 사망 → 추모 분위기
 
+## 🖼️ Image Generation (3-Stage Fallback)
+
+1. **Normal**: 사실적 이미지 (얼굴 허용 - 알려진 인물일 때)
+2. **No Face**: Policy 에러 시 → 뒷모습/실루엣 (얼굴 없음)
+3. **Abstract**: 여전히 실패 시 → 추상적/상징적 이미지
+
 ## 🌍 Subtitles (5 Languages)
 
 en, ko, ja, zh, es
 
-## 📅 Schedule
+## 📅 Schedule (n8n Luxon weekday: Mon=1...Sun=7)
 
-| Time (KST) | Days | Content |
-|------------|------|---------|
-| 11:50 | Tue-Sat | Daily Shorts (US) |
-| 20:50 | Mon-Fri | Daily Shorts (Korea) |
-| 11:30 | Sun | Weekly Video |
-| Every 10min | 24/7 | Breaking News |
+| Time (KST) | Days | Content | Skip |
+|------------|------|---------|------|
+| 11:50 | Tue-Sat | Daily Shorts (US) | 일/월 (US 주말) |
+| 20:50 | Mon-Fri | Daily Shorts (Korea) | 토/일 (KR 주말) |
+| 11:30 | Sun | Weekly Video | - |
+| Every 10min | 24/7 | Breaking News (max 1/day) | - |
 
 ## 🔥 Breaking News
 
@@ -157,11 +171,13 @@ python run_breaking_news.py
 
 ## 📧 Email Notifications
 
-| Icon | Type |
-|------|------|
-| ✅ | Success |
-| ❌ | Failure |
-| 🔥 | Breaking |
+| Icon | Type | Content |
+|------|------|---------|
+| ✅ | Success | 로그 + YouTube Description |
+| ❌ | Failure | 에러 로그 |
+| 🔥 | Breaking | 속보 알림 |
+
+**YouTube Description 포함**: 성공 메일에 업로드된 영상의 설명 전문 포함
 
 ## 📰 RSS Sources (38 feeds)
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-News Automation Pipeline v2.6
+News Automation Pipeline v2.7
 =============================
 
 YouTube 뉴스 콘텐츠 자동 생성 파이프라인
@@ -13,11 +13,12 @@ Content Types:
 Tech Stack:
     - Script: GPT-5 mini (reasoning_effort: minimal)
     - Image: GPT Image 1.5 (오프닝 + 뉴스당 2-3장 + 엔딩)
-    - TTS: GPT-4o mini TTS (Marin voice, 세그먼트별)
+    - TTS: GPT-4o mini TTS (3-voice rotation: marin, coral, nova)
     - News: 38 RSS feeds
 
 Features:
-    - GPT 기반 오프닝 이미지 (기념일/계절/브레이킹 자동 판단)
+    - GPT 기반 오프닝 이미지 (날짜 + TOP 헤드라인 강조)
+    - 3단계 이미지 fallback (normal → no face → abstract)
     - 세그먼트 기반 TTS (정확한 오디오-이미지 싱크)
     - 5개 언어 자막 (en, ko, ja, zh, es)
     - 브레이킹 뉴스 전용 긴박한 오프닝 테마
@@ -25,20 +26,25 @@ Features:
     - 썸네일 자동 생성 (Weekly)
 
 Video Structure:
-    1. 오프닝 이미지 (날짜 + 기념일/계절 또는 브레이킹 테마) - 3초
+    1. 오프닝 이미지 (날짜 + TOP 헤드라인) - 3초
     2. 뉴스별 이미지 - 오디오 길이에 맞춤
     3. 엔딩 이미지 (구독/좋아요) - 2초(Shorts) / 3초(Video)
+
+Image Fallback (3-stage):
+    1. Normal: 사실적 이미지 (얼굴 허용)
+    2. No Face: Policy 에러 시 → 뒷모습/실루엣
+    3. Abstract: 여전히 실패 시 → 추상적/상징적
 
 Usage:
     python news_dual.py --count 6 --shorts-only --use-rss      # Daily Shorts
     python news_dual.py --count 16 --video-only --by-category --use-rss  # Weekly
     python news_dual.py --breaking-news temp.json              # Breaking
 
-Schedule:
-    - 11:50 KST (Tue-Sat): US Primetime Shorts
-    - 20:50 KST (Mon-Fri): Korea Primetime Shorts
+Schedule (n8n):
+    - 11:50 KST (Tue-Sat): US Primetime Shorts (skip Sun/Mon)
+    - 20:50 KST (Mon-Fri): Korea Primetime Shorts (skip Sat/Sun)
     - 11:30 KST (Sun): Weekly Video
-    - Every 10min: Breaking News Detection
+    - Every 10min: Breaking News Detection (max 1/day)
 
 GitHub: https://github.com/quietload/ai-news-automation
 """

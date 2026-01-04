@@ -1,9 +1,15 @@
-feat: include YouTube description in email notification logs
+docs: update documentation to v2.7
 
-Added [YouTube Description] section to stdout output so n8n
-can include it in email notifications.
+README.md:
+- Version bump to v2.7
+- Added TTS 3-voice rotation section (marin, coral, nova)
+- Added Image Fallback section (3-stage: normal → no face → abstract)
+- Updated Schedule table with n8n Luxon weekday reference
+- Enhanced Email Notifications section (YouTube description included)
 
-Updated files:
-- run_daily_shorts_rss.py
-- run_daily_shorts_rss_morning.py
-- run_weekly_video_rss.py
+news_dual.py docstring:
+- Version bump to v2.7
+- Updated TTS description (3-voice rotation)
+- Added Image Fallback documentation (3-stage)
+- Updated Schedule with skip days
+- Added breaking news daily limit note
