@@ -663,7 +663,6 @@ def fetch_rss_news_by_category(count: int = 16, news_type: str = "weekly") -> Li
             print(f"  [FILL] {news['category']}: {news['title'][:40]}...")
             
             if len(selected) >= count:
-            if len(selected) >= count:
                 break
     
     # 카테고리별로 그룹화 + 비슷한 기사끼리 클러스터링

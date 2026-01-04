@@ -1,6 +1,0 @@
-fix: sort RSS news by publish time (newest first)
-
-- parse_feed now extracts publish timestamp from RSS
-- fetch_rss_news sorts all articles by time before selection
-- fetch_rss_news_by_category also sorts by newest first
-- Ensures latest breaking news gets priority
