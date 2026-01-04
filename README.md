@@ -52,9 +52,9 @@ GPT가 오늘 날짜를 분석하여 테마 자동 결정:
 - 경제 위기 → 시장 긴장감
 - 유명인 사망 → 추모 분위기
 
-## 🌍 Subtitles (11 Languages)
+## 🌍 Subtitles (5 Languages)
 
-en, ko, ja, zh, es, hi, pt, id, fr, ar, ru
+en, ko, ja, zh, es
 
 ## 📅 Schedule
 

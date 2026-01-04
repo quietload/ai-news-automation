@@ -1,4 +1,9 @@
-fix: triggerAtDay must be array in n8n schedule trigger
+docs: update subtitle languages from 11 to 5
 
-Changed triggerAtDay from number to array format
-Fixes "days.join is not a function" error on workflow activation
+Changed from: en, ko, ja, zh, es, hi, pt, id, fr, ar, ru
+Changed to: en, ko, ja, zh, es
+
+Updated in:
+- news_dual.py docstring
+- news_dual.py description generator
+- README.md

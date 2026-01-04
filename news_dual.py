@@ -19,7 +19,7 @@ Tech Stack:
 Features:
     - GPT 기반 오프닝 이미지 (기념일/계절/브레이킹 자동 판단)
     - 세그먼트 기반 TTS (정확한 오디오-이미지 싱크)
-    - 11개 언어 자막 (en, ko, ja, zh, es, hi, pt, id, fr, ar, ru)
+    - 5개 언어 자막 (en, ko, ja, zh, es)
     - 브레이킹 뉴스 전용 긴박한 오프닝 테마
     - 중복 뉴스 방지 (Daily/Weekly 분리 관리)
     - 썸네일 자동 생성 (Weekly)
@@ -1403,7 +1403,7 @@ def generate_description(news_list: list, is_weekly: bool = False) -> str:
         header = "AI News Daily | Today's Headlines (6 Stories)"
         stories_header = "Today's Stories:"
     
-    subtitle_langs = "🌍 Subtitles: English, 한국어, 日本語, 中文, Español, हिन्दी, Português, Bahasa Indonesia, Français, العربية, Русский"
+    subtitle_langs = "🌍 Subtitles: English, 한국어, 日本語, 中文, Español"
     
     description = f"{header}\n\n{subtitle_langs}\n\n{stories_header}\n\n{stories_text}\n\n---\nGenerated with AI\n\n#news #AI #globalNews #worldnews #breakingnews"
     return description
