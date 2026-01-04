@@ -1,15 +1,10 @@
-docs: update documentation to v2.7
+feat: use US Eastern time for display dates
 
-README.md:
-- Version bump to v2.7
-- Added TTS 3-voice rotation section (marin, coral, nova)
-- Added Image Fallback section (3-stage: normal → no face → abstract)
-- Updated Schedule table with n8n Luxon weekday reference
-- Enhanced Email Notifications section (YouTube description included)
+Changed display dates from local (KST) to US Eastern time:
+- Opening images date text (1/4 format)
+- Breaking news opening date
+- Thumbnail date text
+- Video/Shorts title date (e.g., "Today's Top News - Jan 04")
 
-news_dual.py docstring:
-- Version bump to v2.7
-- Updated TTS description (3-voice rotation)
-- Added Image Fallback documentation (3-stage)
-- Updated Schedule with skip days
-- Added breaking news daily limit note
+File timestamps still use local time (for file management).
+Target audience is US, so display should match their timezone.

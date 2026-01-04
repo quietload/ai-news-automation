@@ -68,7 +68,11 @@ import subprocess
 import requests
 from pathlib import Path
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from dotenv import load_dotenv
+
+# Timezone for display (US Eastern - target audience)
+US_EASTERN = ZoneInfo("America/New_York")
 
 # =============================================================================
 # CONFIGURATION
@@ -107,7 +111,7 @@ USED_NEWS_FILE_WEEKLY = Path(__file__).parent / "used_news_weekly.json"
 
 def generate_opening_image(output_path: Path, orientation: str = "vertical", top_headline: str = "", total_count: int = 6) -> Path:
     """Generate opening image with TOP headline highlight"""
-    today = datetime.now()
+    today = datetime.now(US_EASTERN)  # US Eastern time for display
     month = today.month
     day = today.day
     date_text = f"{month}/{day}"
@@ -171,7 +175,7 @@ Make it look exciting and clickable! The viewer should want to know about this s
 
 def generate_breaking_opening_image(output_path: Path, news: dict, orientation: str = "vertical") -> Path:
     """Generate urgent breaking news opening image with headline highlight"""
-    today = datetime.now()
+    today = datetime.now(US_EASTERN)  # US Eastern time for display
     month = today.month
     day = today.day
     date_text = f"{month}/{day}"
@@ -1507,8 +1511,8 @@ def generate_thumbnail(news_list: list, output_path: Path, style: str = "shorts"
     
     if style == "shorts":
         # Shorts 세로형 레이아웃
-        today = datetime.now().strftime("%b %d").upper()  # "DEC 31"
-        year = datetime.now().strftime("%Y")  # "2025"
+        today = datetime.now(US_EASTERN).strftime("%b %d").upper()  # "JAN 04"
+        year = datetime.now(US_EASTERN).strftime("%Y")  # "2026"
         
         # 상단: "TODAY'S"
         text1 = "TODAY'S"
@@ -1543,8 +1547,8 @@ def generate_thumbnail(news_list: list, output_path: Path, style: str = "shorts"
         
     else:
         # Video 가로형 레이아웃 - 심플하게
-        today = datetime.now().strftime("%b %d").upper()
-        year = datetime.now().strftime("%Y")
+        today = datetime.now(US_EASTERN).strftime("%b %d").upper()
+        year = datetime.now(US_EASTERN).strftime("%Y")
         
         # 큰 폰트 설정
         try:
@@ -1816,7 +1820,7 @@ def main():
         print(f"  [OK] Shorts: {shorts_video.name}")
         
         # Shorts는 썸네일 업로드 불가 (영상에서 프레임 선택 방식)
-        shorts_title = f"Today's Top News - {datetime.now().strftime('%b %d')} #shorts"
+        shorts_title = f"Today's Top News - {datetime.now(US_EASTERN).strftime('%b %d')} #shorts"
         shorts_description = generate_description(news_list)
         
         results["shorts"] = {
@@ -1900,7 +1904,7 @@ def main():
             video_thumb = None
             print(f"  [WARN] Thumbnail failed: {e}")
         
-        video_title = f"Weekly News Roundup - {datetime.now().strftime('%b %d, %Y')}"
+        video_title = f"Weekly News Roundup - {datetime.now(US_EASTERN).strftime('%b %d, %Y')}"
         video_description = generate_description(news_list, is_weekly=True)
         
         results["video"] = {
