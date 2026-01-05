@@ -19,18 +19,18 @@ Filtering:
     - Duplicates: daily/weekly/breaking 별도 추적
 
 Breaking News:
-    - Trigger: breaking keywords + 5개 이상 소스
+    - Trigger: breaking keywords + 8개 이상 소스 + GPT 검증
     - Keywords: breaking, dies, war, earthquake, resigns, etc.
     - 키워드 기반 그룹핑: 동일 사건 다른 제목도 그룹핑
       (venezuela, ukraine, russia, china, iran, israel 등)
     - 40% 유사도 또는 동일 토픽 키워드로 그룹화
-    - Daily limit: 최대 1개/일
+    - Daily limit: 최대 2개/일
 
 Usage:
     from news_rss import fetch_rss_news, detect_breaking_news
     
     news = fetch_rss_news(count=6, news_type="daily")
-    breaking = detect_breaking_news(min_sources=5)
+    breaking = detect_breaking_news(min_sources=8)
 
 Log:
     [OK] technology: Apple announces... (TechCrunch)
@@ -140,7 +140,7 @@ USED_NEWS_FILE_RSS_WEEKLY = Path(__file__).parent / "used_news_rss_weekly.json"
 USED_NEWS_FILE_RSS_BREAKING = Path(__file__).parent / "used_news_rss_breaking.json"
 
 # Breaking news daily limit
-MAX_BREAKING_PER_DAY = 1
+MAX_BREAKING_PER_DAY = 2
 
 # Breaking News 키워드
 BREAKING_KEYWORDS = [
@@ -160,12 +160,21 @@ BREAKING_KEYWORDS = [
     "record", "historic", "first ever", "unprecedented",
 ]
 
-# 브레이킹 뉴스 제외 키워드 (비난/반응 기사는 브레이킹 아님)
+# 브레이킹 뉴스 제외 키워드 (비난/반응/분석 기사는 브레이킹 아님)
 BREAKING_EXCLUDE_KEYWORDS = [
+    # 비난/반응
     "slams", "slam", "criticizes", "criticize", "condemns", "condemn",
     "blasts", "blast", "denounces", "denounce", "rejects", "reject",
     "warns", "warn", "urges", "urge", "calls for", "responds", "response",
     "reacts", "reaction", "says", "said", "claims", "comments",
+    # 분석/의견
+    "divided", "split", "debate", "debates", "opinion", "analysis",
+    "could", "would", "should", "might", "may",
+    "what it means", "what we know", "explained", "why",
+    # 과거 사건 회고
+    "after", "following", "in wake of", "aftermath",
+    # 예측/전망
+    "expected", "expected to", "likely", "unlikely", "predict", "forecast",
 ]
 
 # 주요 인물/기관 (이들 관련 뉴스는 가중치)
@@ -444,7 +453,7 @@ def save_used_news(used: set, news_type: str = "daily", max_keep: int = 500):
 
 
 def parse_feed(url: str, source_name: str, category: str) -> List[Dict]:
-    """Parse a single RSS feed and sort by publish time (newest first)"""
+    """Parse a single RSS feed (keeps original order = Top news first)"""
     try:
         feed = feedparser.parse(url)
         news_items = []
@@ -454,13 +463,13 @@ def parse_feed(url: str, source_name: str, category: str) -> List[Dict]:
             description = entry.get('summary', '') or entry.get('description', '')
             link = entry.get('link', '')
             
-            # Get publish time
+            # Get publish time (for reference, not sorting)
             published = entry.get('published_parsed') or entry.get('updated_parsed')
             if published:
                 from time import mktime
                 pub_timestamp = mktime(published)
             else:
-                pub_timestamp = 0  # Unknown time goes to end
+                pub_timestamp = 0
             
             # Clean description (remove HTML tags)
             if description:
@@ -478,9 +487,7 @@ def parse_feed(url: str, source_name: str, category: str) -> List[Dict]:
                     "pub_timestamp": pub_timestamp,
                 })
         
-        # Sort by publish time (newest first)
-        news_items.sort(key=lambda x: x['pub_timestamp'], reverse=True)
-        
+        # RSS 원본 순서 유지 (Top 뉴스 우선) - 정렬 제거
         return news_items
     except Exception as e:
         print(f"  [WARN] Failed to parse {source_name}: {e}")
@@ -494,18 +501,19 @@ def parse_feed(url: str, source_name: str, category: str) -> List[Dict]:
 def fetch_rss_news(count: int = 8, news_type: str = "daily", dry_run: bool = False) -> List[Dict]:
     """
     Fetch news from RSS feeds (for Daily Shorts)
-    Returns diverse news from all categories, sorted by newest first
+    Returns diverse news from all categories, using RSS feed order (Top news first)
     Filters out: local news, similar articles
     dry_run=True이면 used_news 파일에 저장하지 않음
     """
-    print(f"\n[RSS] Fetching {count} news articles (newest first)...")
+    print(f"\n[RSS] Fetching {count} news articles (Top news first)...")
     
     used_news = load_used_news(news_type)
     all_news = []
     all_titles = []  # 유사도 체크용
     categories = list(RSS_FEEDS.keys())
+    random.shuffle(categories)  # 카테고리 순서 랜덤화
     
-    # Collect news from each category
+    # Collect news from each category (RSS 원본 순서 유지 = Top 뉴스 우선)
     for category in categories:
         feeds = RSS_FEEDS[category]
         
@@ -530,11 +538,10 @@ def fetch_rss_news(count: int = 8, news_type: str = "daily", dry_run: bool = Fal
                 all_news.append(item)
                 all_titles.append(item['title'])
     
-    # Sort all news by publish time (newest first)
-    all_news.sort(key=lambda x: x.get('pub_timestamp', 0), reverse=True)
-    print(f"  [INFO] Collected {len(all_news)} articles, sorting by newest...")
+    # RSS 피드 원본 순서 유지 (Top 뉴스 우선) - 시간순 정렬 제거
+    print(f"  [INFO] Collected {len(all_news)} articles (Top news order)...")
     
-    # Select news ensuring category diversity (newest first within each category)
+    # Select news ensuring category diversity (Top news first within each category)
     selected = []
     selected_titles = []
     category_count = {}
@@ -588,20 +595,21 @@ def fetch_rss_news(count: int = 8, news_type: str = "daily", dry_run: bool = Fal
 def fetch_rss_news_by_category(count: int = 16, news_type: str = "weekly", dry_run: bool = False) -> List[Dict]:
     """
     Fetch news by category (for Weekly Video)
-    Returns balanced news across all categories, newest first
+    Returns balanced news across all categories, using RSS feed order (Top news first)
     Filters out: local news, similar articles
     If a category is short, fills from other categories
     dry_run=True이면 used_news 파일에 저장하지 않음
     """
-    print(f"\n[RSS] Fetching {count} news articles by category (newest first)...")
+    print(f"\n[RSS] Fetching {count} news articles by category (Top news first)...")
     
     used_news = load_used_news(news_type)
     all_news = []
     all_titles = []  # 전체 유사도 체크용
     categories = list(RSS_FEEDS.keys())
+    random.shuffle(categories)  # 카테고리 순서 랜덤화
     per_category = (count + len(categories) - 1) // len(categories)  # Ceiling division
     
-    # 1차: 모든 카테고리에서 뉴스 수집
+    # 1차: 모든 카테고리에서 뉴스 수집 (RSS 원본 순서 유지 = Top 뉴스 우선)
     for category in categories:
         feeds = RSS_FEEDS[category]
         
@@ -626,11 +634,10 @@ def fetch_rss_news_by_category(count: int = 16, news_type: str = "weekly", dry_r
                 all_news.append(item)
                 all_titles.append(item['title'])
     
-    # 시간순 정렬 (최신 먼저)
-    all_news.sort(key=lambda x: x.get('pub_timestamp', 0), reverse=True)
-    print(f"  [INFO] Collected {len(all_news)} articles, sorting by newest...")
+    # RSS 피드 원본 순서 유지 (Top 뉴스 우선) - 시간순 정렬 제거
+    print(f"  [INFO] Collected {len(all_news)} articles (Top news order)...")
     
-    # 카테고리별 균형 맞추면서 최신 기사 선택
+    # 카테고리별 균형 맞추면서 Top 기사 선택
     selected = []
     selected_titles = []
     category_count = {}

@@ -77,13 +77,19 @@ en, ko, ja, zh, es
 | 11:50 | 12:00 | Tue-Sat | Daily Shorts (US) | 22:00 EST / 19:00 PST |
 | 21:50 | 22:00 | Mon-Fri | Daily Shorts (Korea) | - |
 | 11:30 | 12:00 | Sun | Weekly Video | 22:00 EST Sat |
-| Every 10min | Immediate | 24/7 | Breaking News (max 1/day) | - |
+| Every 10min | Immediate | 24/7 | Breaking News (max 2/day) | - |
 
 ## 🔥 Breaking News
 
-**Trigger:** Breaking keywords + 5+ sources reporting same story
+**Trigger:** Breaking keywords + 8+ sources reporting same story + GPT verification
 
 **Keywords:** breaking, dies, war, earthquake, crash, resigns, etc.
+
+**GPT Verification:**
+- 방금 발생했거나 진행 중인 사건인지 확인
+- 전 세계적 영향이 있는지 확인  
+- 반응/분석/의견 기사는 제외
+- 지역 뉴스, 일반 비즈니스/연예 뉴스 제외
 
 **Keyword-based Grouping:**
 - 동일 사건이 다른 제목으로 보도되어도 그룹핑

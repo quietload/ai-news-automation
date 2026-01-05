@@ -44,7 +44,7 @@ Schedule (n8n):
     - 11:50 KST (Tue-Sat): US Primetime Shorts (skip Sun/Mon)
     - 20:50 KST (Mon-Fri): Korea Primetime Shorts (skip Sat/Sun)
     - 11:30 KST (Sun): Weekly Video
-    - Every 10min: Breaking News Detection (max 1/day)
+    - Every 10min: Breaking News Detection (max 2/day, GPT verified)
 
 GitHub: https://github.com/quietload/ai-news-automation
 """
