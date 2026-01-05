@@ -70,6 +70,7 @@ from pathlib import Path
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from dotenv import load_dotenv
+from PIL import Image, ImageDraw, ImageFont
 
 # Timezone for display (US Eastern - target audience)
 US_EASTERN = ZoneInfo("America/New_York")
@@ -142,6 +143,7 @@ STYLE:
 - Eye-catching, YouTube thumbnail style
 - Bold colors, high contrast, professional news aesthetic
 - The headline "{top_headline}" should be the BIGGEST and most prominent
+- If any person is shown, use ONLY back view, side profile, or silhouette - NEVER frontal face
 - {format_desc} format
 
 Make it look exciting and clickable! The viewer should want to know about this story."""
@@ -169,6 +171,9 @@ Make it look exciting and clickable! The viewer should want to know about this s
         img_response = requests.get(data["url"], timeout=60)
         with open(output_path, 'wb') as f:
             f.write(img_response.content)
+    
+    # 워터마크 추가 (오프닝은 하단)
+    add_watermark(output_path, position="bottom")
     
     return output_path
 
@@ -222,6 +227,7 @@ STYLE:
 - Eye-catching, YouTube thumbnail style
 - The headline "{short_headline}" should be HUGE and prominent
 - Professional emergency broadcast aesthetic
+- If any person is shown, use ONLY back view, side profile, or silhouette - NEVER frontal face
 - {format_desc} format
 
 Make it look URGENT! The viewer must click to know what happened."""
@@ -247,6 +253,9 @@ Make it look URGENT! The viewer must click to know what happened."""
         img_response = requests.get(data["url"], timeout=60)
         with open(output_path, 'wb') as f:
             f.write(img_response.content)
+    
+    # 워터마크 추가 (브레이킹 오프닝도 하단)
+    add_watermark(output_path, position="bottom")
     
     return output_path
     news_category = news.get('category', '')
@@ -518,7 +527,7 @@ Format: {orient_desc}
 
 STYLE: Cinematic photojournalism
 - Realistic, professional photography
-- NO TEXT, NO LETTERS, NO CAPTIONS
+- If any person is shown, use ONLY back view, side profile, or silhouette - NEVER frontal face (portrait rights protection)
 - Dramatic lighting
 
 Output one prompt per line, no numbering. Under 80 words each."""
@@ -535,8 +544,8 @@ Output one prompt per line, no numbering. Under 80 words each."""
     if response.status_code == 200:
         content = response.json()["choices"][0]["message"]["content"].strip()
         prompts = [p.strip() for p in content.split('\n') if p.strip()]
-        return prompts[:count] if prompts else [f"Cinematic photo, no text, realistic, {orient_desc}"] * count
-    return [f"Cinematic photo, no text, realistic, {orient_desc}"] * count
+        return prompts[:count] if prompts else [f"Cinematic photo, back view or silhouette only, {orient_desc}"] * count
+    return [f"Cinematic photo, back view or silhouette only, {orient_desc}"] * count
 
 
 def generate_image_prompts_safe(news: dict, count: int, orientation: str) -> list:
@@ -544,9 +553,9 @@ def generate_image_prompts_safe(news: dict, count: int, orientation: str) -> lis
     orient_desc = "vertical portrait 9:16" if orientation == "vertical" else "horizontal landscape 16:9"
     title = news.get('title', '')[:30]
     return [
-        f"Cinematic photo related to {title}, back view or silhouette only, no visible faces, no text, {orient_desc}",
-        f"Dramatic scene, people from behind or in shadow, no recognizable faces, no text, {orient_desc}",
-        f"News scene with silhouettes, no clear faces visible, cinematic lighting, no text, {orient_desc}"
+        f"Cinematic photo related to {title}, back view or silhouette only, no visible faces, {orient_desc}",
+        f"Dramatic scene, people from behind or in shadow, no recognizable faces, {orient_desc}",
+        f"News scene with silhouettes, no clear faces visible, cinematic lighting, {orient_desc}"
     ][:count]
 
 
@@ -555,14 +564,78 @@ def generate_image_prompts_fallback(news: dict, count: int, orientation: str) ->
     orient_desc = "vertical portrait 9:16" if orientation == "vertical" else "horizontal landscape 16:9"
     category = news.get('category', 'news')
     return [
-        f"Abstract colorful background representing {category}, no text, no people, {orient_desc}",
-        f"Dramatic cinematic scene of objects or scenery, no people, no text, {orient_desc}",
-        f"Professional photograph of location or objects, no people, no text, {orient_desc}"
+        f"Abstract colorful background representing {category}, no people, {orient_desc}",
+        f"Dramatic cinematic scene of objects or scenery, no people, {orient_desc}",
+        f"Professional photograph of location or objects, no people, {orient_desc}"
     ][:count]
 
 
-def generate_image(prompt: str, output_path: Path, size: str, retry_count: int = 0) -> Path:
-    """Generate image with GPT Image 1.5"""
+# =============================================================================
+# WATERMARK FUNCTION
+# =============================================================================
+
+def add_watermark(image_path: Path, text: str = "AI NEWS DAILY | AI GENERATED", position: str = "center") -> Path:
+    """이미지에 고정 크기 워터마크 추가
+    
+    Args:
+        image_path: 이미지 파일 경로
+        text: 워터마크 텍스트
+        position: "center" (화면 가운데) 또는 "bottom" (하단 가운데)
+    """
+    try:
+        img = Image.open(image_path).convert("RGBA")
+        
+        # 투명 레이어 생성
+        overlay = Image.new("RGBA", img.size, (0, 0, 0, 0))
+        draw = ImageDraw.Draw(overlay)
+        
+        # 폰트 설정 (고정 크기)
+        font_size = 28
+        try:
+            font = ImageFont.truetype("C:/Windows/Fonts/arialbd.ttf", font_size)
+        except:
+            try:
+                font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", font_size)
+            except:
+                font = ImageFont.load_default()
+        
+        # 텍스트 크기 계산
+        bbox = draw.textbbox((0, 0), text, font=font)
+        text_width = bbox[2] - bbox[0]
+        text_height = bbox[3] - bbox[1]
+        
+        # 위치 계산
+        x = (img.width - text_width) // 2
+        if position == "bottom":
+            y = img.height - text_height - 30  # 하단에서 30px 위
+        else:  # center
+            y = (img.height - text_height) // 2
+        
+        # 반투명 배경 박스 (투명도 0.2)
+        padding = 10
+        draw.rectangle(
+            [x - padding, y - padding, x + text_width + padding, y + text_height + padding],
+            fill=(0, 0, 0, 40)
+        )
+        
+        # 텍스트 그리기 (흰색, 투명도 0.3)
+        draw.text((x, y), text, font=font, fill=(255, 255, 255, 76))
+        
+        # 합성
+        img = Image.alpha_composite(img, overlay)
+        
+        # RGB로 변환 후 저장
+        img = img.convert("RGB")
+        img.save(image_path)
+        
+        return image_path
+    except Exception as e:
+        print(f"    [WARN] Watermark failed: {e}")
+        return image_path
+
+
+def generate_image(prompt: str, output_path: Path, size: str, retry_count: int = 0, watermark_position: str = "center") -> Path:
+    """Generate image with GPT Image 1.5 + 워터마크 추가"""
     # size 변환: DALL-E 형식 -> gpt-image-1.5 형식
     # gpt-image-1.5는 auto, 1024x1024, 1536x1024, 1024x1536 지원
     if size == "1024x1792":  # Shorts (세로)
@@ -600,6 +673,9 @@ def generate_image(prompt: str, output_path: Path, size: str, retry_count: int =
             f.write(img_data)
     else:
         raise Exception(f"Unknown response format: {data.keys()}")
+    
+    # 워터마크 추가
+    add_watermark(output_path, position=watermark_position)
     
     return output_path
 

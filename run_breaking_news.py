@@ -60,7 +60,10 @@ OPENAI_API_BASE = "https://api.openai.com/v1"
 
 def log(msg):
     """Log to console and file"""
-    print(msg)
+    try:
+        print(msg)
+    except UnicodeEncodeError:
+        print(msg.encode('utf-8', errors='replace').decode('utf-8'))
     with open(LOG_FILE, 'a', encoding='utf-8') as f:
         f.write(f"{datetime.now(KST).strftime('%H:%M:%S')} {msg}\n")
 
