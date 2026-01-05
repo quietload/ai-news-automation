@@ -92,7 +92,10 @@ def upload_shorts(summary: dict):
         return
     
     video_path = shorts.get("video")
-    if not video_path or not Path(video_path).exists():
+    # 상대경로를 절대경로로 변환
+    if video_path:
+        video_path = Path(__file__).parent / video_path
+    if not video_path or not video_path.exists():
         log(f"[FAIL] Video not found: {video_path}")
         return
     
@@ -108,7 +111,7 @@ def upload_shorts(summary: dict):
     
     cmd = [
         sys.executable, "upload_video.py",
-        "--file", video_path,
+        "--file", str(video_path),
         "--title", shorts["title"][:100],
         "--description", shorts["description"][:5000],
         "--privacyStatus", "private",
@@ -116,7 +119,7 @@ def upload_shorts(summary: dict):
     ]
     
     subtitles = shorts.get("subtitles", {})
-    subtitle_files = [f for f in subtitles.values() if Path(f).exists()]
+    subtitle_files = [str(Path(__file__).parent / f) for f in subtitles.values() if (Path(__file__).parent / f).exists()]
     if subtitle_files:
         cmd.extend(["--subtitles", ",".join(subtitle_files)])
     
