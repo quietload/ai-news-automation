@@ -17,6 +17,7 @@ import sys
 import time
 import json
 import argparse
+from datetime import datetime, timedelta
 
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -225,8 +226,19 @@ def upload_thumbnail(youtube, video_id, thumbnail_path):
 # =============================================================================
 
 def schedule_video(youtube, video_id, publish_at):
-    """Set video to private with scheduled publish time"""
+    """Set video to private with scheduled publish time
+    
+    publish_at: KST 시간 (한국 시간) - UTC로 변환하여 YouTube에 전달
+    """
     try:
+        # KST → UTC 변환 (KST는 UTC+9)
+        if publish_at:
+            if 'Z' not in publish_at and '+' not in publish_at:
+                dt = datetime.fromisoformat(publish_at)
+                dt_utc = dt - timedelta(hours=9)
+                publish_at = dt_utc.strftime("%Y-%m-%dT%H:%M:%SZ")
+                print(f"[INFO] Converted KST to UTC: {publish_at}")
+        
         youtube.videos().update(
             part="status",
             body={

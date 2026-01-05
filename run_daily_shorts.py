@@ -179,6 +179,20 @@ def main():
         log("[OK] Daily Shorts Complete!")
         log("=" * 60)
         
+        # 최종 JSON 요약 출력 (n8n 파싱용)
+        json_summary = {
+            "status": "success",
+            "title": shorts["title"],
+            "description": shorts["description"],
+            "video": shorts["video"],
+            "video_id": video_id,
+            "url": f"https://youtube.com/watch?v={video_id}",
+            "api": "OpenAI GPT-4"
+        }
+        print("\n[JSON_SUMMARY]")
+        print(json.dumps(json_summary, ensure_ascii=False))
+        print("[/JSON_SUMMARY]")
+        
     except Exception as e:
         log(f"[ERROR] {e}")
         log(traceback.format_exc())

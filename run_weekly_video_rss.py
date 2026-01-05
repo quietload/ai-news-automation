@@ -159,6 +159,19 @@ def main():
         summary = run_video()
         if summary:
             upload_video(summary)
+            
+            # 최종 JSON 요약 출력 (n8n 파싱용)
+            video = summary.get("video", {})
+            json_summary = {
+                "status": "success",
+                "title": video.get("title", ""),
+                "description": video.get("description", ""),
+                "video": video.get("video", ""),
+                "api": "OpenAI GPT-4"
+            }
+            print("\n[JSON_SUMMARY]")
+            print(json.dumps(json_summary, ensure_ascii=False))
+            print("[/JSON_SUMMARY]")
         else:
             log("[FAIL] No video generated")
             sys.exit(1)

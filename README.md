@@ -1,4 +1,4 @@
-# 📰 AI News Automation Pipeline v2.7
+# 📰 AI News Automation Pipeline v2.8
 
 Automatically generates and uploads YouTube news content using AI.
 
@@ -10,16 +10,17 @@ Automatically generates and uploads YouTube news content using AI.
 |-----------|------------|
 | Script | GPT-5 mini (reasoning_effort: minimal) |
 | Image | GPT Image 1.5 (오프닝 + 뉴스 + 엔딩) |
-| TTS | GPT-4o mini TTS (3-voice rotation) |
+| TTS | GPT-4o mini TTS |
 | News | 38 RSS feeds |
 | Automation | n8n |
 
-## 🎙️ TTS Voice Rotation
+## 🎙️ TTS Voice Schedule
 
-3명의 AI 앵커가 번갈아 진행:
-- **Marin** (Leader): 메인 앵커, 오프닝/클로징
-- **Coral** (Friendly): 친근한 스타일
-- **Nova** (Analyst): 분석적 스타일
+| Time | Voice | Style |
+|------|-------|-------|
+| Morning (12:00) | marin | 여성, 부드러운 |
+| Evening (22:00) | cedar | 남성, 차분한 |
+| Weekly | Alternating | 짝수주=marin, 홀수주=cedar |
 
 ## 🎬 Video Structure
 
@@ -31,6 +32,7 @@ Automatically generates and uploads YouTube news content using AI.
 │  뉴스별 이미지들                      │  ← 오디오 길이에 맞춤
 ├─────────────────────────────────────┤
 │  엔딩 이미지 (구독/좋아요)            │  ← 2초(Shorts) / 3초(Video)
+│  ※ 워터마크 투명도 0.3               │
 └─────────────────────────────────────┘
 ```
 
@@ -44,129 +46,72 @@ Automatically generates and uploads YouTube news content using AI.
 | Images | 2 per news | 3 per news | 5 images |
 | Opening | 기념일/계절 | - | 긴박한 속보 테마 |
 
-## 🎯 Smart Opening Image
+## 📅 Schedule (n8n)
 
-GPT가 오늘 날짜를 분석하여 테마 자동 결정:
-
-**일반 Shorts/Video:**
-- 기념일: Christmas, Halloween, Valentine's Day, etc.
-- 계절: 봄 벚꽃, 여름 해변, 가을 단풍, 겨울 눈
-- TOP 헤드라인 강조 (첫 번째 뉴스 제목)
-
-**Breaking News:**
-- GPT가 뉴스 헤드라인 분석
-- 재난 → 긴급 빨간색
-- 정치 → 공식적 분위기
-- 경제 위기 → 시장 긴장감
-- 유명인 사망 → 추모 분위기
-
-## 🖼️ Image Generation (3-Stage Fallback)
-
-1. **Normal**: 사실적 이미지 (얼굴 허용 - 알려진 인물일 때)
-2. **No Face**: Policy 에러 시 → 뒷모습/실루엣 (얼굴 없음)
-3. **Abstract**: 여전히 실패 시 → 추상적/상징적 이미지
-
-## 🌍 Subtitles (5 Languages)
-
-en, ko, ja, zh, es
-
-## 📅 Schedule (n8n Luxon weekday: Mon=1...Sun=7)
-
-| Time (KST) | Publish (KST) | Days | Content | US Time |
-|------------|---------------|------|---------|---------|
-| 11:50 | 12:00 | Tue-Sat | Daily Shorts (US) | 22:00 EST / 19:00 PST |
-| 21:50 | 22:00 | Mon-Fri | Daily Shorts (Korea) | - |
-| 11:30 | 12:00 | Sun | Weekly Video | 22:00 EST Sat |
-| Every 10min | Immediate | 24/7 | Breaking News (max 2/day) | - |
+| Generate (KST) | Publish (KST) | Days | Content |
+|----------------|---------------|------|---------|
+| 11:45 | 12:00 | Tue-Sat | Daily Shorts (US primetime) |
+| 21:45 | 22:00 | Mon-Fri | Daily Shorts (Korea primetime) |
+| 11:30 | 12:00 | Sun | Weekly Video |
+| Every 10min | Immediate | 24/7 | Breaking News (max 2/day) |
 
 ## 🔥 Breaking News
 
 **Trigger:** Breaking keywords + 8+ sources reporting same story + GPT verification
 
-**Keywords:** breaking, dies, war, earthquake, crash, resigns, etc.
-
-**GPT Verification:**
-- 방금 발생했거나 진행 중인 사건인지 확인
-- 전 세계적 영향이 있는지 확인  
-- 반응/분석/의견 기사는 제외
-- 지역 뉴스, 일반 비즈니스/연예 뉴스 제외
-
-**Keyword-based Grouping:**
-- 동일 사건이 다른 제목으로 보도되어도 그룹핑
-- 국가/지역 키워드: venezuela, ukraine, russia, china, iran, israel 등
-- 예: "US strikes Venezuela" + "Maduro captured" + "Caracas explosions" → 동일 사건
-
-**Lock File:**
-- `breaking.lock` 생성하여 중복 실행 방지
-- 30분 이상 된 락은 자동 삭제
+**Exit Codes:**
+- `0` = 성공 (뉴스 업로드됨) → 이메일 발송
+- `1` = 에러 → 에러 이메일 발송
+- `2` = 뉴스 없음 → 무시 (이메일 없음)
 
 ## 📁 Project Structure
 
 ```
 news/
 ├── news_dual.py                    # 메인 생성기
-│   ├── generate_opening_image()        # GPT 기반 오프닝 테마
-│   ├── generate_breaking_opening_image()  # 속보용 긴박한 테마
-│   ├── generate_segmented_audio()      # 세그먼트별 TTS
-│   └── create_video()                  # 오프닝/엔딩 포함 영상
 ├── news_rss.py                     # RSS 수집 + 속보 감지
-├── upload_video.py                 # YouTube 업로드
+├── upload_video.py                 # YouTube 업로드 (KST→UTC 변환)
 │
-├── # Runner Scripts
-├── run_daily_shorts_rss_morning.py
-├── run_daily_shorts_rss.py
-├── run_weekly_video_rss.py
-├── run_breaking_news.py
+├── run_daily_shorts_rss_morning.py # Morning (11:45 → 12:00)
+├── run_daily_shorts_rss.py         # Evening (21:45 → 22:00)
+├── run_weekly_video_rss.py         # Weekly (Sun 11:30)
+├── run_breaking_news.py            # Breaking (Every 10min)
 │
-├── # n8n Workflows
-├── n8n_*.json
-│
-├── # Tracking
-├── used_news_daily.json
-├── used_news_weekly.json
+├── n8n_daily_shorts_rss_morning_scheduled.json  # Tue-Sat 11:45
+├── n8n_daily_shorts_rss_scheduled.json          # Mon-Fri 21:45
+├── n8n_weekly_video_rss_scheduled.json          # Sun 11:30
+├── n8n_breaking_news_detector.json              # Every 10min
 │
 ├── assets/
-│   ├── ending_shorts.png           # 세로 엔딩
-│   └── ending_video.png            # 가로 엔딩
+│   ├── ending_shorts.png           # 세로 엔딩 (워터마크 0.3)
+│   └── ending_video.png            # 가로 엔딩 (워터마크 0.3)
 └── output/                         # 생성된 영상
 ```
 
 ## ⚙️ Setup
 
-### 1. Install
-
 ```bash
+# Install dependencies
 pip install requests python-dotenv pillow feedparser openai google-auth google-auth-oauthlib google-api-python-client
-```
 
-### 2. FFmpeg
+# FFmpeg (Windows)
+choco install ffmpeg
 
-```bash
-choco install ffmpeg  # Windows
-```
-
-### 3. API Keys (.env)
-
-```env
+# API Keys (.env)
 OPENAI_API_KEY=sk-xxxxxxxxxxxxx
-```
 
-### 4. YouTube OAuth
-
-1. Google Cloud Console → YouTube Data API v3
-2. OAuth 2.0 credentials → `client_secrets.json`
-
-### 5. Create Ending Images
-
-```bash
+# Create Ending Images
 python create_ending_images.py
 ```
 
 ## 🎮 Usage
 
 ```bash
-# Daily Shorts
-python news_dual.py --count 6 --shorts-only --use-rss
+# Daily Shorts (Morning - female voice)
+python news_dual.py --count 6 --shorts-only --use-rss --voice marin
+
+# Daily Shorts (Evening - male voice)
+python news_dual.py --count 6 --shorts-only --use-rss --voice cedar
 
 # Weekly Video
 python news_dual.py --count 16 --video-only --by-category --use-rss
@@ -175,15 +120,12 @@ python news_dual.py --count 16 --video-only --by-category --use-rss
 python run_breaking_news.py
 ```
 
-## 📧 Email Notifications
+## 📧 n8n Email Notifications
 
-| Icon | Type | Content |
-|------|------|---------|
-| ✅ | Success | 로그 + YouTube Description |
-| ❌ | Failure | 에러 로그 |
-| 🔥 | Breaking | 속보 알림 |
-
-**YouTube Description 포함**: 성공 메일에 업로드된 영상의 설명 전문 포함
+워크플로우 실행 결과를 이메일로 알림:
+- **✅ Success:** 제목, YouTube 설명 포함
+- **❌ Failure:** 에러 로그 포함
+- **🔥 Breaking (뉴스 없음):** 이메일 발송 안 함 (exit code 2)
 
 ## 📰 RSS Sources (38 feeds)
 

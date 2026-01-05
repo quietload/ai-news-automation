@@ -147,6 +147,19 @@ def main():
         summary = run_shorts()
         if summary:
             upload_shorts(summary)
+            
+            # 최종 JSON 요약 출력 (n8n 파싱용)
+            shorts = summary.get("shorts", {})
+            json_summary = {
+                "status": "success",
+                "title": shorts.get("title", ""),
+                "description": shorts.get("description", ""),
+                "video": shorts.get("video", ""),
+                "api": "OpenAI GPT-4"
+            }
+            print("\n[JSON_SUMMARY]")
+            print(json.dumps(json_summary, ensure_ascii=False))
+            print("[/JSON_SUMMARY]")
         else:
             log("[FAIL] No shorts generated")
             sys.exit(1)
