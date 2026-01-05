@@ -113,10 +113,7 @@ USED_NEWS_FILE_WEEKLY = Path(__file__).parent / "used_news_weekly.json"
 def generate_opening_image(output_path: Path, orientation: str = "vertical", top_headline: str = "", total_count: int = 6) -> Path:
     """Generate opening image with TOP headline highlight"""
     today = datetime.now(US_EASTERN)  # US Eastern time for display
-    year = today.year
-    month = today.month
-    day = today.day
-    date_text = f"{year}/{month}/{day}"
+    date_text = today.strftime("%b %d, %Y")  # Jan 05, 2026
     
     # 추가 뉴스 개수 (TOP 1개 제외)
     more_count = total_count - 1 if total_count > 1 else 0
@@ -182,10 +179,7 @@ Make it look exciting and clickable! The viewer should want to know about this s
 def generate_breaking_opening_image(output_path: Path, news: dict, orientation: str = "vertical") -> Path:
     """Generate urgent breaking news opening image with headline highlight"""
     today = datetime.now(US_EASTERN)  # US Eastern time for display
-    year = today.year
-    month = today.month
-    day = today.day
-    date_text = f"{year}/{month}/{day}"
+    date_text = today.strftime("%b %d, %Y")  # Jan 05, 2026
     
     news_title = news.get('title', '')
     
