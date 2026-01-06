@@ -1618,19 +1618,22 @@ def generate_thumbnail(news_list: list, output_path: Path, style: str = "shorts"
         today = datetime.now(US_EASTERN).strftime("%b %d").upper()  # "JAN 04"
         year = datetime.now(US_EASTERN).strftime("%Y")  # "2026"
         
-        # 상단: "TODAY'S"
+        # 10% from top 계산
+        top_10_percent = int(height * 0.10)
+        
+        # 상단: "TODAY'S" (10% 아래로)
         text1 = "TODAY'S"
         bbox1 = draw.textbbox((0, 0), text1, font=font_large)
         x1 = (width - (bbox1[2] - bbox1[0])) // 2
-        draw.text((x1+3, 83), text1, font=font_large, fill="black")
-        draw.text((x1, 80), text1, font=font_large, fill="#FF3333")
+        draw.text((x1+3, top_10_percent + 3), text1, font=font_large, fill="black")
+        draw.text((x1, top_10_percent), text1, font=font_large, fill="#FF3333")
         
-        # "NEWS"
+        # "NEWS" (TODAY'S 아래)
         text2 = "NEWS"
         bbox2 = draw.textbbox((0, 0), text2, font=font_large)
         x2 = (width - (bbox2[2] - bbox2[0])) // 2
-        draw.text((x2+3, 163), text2, font=font_large, fill="black")
-        draw.text((x2, 160), text2, font=font_large, fill="white")
+        draw.text((x2+3, top_10_percent + 83), text2, font=font_large, fill="black")
+        draw.text((x2, top_10_percent + 80), text2, font=font_large, fill="white")
         
         # 중앙: 날짜 (크게)
         try:
@@ -1662,17 +1665,20 @@ def generate_thumbnail(news_list: list, output_path: Path, style: str = "shorts"
             font_title = font_large
             font_date = font_large
         
-        # 좌측 상단: "WEEKLY" (크게, 살짝 아래로)
+        # 10% from top 계산
+        top_10_percent = int(height * 0.10)
+        
+        # 좌측 상단: "WEEKLY" (10% 아래로)
         text1 = "WEEKLY"
-        draw.text((53, 83), text1, font=font_title, fill="black")
-        draw.text((50, 80), text1, font=font_title, fill="#FF3333")
+        draw.text((53, top_10_percent + 3), text1, font=font_title, fill="black")
+        draw.text((50, top_10_percent), text1, font=font_title, fill="#FF3333")
         
-        # 좌측 상단: "NEWS" (크게, 살짝 아래로)
+        # 좌측 상단: "NEWS" (WEEKLY 아래)
         text2 = "NEWS"
-        draw.text((53, 183), text2, font=font_title, fill="black")
-        draw.text((50, 180), text2, font=font_title, fill="white")
+        draw.text((53, top_10_percent + 103), text2, font=font_title, fill="black")
+        draw.text((50, top_10_percent + 100), text2, font=font_title, fill="white")
         
-        # 우측 하단: 날짜 (크게, 살짝 위로 + 왼쪽으로)
+        # 우측 하단: 날짜 (자유롭게 배치 - 우측 하단 유지)
         bbox_date = draw.textbbox((0, 0), today, font=font_date)
         x_date = width - (bbox_date[2] - bbox_date[0]) - 80
         draw.text((x_date+3, height - 200 + 3), today, font=font_date, fill="black")
