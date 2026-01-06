@@ -6,14 +6,14 @@
         "rule": {
           "interval": [
             {
-              "triggerAtHour": 11,
+              "triggerAtHour": 10,
               "triggerAtMinute": 45
             }
           ]
         }
       },
       "id": "1",
-      "name": "Daily 11:45AM",
+      "name": "Daily 10:45AM",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
