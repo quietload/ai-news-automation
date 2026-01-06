@@ -1555,8 +1555,10 @@ def generate_thumbnail(news_list: list, output_path: Path, style: str = "shorts"
     
     if prompt_response.status_code == 200:
         prompt = prompt_response.json()["choices"][0]["message"]["content"].strip()
-    else:
-        prompt = f"Dramatic cinematic {orientation} scene, world news theme, professional photography, high contrast lighting"
+    
+    # 프롬프트가 비어있으면 기본값 사용
+    if not prompt:
+        prompt = f"Dramatic cinematic {orientation} scene, world news theme, professional photography, high contrast lighting, no text, no faces"
     
     # size 변환: gpt-image-1.5 지원 형식
     
@@ -1652,6 +1654,22 @@ def generate_thumbnail(news_list: list, output_path: Path, style: str = "shorts"
         draw.text((x_year+2, height//2 + 52), year, font=font_medium, fill="black")
         draw.text((x_year, height//2 + 50), year, font=font_medium, fill="#FFD700")
         
+        # 하단: 카테고리
+        bbox_cat = draw.textbbox((0, 0), category_text, font=font_small)
+        x_cat = (width - (bbox_cat[2] - bbox_cat[0])) // 2
+        draw.text((x_cat+2, height - 120 + 2), category_text, font=font_small, fill="black")
+        draw.text((x_cat, height - 120), category_text, font=font_small, fill="white")
+        
+        # 헤드라인 기사들 (하단 영역)
+        headline_y = height - 350
+        for i, title in enumerate(titles[:3]):  # 최대 3개
+            short_title = title[:35] + "..." if len(title) > 35 else title
+            bbox_title = draw.textbbox((0, 0), short_title, font=font_small)
+            x_title = (width - (bbox_title[2] - bbox_title[0])) // 2
+            draw.text((x_title+2, headline_y + 2), short_title, font=font_small, fill="black")
+            draw.text((x_title, headline_y), short_title, font=font_small, fill="white")
+            headline_y += 50
+        
     else:
         # Video 가로형 레이아웃 - 심플하게
         today = datetime.now(US_EASTERN).strftime("%b %d").upper()
@@ -1688,6 +1706,18 @@ def generate_thumbnail(news_list: list, output_path: Path, style: str = "shorts"
         x_year = width - (bbox_year[2] - bbox_year[0]) - 80
         draw.text((x_year+2, height - 110 + 2), year, font=font_medium, fill="black")
         draw.text((x_year, height - 110), year, font=font_medium, fill="#FFD700")
+        
+        # 좌측 하단: 카테고리
+        draw.text((52, height - 80 + 2), category_text, font=font_small, fill="black")
+        draw.text((50, height - 80), category_text, font=font_small, fill="white")
+        
+        # 헤드라인 기사들 (좌측 중앙~하단)
+        headline_y = int(height * 0.45)
+        for i, title in enumerate(titles[:4]):  # 최대 4개
+            short_title = title[:45] + "..." if len(title) > 45 else title
+            draw.text((52, headline_y + 2), f"• {short_title}", font=font_small, fill="black")
+            draw.text((50, headline_y), f"• {short_title}", font=font_small, fill="white")
+            headline_y += 45
     
     # 4. 저장 (JPEG로 압축 - YouTube 썸네일 2MB 제한)
     img = img.convert("RGB")
