@@ -1,13 +1,189 @@
 {
   "name": "News Automation - Weekly Video RSS (Scheduled)",
   "nodes": [
-    {"parameters": {"rule": {"interval": [{"field": "weeks", "triggerAtDay": [0], "triggerAtHour": 11, "triggerAtMinute": 30}]}}, "id": "1", "name": "Sunday 11:30AM", "type": "n8n-nodes-base.scheduleTrigger", "typeVersion": 1.2, "position": [250, 200]},
-    {"parameters": {"command": "C:\\Users\\USER\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe D:\\workspace\\news\\run_weekly_video_rss.py", "options": {"timeout": 3600000}}, "id": "2", "name": "Run Weekly Video RSS", "type": "n8n-nodes-base.executeCommand", "typeVersion": 1, "position": [500, 200], "onError": "continueRegularOutput"},
-    {"parameters": {"jsCode": "const items = $input.all();\nconst item = items[0].json;\nconst stdout = item.stdout || '';\nconst exitCode = item.exitCode;\nlet summary = {};\nconst match = stdout.match(/\\[JSON_SUMMARY\\]([\\s\\S]*?)\\[\\/JSON_SUMMARY\\]/);\nif (match) { try { summary = JSON.parse(match[1].trim()); } catch (e) {} }\nreturn [{ json: { exitCode: exitCode, stdout: stdout, title: summary.title || '', description: summary.description || '', video: summary.video || '', api: summary.api || 'OpenAI' } }];"}, "id": "6", "name": "Parse JSON Summary", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [700, 200]},
-    {"parameters": {"conditions": {"options": {"caseSensitive": false, "typeValidation": "loose"}, "conditions": [{"leftValue": "={{ $json.exitCode }}", "rightValue": 0, "operator": {"type": "number", "operation": "equals"}}], "combinator": "and"}}, "id": "5", "name": "Success?", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [900, 200]},
-    {"parameters": {"sendTo": "YOUR_EMAIL@gmail.com", "subject": "=✅ Weekly Video: {{ $json.title }}", "emailType": "html", "message": "=<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f5f5;margin:0;padding:20px}.container{max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1)}.header{background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:30px;text-align:center}.header h1{margin:0;font-size:24px}.content{padding:30px}.info-box{background:#f0fdf4;border-left:4px solid #10b981;padding:15px;margin:15px 0;border-radius:0 8px 8px 0}.info-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e5e7eb}.label{color:#6b7280;font-size:14px}.value{color:#111827;font-weight:600}.desc-box{background:#f0fdf4;border-left:4px solid #10b981;padding:15px;margin:15px 0;border-radius:0 8px 8px 0;white-space:pre-wrap}.output-box{background:#1f2937;color:#10b981;padding:15px;border-radius:8px;font-family:monospace;font-size:11px;white-space:pre-wrap;max-height:200px;overflow-y:auto}.footer{background:#f9fafb;padding:20px;text-align:center;color:#6b7280;font-size:12px}</style></head><body><div class=\"container\"><div class=\"header\"><h1>✅ Weekly Video 업로드 완료!</h1></div><div class=\"content\"><div class=\"info-box\"><div class=\"info-row\"><span class=\"label\">Job</span><span class=\"value\">Weekly Video</span></div><div class=\"info-row\"><span class=\"label\">Engine</span><span class=\"value\">{{ $json.api }}</span></div><div class=\"info-row\"><span class=\"label\">Time</span><span class=\"value\">{{ $now.format('yyyy-MM-dd HH:mm:ss') }} KST</span></div></div><h3>📺 제목</h3><div class=\"desc-box\">{{ $json.title }}</div><h3>📝 YouTube 설명</h3><div class=\"desc-box\">{{ $json.description }}</div><details><summary>📋 전체 로그</summary><div class=\"output-box\">{{ $json.stdout }}</div></details></div><div class=\"footer\">🤖 AI News Daily</div></div></body></html>"}, "id": "3", "name": "Email Success", "type": "n8n-nodes-base.emailSend", "typeVersion": 2.1, "position": [1100, 100], "credentials": {"smtp": {"id": "YOUR_SMTP_CREDENTIAL_ID", "name": "Gmail SMTP"}}},
-    {"parameters": {"sendTo": "YOUR_EMAIL@gmail.com", "subject": "❌ Weekly Video - FAILED", "emailType": "html", "message": "=<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><style>body{font-family:sans-serif;background:#f5f5f5;padding:20px}.container{max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden}.header{background:#ef4444;color:#fff;padding:30px;text-align:center}.content{padding:30px}.error-box{background:#1f2937;color:#ef4444;padding:15px;border-radius:8px;font-family:monospace;font-size:12px;white-space:pre-wrap;max-height:300px;overflow-y:auto}</style></head><body><div class=\"container\"><div class=\"header\"><h1>❌ Job Failed</h1></div><div class=\"content\"><h3>🚨 Error Log</h3><div class=\"error-box\">{{ $json.stdout }}</div></div></div></body></html>"}, "id": "4", "name": "Email Failure", "type": "n8n-nodes-base.emailSend", "typeVersion": 2.1, "position": [1100, 300], "credentials": {"smtp": {"id": "YOUR_SMTP_CREDENTIAL_ID", "name": "Gmail SMTP"}}}
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                0
+              ],
+              "triggerAtHour": 11,
+              "triggerAtMinute": 30
+            }
+          ]
+        }
+      },
+      "id": "1",
+      "name": "Sunday 11:30AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        250,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "command": "C:\\Users\\USER\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe D:\\workspace\\news\\run_weekly_video_rss.py",
+        "options": {
+          "timeout": 3600000
+        }
+      },
+      "id": "2",
+      "name": "Run Weekly Video RSS",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        500,
+        200
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst item = items[0].json;\nconst stdout = item.stdout || '';\nconst exitCode = item.exitCode;\nlet summary = {};\nconst match = stdout.match(/\\[JSON_SUMMARY\\]([\\s\\S]*?)\\[\\/JSON_SUMMARY\\]/);\nif (match) { try { summary = JSON.parse(match[1].trim()); } catch (e) {} }\nreturn [{ json: { exitCode: exitCode, stdout: stdout, title: summary.title || '', description: summary.description || '', video: summary.video || '', api: summary.api || 'OpenAI' } }];"
+      },
+      "id": "6",
+      "name": "Parse JSON Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.exitCode }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "5",
+      "name": "Success?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        900,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_EMAIL@gmail.com",
+        "subject": "=✅ Weekly Video: {{ $json.title }}",
+        "emailType": "html",
+        "message": "=<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f5f5;margin:0;padding:20px}.container{max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1)}.header{background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:30px;text-align:center}.header h1{margin:0;font-size:24px}.content{padding:30px}.info-box{background:#ecfdf5;border-left:4px solid #10b981;padding:15px;margin:15px 0;border-radius:0 8px 8px 0}.info-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e5e7eb}.label{color:#6b7280;font-size:14px}.value{color:#111827;font-weight:600}.desc-box{background:#f0fdf4;border-left:4px solid #10b981;padding:15px;margin:15px 0;border-radius:0 8px 8px 0;white-space:pre-wrap}.footer{background:#f9fafb;padding:20px;text-align:center;color:#6b7280;font-size:12px}</style></head><body><div class=\"container\"><div class=\"header\"><h1>✅ 업로드 완료!</h1></div><div class=\"content\"><div class=\"info-box\"><div class=\"info-row\"><span class=\"label\">Engine</span><span class=\"value\">{{ $json.api }}</span></div><div class=\"info-row\"><span class=\"label\">Time</span><span class=\"value\">{{ $now.format('yyyy-MM-dd HH:mm:ss') }} KST</span></div></div><h3>📺 제목</h3><div class=\"desc-box\">{{ $json.title }}</div><h3>📝 YouTube 설명</h3><div class=\"desc-box\">{{ $json.description }}</div></div><div class=\"footer\">🎬 YouTube Shorts Automation</div></div></body></html>"
+      },
+      "id": "3",
+      "name": "Email Success",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1100,
+        100
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "YOUR_SMTP_CREDENTIAL_ID",
+          "name": "Gmail SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_EMAIL@gmail.com",
+        "subject": "❌ Weekly Video - FAILED",
+        "emailType": "html",
+        "message": "=<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f5f5;margin:0;padding:20px}.container{max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1)}.header{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;padding:30px;text-align:center}.header h1{margin:0;font-size:24px}.content{padding:30px}.info-box{background:#fef2f2;border-left:4px solid #ef4444;padding:15px;margin:15px 0;border-radius:0 8px 8px 0}.info-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e5e7eb}.label{color:#6b7280;font-size:14px}.value{color:#111827;font-weight:600}.error-box{background:#1f2937;color:#ef4444;padding:15px;border-radius:8px;font-family:monospace;font-size:12px;white-space:pre-wrap;max-height:400px;overflow-y:auto}.footer{background:#f9fafb;padding:20px;text-align:center;color:#6b7280;font-size:12px}</style></head><body><div class=\"container\"><div class=\"header\"><h1>❌ 작업 실패</h1></div><div class=\"content\"><div class=\"info-box\"><div class=\"info-row\"><span class=\"label\">Time</span><span class=\"value\">{{ $now.format('yyyy-MM-dd HH:mm:ss') }} KST</span></div><div class=\"info-row\"><span class=\"label\">Exit Code</span><span class=\"value\">{{ $json.exitCode }}</span></div></div><h3>🚨 에러 로그</h3><div class=\"error-box\">{{ $json.stdout }}</div></div><div class=\"footer\">⚠️ 로그를 확인하세요</div></div></body></html>"
+      },
+      "id": "4",
+      "name": "Email Failure",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1100,
+        300
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "YOUR_SMTP_CREDENTIAL_ID",
+          "name": "Gmail SMTP"
+        }
+      }
+    }
   ],
-  "connections": {"Sunday 11:30AM": {"main": [[{"node": "Run Weekly Video RSS", "type": "main", "index": 0}]]}, "Run Weekly Video RSS": {"main": [[{"node": "Parse JSON Summary", "type": "main", "index": 0}]]}, "Parse JSON Summary": {"main": [[{"node": "Success?", "type": "main", "index": 0}]]}, "Success?": {"main": [[{"node": "Email Success", "type": "main", "index": 0}], [{"node": "Email Failure", "type": "main", "index": 0}]]}},
-  "settings": {"executionOrder": "v1", "timezone": "Asia/Seoul"}
+  "connections": {
+    "Sunday 11:30AM": {
+      "main": [
+        [
+          {
+            "node": "Run Weekly Video RSS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Weekly Video RSS": {
+      "main": [
+        [
+          {
+            "node": "Parse JSON Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse JSON Summary": {
+      "main": [
+        [
+          {
+            "node": "Success?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Success?": {
+      "main": [
+        [
+          {
+            "node": "Email Success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Seoul"
+  }
 }
