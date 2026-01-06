@@ -1654,22 +1654,53 @@ def generate_thumbnail(news_list: list, output_path: Path, style: str = "shorts"
         draw.text((x_year+2, height//2 + 52), year, font=font_medium, fill="black")
         draw.text((x_year, height//2 + 50), year, font=font_medium, fill="#FFD700")
         
-        # 하단: 헤드라인 1개 (크게)
-        top_headline = titles[0][:40] + "..." if len(titles[0]) > 40 else titles[0]
+        # 하단: 헤드라인 1개 (크게, 2줄로)
+        top_headline = titles[0]
+        if len(top_headline) > 25:
+            # 2줄로 나누기
+            words = top_headline.split()
+            line1 = ""
+            line2 = ""
+            for word in words:
+                if len(line1) < 20:
+                    line1 += word + " "
+                else:
+                    line2 += word + " "
+            line1 = line1.strip()
+            line2 = line2.strip()[:25]
+            if len(line2) == 25:
+                line2 += "..."
+        else:
+            line1 = top_headline
+            line2 = ""
+        
         try:
-            font_headline = ImageFont.truetype("C:/Windows/Fonts/arialbd.ttf", 48)
+            font_headline = ImageFont.truetype("C:/Windows/Fonts/arialbd.ttf", 64)
         except:
-            font_headline = font_medium
-        bbox_hl = draw.textbbox((0, 0), top_headline, font=font_headline)
-        x_hl = (width - (bbox_hl[2] - bbox_hl[0])) // 2
-        draw.text((x_hl+3, height - 200 + 3), top_headline, font=font_headline, fill="black")
-        draw.text((x_hl, height - 200), top_headline, font=font_headline, fill="white")
+            font_headline = font_large
+        
+        # Line 1
+        bbox_hl1 = draw.textbbox((0, 0), line1, font=font_headline)
+        x_hl1 = (width - (bbox_hl1[2] - bbox_hl1[0])) // 2
+        draw.text((x_hl1+4, height - 280 + 4), line1, font=font_headline, fill="black")
+        draw.text((x_hl1, height - 280), line1, font=font_headline, fill="white")
+        
+        # Line 2
+        if line2:
+            bbox_hl2 = draw.textbbox((0, 0), line2, font=font_headline)
+            x_hl2 = (width - (bbox_hl2[2] - bbox_hl2[0])) // 2
+            draw.text((x_hl2+4, height - 200 + 4), line2, font=font_headline, fill="black")
+            draw.text((x_hl2, height - 200), line2, font=font_headline, fill="white")
         
         # 카테고리
-        bbox_cat = draw.textbbox((0, 0), category_text, font=font_small)
+        try:
+            font_cat = ImageFont.truetype("C:/Windows/Fonts/arialbd.ttf", 42)
+        except:
+            font_cat = font_medium
+        bbox_cat = draw.textbbox((0, 0), category_text, font=font_cat)
         x_cat = (width - (bbox_cat[2] - bbox_cat[0])) // 2
-        draw.text((x_cat+2, height - 120 + 2), category_text, font=font_small, fill="black")
-        draw.text((x_cat, height - 120), category_text, font=font_small, fill="white")
+        draw.text((x_cat+2, height - 100 + 2), category_text, font=font_cat, fill="black")
+        draw.text((x_cat, height - 100), category_text, font=font_cat, fill="#FFD700")
         
     else:
         # Video 가로형 레이아웃 - 심플하게
@@ -1709,17 +1740,21 @@ def generate_thumbnail(news_list: list, output_path: Path, style: str = "shorts"
         draw.text((x_year, height - 110), year, font=font_medium, fill="#FFD700")
         
         # 좌측 중앙: 헤드라인 1개 (크게)
-        top_headline = titles[0][:50] + "..." if len(titles[0]) > 50 else titles[0]
+        top_headline = titles[0][:35] + "..." if len(titles[0]) > 35 else titles[0]
         try:
-            font_headline = ImageFont.truetype("C:/Windows/Fonts/arialbd.ttf", 56)
+            font_headline = ImageFont.truetype("C:/Windows/Fonts/arialbd.ttf", 72)
         except:
-            font_headline = font_medium
-        draw.text((53, int(height * 0.45) + 3), top_headline, font=font_headline, fill="black")
+            font_headline = font_large
+        draw.text((54, int(height * 0.45) + 4), top_headline, font=font_headline, fill="black")
         draw.text((50, int(height * 0.45)), top_headline, font=font_headline, fill="white")
         
         # 좌측 하단: 카테고리
-        draw.text((52, height - 80 + 2), category_text, font=font_small, fill="black")
-        draw.text((50, height - 80), category_text, font=font_small, fill="white")
+        try:
+            font_cat = ImageFont.truetype("C:/Windows/Fonts/arialbd.ttf", 42)
+        except:
+            font_cat = font_medium
+        draw.text((52, height - 70 + 2), category_text, font=font_cat, fill="black")
+        draw.text((50, height - 70), category_text, font=font_cat, fill="#FFD700")
     
     # 4. 저장 (JPEG로 압축 - YouTube 썸네일 2MB 제한)
     img = img.convert("RGB")
