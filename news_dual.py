@@ -1534,6 +1534,10 @@ def generate_thumbnail(news_list: list, output_path: Path, style: str = "shorts"
     titles = [n['title'][:50] for n in news_list[:5]]
     titles_summary = ", ".join(titles)
     
+    # 메인 헤드라인과 서브 토픽 분리
+    main_headline = titles[0] if titles else "Breaking News"
+    sub_topics = ", ".join(titles[1:4]) if len(titles) > 1 else ""
+    
     # 1. GPT에게 뉴스 내용 기반 이미지 프롬프트 요청
     prompt_response = requests.post(
         f"{OPENAI_API_BASE}/chat/completions",
@@ -1542,10 +1546,27 @@ def generate_thumbnail(news_list: list, output_path: Path, style: str = "shorts"
             "model": "gpt-5-mini",
             "messages": [{
                 "role": "system",
-                "content": f"Create a DALL-E image prompt that combines these news topics into ONE dramatic scene. Format: {orientation}. RULES: Combine all topics into a single cohesive, dramatic scene. Photorealistic, cinematic quality, dramatic lighting. NO text, NO words, NO letters, NO numbers, NO faces. Show objects, symbols, or scenes representing the news. High contrast, vibrant colors, eye-catching. Under 100 words."
+                "content": f"""Create a DALL-E image prompt for a news thumbnail. Format: {orientation}.
+
+The image should be 100% focused on visually representing this ONE headline:
+"{main_headline}"
+
+Create a DRAMATIC, eye-catching visual that directly illustrates this specific news story.
+- Use symbolic imagery that clearly represents the headline topic
+- For financial news: show relevant symbols (coins, charts, money)
+- For political news: show relevant symbols (flags, buildings, documents)
+- For tech news: show relevant tech imagery
+- For sports: show relevant sports imagery
+
+RULES:
+- Photorealistic, cinematic, dramatic lighting
+- NO text, NO words, NO letters, NO numbers
+- NO human faces (use silhouettes or back views only)
+- High contrast, vibrant colors
+- Under 80 words."""
             }, {
                 "role": "user",
-                "content": f"News topics: {titles_summary}"
+                "content": f"Create image for: {main_headline}"
             }],
             "max_completion_tokens": 150,
             "reasoning_effort": "minimal"
