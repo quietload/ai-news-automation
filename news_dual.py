@@ -132,8 +132,8 @@ def generate_opening_image(output_path: Path, orientation: str = "vertical", top
     prompt = f"""Create a bold, attention-grabbing opening image for daily news.
 
 MUST INCLUDE TEXT (exact layout, top to bottom):
-1. "DAILY NEWS" - bold title at top
-2. "{date_text}" - date below title
+1. "DAILY NEWS" - bold title, positioned around 10% from top (NOT at the very top edge)
+2. "{date_text}" - date, freely positioned where it fits best in the composition
 3. "{top_headline}" - LARGE, highlighted, center focus (this is today's top story!)
 4. "+{more_count} more stories" - smaller text at bottom
 
@@ -214,8 +214,8 @@ def generate_breaking_opening_image(output_path: Path, news: dict, orientation: 
     prompt = f"""Create an URGENT, attention-grabbing BREAKING NEWS opening image.
 
 MUST INCLUDE TEXT (exact layout, top to bottom):
-1. "BREAKING" - bold, urgent red/white at top
-2. "{date_text}" - date below
+1. "BREAKING" - bold, urgent red/white, positioned around 10% from top (NOT at the very top edge)
+2. "{date_text}" - date, freely positioned where it fits best in the composition
 3. "{short_headline}" - LARGE, dramatic, center focus (this is the breaking story!)
 
 STYLE:
@@ -305,8 +305,8 @@ Example: "Breaking financial crisis, stock market crash visualization, urgent re
     prompt = f"""Create an URGENT breaking news opening image.
 
 MUST INCLUDE TEXT (in this exact order, top to bottom):
-1. "BREAKING NEWS" in bold, urgent red/white typography at top
-2. The date "{date_text}" in large, bold typography below
+1. "BREAKING NEWS" in bold, urgent red/white typography, positioned around 10% from top (NOT at the very top edge)
+2. The date "{date_text}" - freely positioned where it fits best in the composition
 
 NO other text, NO headlines, NO logos - ONLY these two texts.
 
