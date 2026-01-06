@@ -1654,21 +1654,22 @@ def generate_thumbnail(news_list: list, output_path: Path, style: str = "shorts"
         draw.text((x_year+2, height//2 + 52), year, font=font_medium, fill="black")
         draw.text((x_year, height//2 + 50), year, font=font_medium, fill="#FFD700")
         
-        # 하단: 카테고리
+        # 하단: 헤드라인 1개 (크게)
+        top_headline = titles[0][:40] + "..." if len(titles[0]) > 40 else titles[0]
+        try:
+            font_headline = ImageFont.truetype("C:/Windows/Fonts/arialbd.ttf", 48)
+        except:
+            font_headline = font_medium
+        bbox_hl = draw.textbbox((0, 0), top_headline, font=font_headline)
+        x_hl = (width - (bbox_hl[2] - bbox_hl[0])) // 2
+        draw.text((x_hl+3, height - 200 + 3), top_headline, font=font_headline, fill="black")
+        draw.text((x_hl, height - 200), top_headline, font=font_headline, fill="white")
+        
+        # 카테고리
         bbox_cat = draw.textbbox((0, 0), category_text, font=font_small)
         x_cat = (width - (bbox_cat[2] - bbox_cat[0])) // 2
         draw.text((x_cat+2, height - 120 + 2), category_text, font=font_small, fill="black")
         draw.text((x_cat, height - 120), category_text, font=font_small, fill="white")
-        
-        # 헤드라인 기사들 (하단 영역)
-        headline_y = height - 350
-        for i, title in enumerate(titles[:3]):  # 최대 3개
-            short_title = title[:35] + "..." if len(title) > 35 else title
-            bbox_title = draw.textbbox((0, 0), short_title, font=font_small)
-            x_title = (width - (bbox_title[2] - bbox_title[0])) // 2
-            draw.text((x_title+2, headline_y + 2), short_title, font=font_small, fill="black")
-            draw.text((x_title, headline_y), short_title, font=font_small, fill="white")
-            headline_y += 50
         
     else:
         # Video 가로형 레이아웃 - 심플하게
@@ -1707,17 +1708,18 @@ def generate_thumbnail(news_list: list, output_path: Path, style: str = "shorts"
         draw.text((x_year+2, height - 110 + 2), year, font=font_medium, fill="black")
         draw.text((x_year, height - 110), year, font=font_medium, fill="#FFD700")
         
+        # 좌측 중앙: 헤드라인 1개 (크게)
+        top_headline = titles[0][:50] + "..." if len(titles[0]) > 50 else titles[0]
+        try:
+            font_headline = ImageFont.truetype("C:/Windows/Fonts/arialbd.ttf", 56)
+        except:
+            font_headline = font_medium
+        draw.text((53, int(height * 0.45) + 3), top_headline, font=font_headline, fill="black")
+        draw.text((50, int(height * 0.45)), top_headline, font=font_headline, fill="white")
+        
         # 좌측 하단: 카테고리
         draw.text((52, height - 80 + 2), category_text, font=font_small, fill="black")
         draw.text((50, height - 80), category_text, font=font_small, fill="white")
-        
-        # 헤드라인 기사들 (좌측 중앙~하단)
-        headline_y = int(height * 0.45)
-        for i, title in enumerate(titles[:4]):  # 최대 4개
-            short_title = title[:45] + "..." if len(title) > 45 else title
-            draw.text((52, headline_y + 2), f"• {short_title}", font=font_small, fill="black")
-            draw.text((50, headline_y), f"• {short_title}", font=font_small, fill="white")
-            headline_y += 45
     
     # 4. 저장 (JPEG로 압축 - YouTube 썸네일 2MB 제한)
     img = img.convert("RGB")
